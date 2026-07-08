@@ -14,10 +14,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// عناصر الواجهة
 const departureTableBody = document.querySelector("#departure-table tbody");
 const returnTableBody = document.querySelector("#return-table tbody");
 const allTicketsTableBody = document.querySelector("#all-tickets-table tbody");
+const allUmrahTableBody = document.querySelector("#all-umrah-table tbody"); // مستهدف جدول العمرة الجديد
 
 const weeklyTicketsCountEl = document.getElementById("weekly-tickets-count");
 const topDestinationEl = document.getElementById("top-destination");
@@ -30,7 +30,6 @@ function processTickets(tickets) {
     const now = new Date();
     const fortyEightHoursLater = new Date(now.getTime() + (48 * 60 * 60 * 1000));
     const seventyTwoHoursLater = new Date(now.getTime() + (72 * 60 * 60 * 1000));
-    
     const startOfWeek = new Date();
     startOfWeek.setDate(now.getDate() - 7);
 
@@ -38,7 +37,6 @@ function processTickets(tickets) {
     let destinationsMap = {};
     let sourcesMap = {};
 
-    // تفريغ الجداول الثلاثة لمنع التكرار عند التحديث التلقائي
     departureTableBody.innerHTML = "";
     returnTableBody.innerHTML = "";
     allTicketsTableBody.innerHTML = "";
@@ -51,7 +49,6 @@ function processTickets(tickets) {
         const formattedDep = depDate ? depDate.toLocaleString('ar-YE', { day:'2-digit', month:'2-digit', hour: '2-digit', minute:'2-digit' }) : '-';
         const formattedRet = retDate ? retDate.toLocaleString('ar-YE', { day:'2-digit', month:'2-digit', hour: '2-digit', minute:'2-digit' }) : '-';
 
-        // 1️⃣ تحديث التقارير الذكية (48 ساعة مغادرة)
         if (depDate && depDate >= now && depDate <= fortyEightHoursLater) {
             departureTableBody.innerHTML += `<tr>
                 <td><strong>${ticket.passenger_name}</strong></td>
@@ -61,7 +58,6 @@ function processTickets(tickets) {
             </tr>`;
         }
 
-        // 2️⃣ تحديث التقارير الذكية (72 ساعة عودة)
         if (retDate && retDate >= now && retDate <= seventyTwoHoursLater) {
             returnTableBody.innerHTML += `<tr>
                 <td><strong>${ticket.passenger_name}</strong></td>
@@ -71,7 +67,6 @@ function processTickets(tickets) {
             </tr>`;
         }
 
-        // 3️⃣ بناء الجدول العام الشامل لتدقيق البيانات بالكامل
         allTicketsTableBody.innerHTML += `<tr>
             <td><strong>${ticket.passenger_name}</strong></td>
             <td><span style="color: #f59e0b; font-weight: bold;">${ticket.booking_code}</span></td>
@@ -82,7 +77,6 @@ function processTickets(tickets) {
             <td>${ticket.destination_agency}</td>
         </tr>`;
 
-        // الحسابات الإحصائية
         if (createdAt && createdAt >= startOfWeek && createdAt <= now) weeklyCount++;
         if (ticket.to_location) destinationsMap[ticket.to_location] = (destinationsMap[ticket.to_location] || 0) + 1;
         if (ticket.source) sourcesMap[ticket.source] = (sourcesMap[ticket.source] || 0) + 1;
@@ -97,17 +91,33 @@ function processTickets(tickets) {
 
 function processUmrah(umrahList) {
     let ihram = 0, alamoudi = 0, sanabel = 0;
+    allUmrahTableBody.innerHTML = ""; // تفريغ جدول العمرة
+
     umrahList.forEach(p => {
         if (p.agency_type === "احرام") ihram++;
         else if (p.agency_type === "العمودي") alamoudi++;
         else if (p.agency_type === "سنابل الخير") sanabel++;
+
+        const entryStr = p.entry_date ? p.entry_date.toDate().toLocaleDateString('ar-YE') : '-';
+        const exitStr = p.exit_date ? p.exit_date.toDate().toLocaleDateString('ar-YE') : '-';
+
+        // ملء جدول العمرة بالبيانات الستة المطلوبة كاملة
+        allUmrahTableBody.innerHTML += `<tr>
+            <td><strong>${p.pilgrim_name}</strong></td>
+            <td>${entryStr}</td>
+            <td>${exitStr}</td>
+            <td><span style="color: #38bdf8;">${p.travel_type || '-'}</span></td>
+            <td>${p.source || '-'}</td>
+            <td>${p.beneficiary || '-'}</td>
+            <td><span style="font-weight:600;">${p.agency_type}</span></td>
+        </tr>`;
     });
+
     countIhramEl.textContent = ihram;
     countAlAmoudiEl.textContent = alamoudi;
     countSanabelEl.textContent = sanabel;
 }
 
-// مراقبة حية للتذاكر مرتبة من الأحدث إدخالاً إلى الأقدم لمراجعة أسرع
 const ticketsQuery = query(collection(db, "tickets"), orderBy("created_at", "desc"));
 onSnapshot(ticketsQuery, snapshot => {
     const tickets = [];
@@ -115,7 +125,8 @@ onSnapshot(ticketsQuery, snapshot => {
     processTickets(tickets);
 });
 
-onSnapshot(collection(db, "umrah"), snapshot => {
+const umrahQuery = query(collection(db, "umrah"), orderBy("created_at", "desc"));
+onSnapshot(umrahQuery, snapshot => {
     const umrahList = [];
     snapshot.forEach(doc => umrahList.push({ id: doc.id, ...doc.data() }));
     processUmrah(umrahList);

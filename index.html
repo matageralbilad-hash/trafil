@@ -18,6 +18,7 @@
             <button class="tab-btn active" onclick="switchTab('stats-section')">📈 الإحصائيات العامة</button>
             <button class="tab-btn" onclick="switchTab('reports-section')">📋 التقارير الذكية</button>
             <button class="tab-btn" onclick="switchTab('table-section')">🗂️ الجدول الشامل</button>
+            <button class="tab-btn" onclick="switchTab('umrah-table-section')">🕋 جدول العمرة الشامل</button>
         </nav>
 
         <section id="stats-section" class="tab-content active-content">
@@ -101,24 +102,35 @@
                 </table>
             </div>
         </section>
+
+        <section id="umrah-table-section" class="tab-content">
+            <div class="table-holder full-width-table">
+                <table id="all-umrah-table">
+                    <thead>
+                        <tr>
+                            <th>اسم المعتمر</th>
+                            <th>تاريخ الدخول</th>
+                            <th>تاريخ الخروج</th>
+                            <th>النوع</th>
+                            <th>المصدر</th>
+                            <th>المستفيد</th>
+                            <th>الجهة التابع لها</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
     <script>
         function switchTab(tabId) {
-            // إخفاء كل الخانات
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active-content');
-            });
-            // إلغاء تفعيل كل الأزرار
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            // إظهار الخانة المطلوبة وتفعيل زرها
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active-content');
             event.currentTarget.classList.add('active');
         }
     </script>
-
     <script type="module" src="app.js"></script>
 </body>
 </html>

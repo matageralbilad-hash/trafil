@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// إعدادات مفاتيحك الخاصة
 const firebaseConfig = {
   apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
   authDomain: "travel-agency-app-95c51.firebaseapp.com",
@@ -15,95 +14,83 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// === 1️⃣ فورم إدخال التذاكر ===
+// حفظ التذاكر
 document.getElementById("ticket-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    // جلب القيم من المدخلات
-    const passengerName = document.getElementById("passenger_name").value;
-    const bookingCode = document.getElementById("booking_code").value;
-    const departureDateVal = document.getElementById("departure_date").value;
-    const returnDateVal = document.getElementById("return_date").value;
-    const fromLocation = document.getElementById("from_location").value;
-    const toLocation = document.getElementById("to_location").value;
-    const source = document.getElementById("source").value;
-    const destinationAgency = document.getElementById("destination_agency").value;
-
     try {
-        // تجهيز البيانات وتحويل التاريخ المدخل إلى Firebase Timestamp
-        const ticketData = {
-            passenger_name: passengerName,
-            booking_code: bookingCode,
-            departure_date: Timestamp.fromDate(new Date(departureDateVal)),
-            return_date: returnDateVal ? Timestamp.fromDate(new Date(returnDateVal)) : null, // اختياري
-            from_location: fromLocation,
-            to_location: toLocation,
-            source: source,
-            destination_agency: destinationAgency,
-            created_at: Timestamp.fromDate(new Date()) // تاريخ الإدخال الآن لحساب عداد الأسبوع
-        };
-
-        // إرسال البيانات إلى مجموعة tickets في Firestore
-        await addDoc(collection(db, "tickets"), ticketData);
-        alert("✅ تم حفظ التذكرة بنجاح في النظام!");
-        document.getElementById("ticket-form").reset(); // تفريغ الفورم
-    } catch (error) {
-        console.error("خطأ أثناء الحفظ: ", error);
-        alert("❌ حدث خطأ أثناء الحفظ، يرجى المحاولة مجدداً.");
-    }
+        await addDoc(collection(db, "tickets"), {
+            passenger_name: document.getElementById("passenger_name").value,
+            booking_code: document.getElementById("booking_code").value,
+            departure_date: Timestamp.fromDate(new Date(document.getElementById("departure_date").value)),
+            return_date: document.getElementById("return_date").value ? Timestamp.fromDate(new Date(document.getElementById("return_date").value)) : null,
+            from_location: document.getElementById("from_location").value,
+            to_location: document.getElementById("to_location").value,
+            source: document.getElementById("source").value,
+            destination_agency: document.getElementById("destination_agency").value,
+            created_at: Timestamp.fromDate(new Date())
+        });
+        alert("✅ تم حفظ التذكرة بنجاح!");
+        document.getElementById("ticket-form").reset();
+    } catch (error) { alert("❌ خطأ أثناء الحفظ"); }
 });
 
-// === 2️⃣ فورم إدخال العمرة ===
+// حفظ العمرة بالحقول الجديدة
 document.getElementById("umrah-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    const pilgrimName = document.getElementById("pilgrim_name").value;
-    const agencyType = document.getElementById("agency_type").value;
-
     try {
         await addDoc(collection(db, "umrah"), {
-            pilgrim_name: pilgrimName,
-            agency_type: agencyType,
+            pilgrim_name: document.getElementById("pilgrim_name").value,
+            entry_date: Timestamp.fromDate(new Date(document.getElementById("entry_date").value)),
+            exit_date: Timestamp.fromDate(new Date(document.getElementById("exit_date").value)),
+            travel_type: document.getElementById("travel_type").value,
+            source: document.getElementById("umrah_source").value,
+            beneficiary: document.getElementById("beneficiary").value,
+            agency_type: document.getElementById("agency_type").value,
             created_at: Timestamp.fromDate(new Date())
         });
         alert("🕋 تم حفظ معاملة العمرة بنجاح!");
         document.getElementById("umrah-form").reset();
-    } catch (error) {
-        console.error("خطأ أثناء الحفظ: ", error);
-    }
+    } catch (error) { alert("❌ خطأ أثناء الحفظ"); }
 });
 
-// === 3️⃣ جدول إدارة الحجوزات مع خاصية الحذف الفوري (CRUD) ===
+// عرض الكل في جدول الإدارة للحذف
 const adminTableBody = document.querySelector("#admin-manage-table tbody");
-
-const q = query(collection(db, "tickets"), orderBy("created_at", "desc"));
-onSnapshot(q, (snapshot) => {
-    adminTableBody.innerHTML = ""; // تفريغ لمنع التكرار
-    snapshot.forEach((snapshotDoc) => {
-        const ticket = snapshotDoc.data();
-        const ticketId = snapshotDoc.id;
-        const depDate = ticket.departure_date ? ticket.departure_date.toDate().toLocaleDateString('ar-YE') : '-';
-
-        const row = `<tr>
-            <td><strong>${ticket.passenger_name}</strong></td>
-            <td>${ticket.booking_code}</td>
-            <td>${depDate}</td>
-            <td>${ticket.source}</td>
-            <td>
-                <button class="delete-btn" data-id="${ticketId}">❌ حذف</button>
-            </td>
-        </tr>`;
-        adminTableBody.innerHTML += row;
-    });
-
-    // ربط أزرار الحذف بالدالة الخاصة بها برمجياً
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-            const id = e.target.getAttribute("data-id");
-            if (confirm("هل أنت متأكد من حذف هذا الحجز نهائياً من النظام؟")) {
-                await deleteDoc(doc(db, "tickets", id));
-                alert("🗑️ تم حذف الحجز بنجاح.");
-            }
+function updateAdminTable() {
+    adminTableBody.innerHTML = "";
+    
+    // جلب التذاكر
+    onSnapshot(query(collection(db, "tickets"), orderBy("created_at", "desc")), (snap) => {
+        snap.forEach(docSnap => {
+            const data = docSnap.data();
+            adminTableBody.innerHTML += `<tr>
+                <td><strong>[تذكرة] ${data.passenger_name}</strong></td>
+                <td>${data.booking_code}</td>
+                <td>${data.departure_date?.toDate().toLocaleDateString('ar-YE')}</td>
+                <td>${data.source}</td>
+                <td><button class="delete-btn" onclick="deleteData('tickets', '${docSnap.id}')">❌ حذف</button></td>
+            </tr>`;
         });
     });
-});
+
+    // جلب العمرة
+    onSnapshot(query(collection(db, "umrah"), orderBy("created_at", "desc")), (snap) => {
+        snap.forEach(docSnap => {
+            const data = docSnap.data();
+            adminTableBody.innerHTML += `<tr>
+                <td><strong>[عمرة] ${data.pilgrim_name}</strong></td>
+                <td>${data.travel_type}</td>
+                <td>${data.agency_type}</td>
+                <td>${data.source}</td>
+                <td><button class="delete-btn" onclick="deleteData('umrah', '${docSnap.id}')">❌ حذف</button></td>
+            </tr>`;
+        });
+    });
+}
+
+window.deleteData = async (coll, id) => {
+    if (confirm("هل أنت متأكد من الحذف نهائياً؟")) {
+        await deleteDoc(doc(db, coll, id));
+        alert("🗑️ تم الحذف.");
+    }
+}
+updateAdminTable();

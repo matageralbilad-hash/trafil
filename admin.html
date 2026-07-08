@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والأدمن - مكتب السفريات</title>
-    <link rel="stylesheet" href="style.css"> <style>
-        /* إضافات بسيطة خاصة بالفورمات داخل الأدمن */
+    <link rel="stylesheet" href="style.css"> 
+    <style>
         .form-group { margin-bottom: 15px; text-align: right; }
         .form-group label { display: block; margin-bottom: 5px; color: #94a3b8; font-weight: 600; }
         .form-group input, .form-group select { 
@@ -81,6 +81,30 @@
                     <input type="text" id="pilgrim_name" required placeholder="الاسم الكامل للمعتمر">
                 </div>
                 <div class="form-group">
+                    <label>تاريخ الدخول</label>
+                    <input type="date" id="entry_date" required>
+                </div>
+                <div class="form-group">
+                    <label>تاريخ الخروج</label>
+                    <input type="date" id="exit_date" required>
+                </div>
+                <div class="form-group">
+                    <label>النوع (وسيلة السفر)</label>
+                    <select id="travel_type" required>
+                        <option value="">-- اختر النوع --</option>
+                        <option value="جو">جو ✈️</option>
+                        <option value="بر">بر 🚌</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>المصدر</label>
+                    <input type="text" id="umrah_source" required placeholder="مصدر المعاملة">
+                </div>
+                <div class="form-group">
+                    <label>المستفيد</label>
+                    <input type="text" id="beneficiary" required placeholder="اسم الجهة المستفيدة">
+                </div>
+                <div class="form-group">
                     <label>الجهة التابع لها المعاملة</label>
                     <select id="agency_type" required>
                         <option value="">-- اختر الجهة --</option>
@@ -98,15 +122,14 @@
                 <table id="admin-manage-table">
                     <thead>
                         <tr>
-                            <th>الاسم</th>
-                            <th>رقم الحجز</th>
-                            <th>تاريخ الإقلاع</th>
+                            <th>الاسم / المعتمر</th>
+                            <th>النوع</th>
+                            <th>التاريخ / الجهة</th>
                             <th>المصدر</th>
                             <th>إجراءات</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </section>
@@ -120,7 +143,6 @@
             event.currentTarget.classList.add('active');
         }
     </script>
-
     <script type="module" src="admin.js"></script>
 </body>
 </html>
