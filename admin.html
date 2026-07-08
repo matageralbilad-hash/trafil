@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم والأدمن - مكتب السفريات</title>
+    <link rel="stylesheet" href="style.css"> <style>
+        /* إضافات بسيطة خاصة بالفورمات داخل الأدمن */
+        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 5px; color: #94a3b8; font-weight: 600; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 10px; border-radius: 8px; background: #151f32; 
+            border: 1px solid #334155; color: #fff; font-size: 0.95rem;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: #38bdf8; outline: none; }
+        .submit-btn { 
+            width: 100%; background: #38bdf8; color: #0f172a; border: none; 
+            padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem;
+        }
+        .submit-btn:hover { background: #0ea5e9; }
+        .delete-btn { background: #f43f5e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .delete-btn:hover { background: #e11d48; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header>
+            <h1>⚙️ لوحة إدارة الحجوزات والأدمن</h1>
+            <p>إدخال التذاكر، تأشيرات العمرة، وإدارة النظام</p>
+        </header>
+
+        <nav class="tabs-navigation">
+            <button class="tab-btn active" onclick="switchTab('add-ticket-section')">🎟️ إضافة تذكرة</button>
+            <button class="tab-btn" onclick="switchTab('add-umrah-section')">🕋 تاشيرات العمرة</button>
+            <button class="tab-btn" onclick="switchTab('manage-section')">🛠️ إدارة الحجوزات</button>
+        </nav>
+
+        <section id="add-ticket-section" class="tab-content active-content">
+            <form id="ticket-form">
+                <div class="form-group">
+                    <label>اسم صاحب التذكرة</label>
+                    <input type="text" id="passenger_name" required placeholder="الاسم الكامل للمسافر">
+                </div>
+                <div class="form-group">
+                    <label>رقم الحجز (PNR)</label>
+                    <input type="text" id="booking_code" required placeholder="مثال: XZ98LL">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ ووقت الاقلاع</label>
+                    <input type="datetime-local" id="departure_date" required>
+                </div>
+                <div class="form-group">
+                    <label>من (مدينة الإقلاع)</label>
+                    <input type="text" id="from_location" required placeholder="مثال: سيئون">
+                </div>
+                <div class="form-group">
+                    <label>إلى (الوجهة)</label>
+                    <input type="text" id="to_location" required placeholder="مثال: جدة">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ ووقت العودة (اتركه فارغاً إذا كان ذهاب فقط)</label>
+                    <input type="datetime-local" id="return_date">
+                </div>
+                <div class="form-group">
+                    <label>المصدر (مكان صدور التذكرة)</label>
+                    <input type="text" id="source" required placeholder="مثال: مكتب سيئون الرئيسي / منصة B2B">
+                </div>
+                <div class="form-group">
+                    <label>الجهة (الشركة الناقلة / الوكيل)</label>
+                    <input type="text" id="destination_agency" required placeholder="مثال: الخطوط اليمنية / طيران أديل">
+                </div>
+                <button type="submit" class="submit-btn">💾 حفظ التذكرة في النظام</button>
+            </form>
+        </section>
+
+        <section id="add-umrah-section" class="tab-content">
+            <form id="umrah-form">
+                <div class="form-group">
+                    <label>اسم المعتمر</label>
+                    <input type="text" id="pilgrim_name" required placeholder="الاسم الكامل للمعتمر">
+                </div>
+                <div class="form-group">
+                    <label>الجهة التابع لها المعاملة</label>
+                    <select id="agency_type" required>
+                        <option value="">-- اختر الجهة --</option>
+                        <option value="احرام">إحرام</option>
+                        <option value="العمودي">العمودي</option>
+                        <option value="سنابل الخير">سنابل الخير</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn" style="background: #10b981;">🕋 حفظ معاملة العمرة</button>
+            </form>
+        </section>
+
+        <section id="manage-section" class="tab-content">
+            <div class="table-holder full-width-table">
+                <table id="admin-manage-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>رقم الحجز</th>
+                            <th>تاريخ الإقلاع</th>
+                            <th>المصدر</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active-content');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

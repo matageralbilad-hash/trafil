@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Cairo', sans-serif;
+}
+
+body {
+    background-color: #121824;
+    color: #e2e8f0;
+    padding: 15px;
+    font-size: 14px;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 1.6rem;
+    color: #38bdf8;
+}
+
+header p {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+/* شريط التنقل بين الخانات الثلاث */
+.tabs-navigation {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    background: #1e293b;
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 12px 5px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.tab-btn:hover {
+    color: #f8fafc;
+    background: #243249;
+}
+
+/* الزر النشط حالياً */
+.tab-btn.active {
+    background: #38bdf8;
+    color: #0f172a;
+}
+
+/* التحكم بظهور واختفاء الخانات */
+.tab-content {
+    display: none; /* مخفي افتراضياً */
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.tab-content.active-content {
+    display: block; /* يظهر فقط عند التفعيل */
+}
+
+/* شبكة كروت الإحصائيات */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.stat-card {
+    background: #151f32;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border-bottom: 3px solid #38bdf8;
+}
+
+.stat-card h3 {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.stat-card p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+/* كروت العمرة الخاصة */
+.ihram { border-color: #38bdf8; }
+.alamoudi { border-color: #f59e0b; }
+.sanabel { border-color: #10b981; }
+
+/* شبكة التقارير والجداول */
+.tables-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+}
+
+.table-holder {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #334155;
+}
+
+th {
+    color: #94a3b8;
+    background: #151f32;
+}
+
+tr:hover {
+    background: #1f2d44;
+}
+
+/* الشاشات الكبيرة للكمبيوتر */
+@media (min-width: 768px) {
+    body { padding: 30px; }
+    header h1 { font-size: 2rem; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .tables-grid { grid-template-columns: 1fr 1fr; }
+    .tab-btn { font-size: 1.05rem; padding: 12px 20px; }
+}

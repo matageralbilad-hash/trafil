@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة وإحصائيات السفر</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header>
+            <h1>📊 نظام إدارة وإحصائيات السفر</h1>
+            <p>لوحة الرقابة والمتابعة الفورية لحجوزات المكتب</p>
+        </header>
+
+        <nav class="tabs-navigation">
+            <button class="tab-btn active" onclick="switchTab('stats-section')">📈 الإحصائيات العامة</button>
+            <button class="tab-btn" onclick="switchTab('reports-section')">📋 التقارير الذكية</button>
+            <button class="tab-btn" onclick="switchTab('table-section')">🗂️ الجدول الشامل</button>
+        </nav>
+
+        <section id="stats-section" class="tab-content active-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>تذاكر هذا الأسبوع</h3>
+                    <p id="weekly-tickets-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>أكثر وجهة طلباً</h3>
+                    <p id="top-destination">-</p>
+                </div>
+                <div class="stat-card">
+                    <h3>أكثر مصدر تذاكر</h3>
+                    <p id="top-source">-</p>
+                </div>
+                <div class="stat-card ihram">
+                    <h3>عمرة (إحرام)</h3>
+                    <p id="count-ihram">0</p>
+                </div>
+                <div class="stat-card alamoudi">
+                    <h3>عمرة (العمودي)</h3>
+                    <p id="count-alamoudi">0</p>
+                </div>
+                <div class="stat-card sanabel">
+                    <h3>عمرة (سنابل الخير)</h3>
+                    <p id="count-sanabel">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="reports-section" class="tab-content">
+            <div class="tables-grid">
+                <div class="table-holder">
+                    <h3 style="color: #f43f5e; margin-bottom: 12px;">🛫 المسافرون خلال الـ 48 ساعة القادمة</h3>
+                    <table id="departure-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>رقم الحجز</th>
+                                <th>من -> إلى</th>
+                                <th>الإقلاع</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="table-holder">
+                    <h3 style="color: #10b981; margin-bottom: 12px;">🛬 العائدون خلال الـ 72 ساعة القادمة</h3>
+                    <table id="return-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>رقم الحجز</th>
+                                <th>المصدر</th>
+                                <th>العودة</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="table-section" class="tab-content">
+            <div class="table-holder full-width-table">
+                <table id="all-tickets-table">
+                    <thead>
+                        <tr>
+                            <th>اسم صاحب التذكرة</th>
+                            <th>رقم الحجز</th>
+                            <th>تاريخ الإقلاع</th>
+                            <th>من ... إلى ...</th>
+                            <th>تاريخ العودة</th>
+                            <th>المصدر</th>
+                            <th>الجهة</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            // إخفاء كل الخانات
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active-content');
+            });
+            // إلغاء تفعيل كل الأزرار
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // إظهار الخانة المطلوبة وتفعيل زرها
+            document.getElementById(tabId).classList.add('active-content');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
