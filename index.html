@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة وإحصائيات السفر</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -132,5 +133,15 @@
         }
     </script>
     <script type="module" src="app.js"></script>
+<script>
+    // التأكد من أن متصفح الجوال يدعم ميزة خادم الخلفية
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((reg) => console.log('✅ تم تسجيل خادم الخلفية بنجاح:', reg.scope))
+                .catch((err) => console.error('❌ فشل تسجيل خادم الخلفية:', err));
+        });
+    }
+</script>
 </body>
 </html>
