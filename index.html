@@ -57,7 +57,7 @@
                     <div class="card-icon">🛫</div>
                     <div class="card-info">
                         <h3>رحلات مغادرة خلال الـ 48 ساعة القادمة</h3>
-                        <p class="click-hint">اضغط هنا للبحث وعرض التفاصيل الكاملة</p>
+                        <p class="click-hint">اضغط هنا لعرض الجدول وتصفية البيانات</p>
                     </div>
                 </div>
 
@@ -65,40 +65,63 @@
                     <div class="card-icon">🛬</div>
                     <div class="card-info">
                         <h3>تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة)</h3>
-                        <p class="click-hint">اضغط هنا للبحث وعرض التفاصيل الكاملة</p>
+                        <p class="click-hint">اضغط هنا لعرض الجدول وتصفية البيانات</p>
                     </div>
                 </div>
             </div>
 
-            <div id="detailed-report-view" class="detailed-view-container" style="display: none;">
+            <div id="departure-report-view" class="detailed-view-container" style="display: none; margin-top: 20px;">
                 <div class="view-header">
-                    <h2 id="detailed-report-title">تقرير تفصيلي</h2>
-                    <button class="back-btn" onclick="closeDetailedReport()">➔ العودة للتقارير</button>
+                    <h2>🛫 تفاصيل الرحلات المغادرة (48 ساعة)</h2>
+                    <button class="back-btn" onclick="closeDetailedReport('departure')">➔ عودة للتقارير</button>
                 </div>
-                
-<div class="search-wrapper">
-    <input type="text" id="report-search-input" placeholder="🔍 بحث قوي فوري بالاسم، رقم الحجز، الوكيل، المصدر أو الوجهة...">
-</div>
-              
-
+                <div class="search-wrapper">
+                    <input type="text" id="departure-search-input" placeholder="🔍 بحث فوري في المغادرين بالاسم، الحجز، أو المسار...">
+                </div>
                 <div class="table-holder">
-                    <table id="detailed-report-table">
+                    <table id="departure-table">
                         <thead>
-                            <tr id="detailed-table-header">
-                                </tr>
+                            <tr>
+                                <th>اسم صاحب التذكرة</th>
+                                <th>رقم الحجز</th>
+                                <th>المسار</th>
+                                <th>تاريخ الإقلاع</th>
+                            </tr>
                         </thead>
-                        <tbody>
-                            </tbody>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="return-report-view" class="detailed-view-container" style="display: none; margin-top: 20px;">
+                <div class="view-header">
+                    <h2>🛬 تفاصيل رحلات العودة (72 ساعة)</h2>
+                    <button class="back-btn" onclick="closeDetailedReport('return')">➔ عودة للتقارير</button>
+                </div>
+                <div class="search-wrapper">
+                    <input type="text" id="return-search-input" placeholder="🔍 بحث فوري في العائدين بالاسم، الحجز، أو المصدر...">
+                </div>
+                <div class="table-holder">
+                    <table id="return-table">
+                        <thead>
+                            <tr>
+                                <th>اسم صاحب التذكرة</th>
+                                <th>رقم الحجز</th>
+                                <th>المصدر</th>
+                                <th>تاريخ العودة</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
         </section> 
 
         <section id="table-section" class="tab-content">
-         <div class="search-wrapper">
-                <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في جدول العمرة (الاسم، المصدر، المستفيد، الجهة)...">
+            <div class="search-wrapper">
+                <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في جدول التذاكر الشامل...">
             </div>   
-<div class="table-holder full-width-table">
+            <div class="table-holder full-width-table">
                 <table id="all-tickets-table">
                     <thead>
                         <tr>
@@ -117,11 +140,11 @@
         </section>
 
         <section id="umrah-table-section" class="tab-content">
-    <div class="search-wrapper">
-        <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في جدول العمرة (الاسم، المصدر، المستفيد، الجهة)...">
-    </div>   
-    <div class="table-holder full-width-table">
-        <table id="all-umrah-table">
+            <div class="search-wrapper">
+                <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في جدول العمرة (الاسم، المصدر، المستفيد)...">
+            </div>   
+            <div class="table-holder full-width-table">
+                <table id="all-umrah-table">
                     <thead>
                         <tr>
                             <th>اسم المعتمر</th>
@@ -147,75 +170,60 @@
             if(event && event.currentTarget) {
                 event.currentTarget.classList.add('active');
             }
-            // إغلاق شاشة تفاصيل التقارير تلقائياً عند تغيير التبويب الرئيسي
-            closeDetailedReport();
+            closeDetailedReport('departure');
+            closeDetailedReport('return');
         }
 
-        // دالتين لإدارة إظهار وإخفاء شاشة البحث المتقدم داخل التقارير
         function openDetailedReport(type) {
             document.querySelector('.reports-summary-grid').style.display = 'none';
-            const detailedView = document.getElementById('detailed-report-view');
-            detailedView.style.display = 'block';
-            detailedView.setAttribute('data-current-type', type);
-            
-            // إرسال حدث مخصص لملف app.js ليعرف أي جدول يملأ وأي حقول يبحث فيها
-            const event = new CustomEvent('reportTypeChanged', { detail: { type: type } });
-            window.dispatchEvent(event);
+            document.getElementById(`${type}-report-view`).style.display = 'block';
         }
 
-        function closeDetailedReport() {
-            const detailedView = document.getElementById('detailed-report-view');
-            if (detailedView) detailedView.style.display = 'none';
+        function closeDetailedReport(type) {
+            const reportView = document.getElementById(`${type}-report-view`);
+            if(reportView) reportView.style.display = 'none';
             const summaryGrid = document.querySelector('.reports-summary-grid');
-            if (summaryGrid) summaryGrid.style.display = 'grid';
-            const searchInput = document.getElementById('report-search-input');
-            if (searchInput) searchInput.value = '';
+            if(summaryGrid) summaryGrid.style.display = 'grid';
+            
+            const searchInput = document.getElementById(`${type}-search-input`);
+            if (searchInput) {
+                searchInput.value = '';
+                // إعادة إظهار الأسطر المخفية عند مسح البحث
+                document.querySelectorAll(`#${type}-table tbody tr`).forEach(row => row.style.display = "");
+            }
         }
     </script>
     <script type="module" src="app.js"></script>
-<script>
-    // 1. التأكد من دعم متصفح الجوال لخادم الخلفية والإشعارات
-    if ('serviceWorker' in navigator && 'Notification' in window) {
-        window.addEventListener('load', () => {
-            // تسجيل خادم الخلفية
-            navigator.serviceWorker.register('/sw.js')
-                .then((reg) => {
-                    console.log('✅ تم تسجيل خادم الخلفية بنجاح:', reg.scope);
-                    
-                    // بعد التسجيل بنجاح، نطلب الإذن للإشعارات فوراً
-                    requestNotificationPermission();
-                })
-                .catch((err) => console.error('❌ فشل تسجيل خادم الخلفية:', err));
-        });
-    }
-
-    // 2. دالة طلب صلاحية الإشعارات وشرحها الممل
-    function requestNotificationPermission() {
-        // التحقق من حالة الإذن الحالية
-        if (Notification.permission === 'default') {
-            Notification.requestPermission().then((permission) => {
-                if (permission === 'granted') {
-                    console.log('🔔 تم منح صلاحية الإشعارات بنجاح من قبل المستخدم!');
-                    // إشعار تجريبي ترحيبي لتأكيد العمل
-                    showWelcomeNotification();
-                } else {
-                    console.warn('🔕 تم رفض صلاحية الإشعارات من قبل المستخدم.');
-                }
+    <script>
+        if ('serviceWorker' in navigator && 'Notification' in window) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => {
+                        console.log('✅ تم تسجيل خادم الخلفية:', reg.scope);
+                        requestNotificationPermission();
+                    })
+                    .catch((err) => console.error('❌ فشل تسجيل خادم الخلفية:', err));
             });
         }
-    }
 
-    // 3. دالة لإرسال إشعار ترحيبي محلي سريع للتجربة
-    function showWelcomeNotification() {
-        navigator.serviceWorker.ready.then((registration) => {
-            registration.showNotification('🚀 تم تفعيل الإشعارات الذكية', {
-                body: 'ستصلك الآن تنبيهات المسافرين والعائدين فوراً أعلى الجوال.',
-                icon: '/icon-192.png', // الأيقونة التي عرفناها في الـ manifest
-                vibrate: [200, 100, 200], // نمط الهزاز في الجوال (اهتزاز، توقف، اهتزاز)
-                badge: '/icon-192.png' // الأيقونة الصغيرة المرافقة للإشعار في شريط الحالة العلوي
+        function requestNotificationPermission() {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') showWelcomeNotification();
+                });
+            }
+        }
+
+        function showWelcomeNotification() {
+            navigator.serviceWorker.ready.then((registration) => {
+                registration.showNotification('🚀 تم تفعيل الإشعارات الذكية', {
+                    body: 'ستصلك تنبيهات المسافرين والعائدين فوراً على الجوال.',
+                    icon: '/icon-192.png',
+                    vibrate: [200, 100, 200],
+                    badge: '/icon-192.png'
+                });
             });
-        });
-    }
-</script>
+        }
+    </script>
 </body>
 </html>
