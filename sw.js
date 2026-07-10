@@ -32,3 +32,25 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+// 4. حدث الضغط على الإشعار: يتم استدعاؤه عندما ينقر المستخدم على التنبيه أعلى الشاشة
+self.addEventListener('notificationclick', (event) => {
+  // إغلاق نافذة الإشعار بمجرد الضغط عليها
+  event.notification.close();
+
+  // إخبار الجوال بفتح التطبيق أو الانتقال إليه إذا كان مفتوحاً في الخلفية
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // إذا كان التطبيق مفتوحاً بالفعل في الخلفية، قم بالتركيز عليه وإظهاره
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        if (client.url.includes('index.html') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // إذا كان التطبيق مغلقاً تماماً، قم بفتحه من جديد
+      if (clients.openWindow) {
+        return clients.openWindow('/index.html');
+      }
+    })
+  );
+});

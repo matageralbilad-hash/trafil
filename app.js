@@ -87,8 +87,65 @@ function processTickets(tickets) {
     topDestinationEl.textContent = topDestination;
     const topSource = Object.keys(sourcesMap).reduce((a, b) => sourcesMap[a] > sourcesMap[b] ? a : b, "-");
     topSourceEl.textContent = topSource;
+
+    // تشغيل الفحص التلقائي للإشعارات
+    checkTicketsForNotifications(tickets);
+}
+// ==========================================
+// 💡 نظام الفحص الذكي للإشعارات الفورية (المرحلة الثالثة)
+// ==========================================
+
+// دالة عامة لإطلاق الإشعار الفوري لأي مسافر أو عائد
+function triggerDeviceNotification(title, message) {
+    // التأكد أولاً من أن المستخدم أعطى الصلاحية وأن خادم الخلفية جاهز
+    if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification(title, {
+                body: message,
+                icon: '/icon-192.png',
+                badge: '/icon-192.png',
+                vibrate: [300, 150, 300], // اهتزاز أقوى للتنبيهات المهمة
+                tag: title + message, // منع تكرار نفس الإشعار إذا تم تحديث الصفحة
+                requireInteraction: true // يجعل الإشعار يظل ثابتاً أعلى الشاشة حتى يضغط عليه المدير
+            });
+        });
+    }
 }
 
+// دالة فحص التذاكر بذكاء (المسافرون في 48 ساعة والعائدون في 72 ساعة)
+export function checkTicketsForNotifications(ticketsList) {
+    const now = new Date();
+    
+    ticketsList.forEach(ticket => {
+        // --- 1. فحص المغادرين (48 ساعة قادمة) ---
+        if (ticket.departure_date) {
+            const departureTime = ticket.departure_date.toDate(); 
+            const timeDifference = departureTime - now; 
+            const hoursLeft = timeDifference / (1000 * 60 * 60);
+
+            if (hoursLeft > 0 && hoursLeft <= 48) {
+                const title = `🛫 تذكير إقلاع: ${ticket.passenger_name}`;
+                const message = `الرحلة من [${ticket.from_location}] إلى [${ticket.to_location}] خلال ${Math.round(hoursLeft)} ساعة. رقم الحجز: ${ticket.booking_code}`;
+                
+                triggerDeviceNotification(title, message);
+            }
+        }
+
+        // --- 2. فحص العائدين (72 ساعة قادمة) ---
+        if (ticket.return_date) {
+            const returnTime = ticket.return_date.toDate(); 
+            const timeDifference = returnTime - now;
+            const hoursLeft = timeDifference / (1000 * 60 * 60);
+
+            if (hoursLeft > 0 && hoursLeft <= 72) {
+                const title = `🛬 تذكير عودة: ${ticket.passenger_name}`;
+                const message = `ميعاد العودة المفترض خلال ${Math.round(hoursLeft)} ساعة عبر مصدر: ${ticket.source}. رقم الحجز: ${ticket.booking_code}`;
+                
+                triggerDeviceNotification(title, message);
+            }
+        }
+    });
+}
 function processUmrah(umrahList) {
     let ihram = 0, alamoudi = 0, sanabel = 0;
     allUmrahTableBody.innerHTML = ""; // تفريغ جدول العمرة

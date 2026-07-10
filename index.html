@@ -134,12 +134,46 @@
     </script>
     <script type="module" src="app.js"></script>
 <script>
-    // التأكد من أن متصفح الجوال يدعم ميزة خادم الخلفية
-    if ('serviceWorker' in navigator) {
+    // 1. التأكد من دعم متصفح الجوال لخادم الخلفية والإشعارات
+    if ('serviceWorker' in navigator && 'Notification' in window) {
         window.addEventListener('load', () => {
+            // تسجيل خادم الخلفية
             navigator.serviceWorker.register('/sw.js')
-                .then((reg) => console.log('✅ تم تسجيل خادم الخلفية بنجاح:', reg.scope))
+                .then((reg) => {
+                    console.log('✅ تم تسجيل خادم الخلفية بنجاح:', reg.scope);
+                    
+                    // بعد التسجيل بنجاح، نطلب الإذن للإشعارات فوراً
+                    requestNotificationPermission();
+                })
                 .catch((err) => console.error('❌ فشل تسجيل خادم الخلفية:', err));
+        });
+    }
+
+    // 2. دالة طلب صلاحية الإشعارات وشرحها الممل
+    function requestNotificationPermission() {
+        // التحقق من حالة الإذن الحالية
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    console.log('🔔 تم منح صلاحية الإشعارات بنجاح من قبل المستخدم!');
+                    // إشعار تجريبي ترحيبي لتأكيد العمل
+                    showWelcomeNotification();
+                } else {
+                    console.warn('🔕 تم رفض صلاحية الإشعارات من قبل المستخدم.');
+                }
+            });
+        }
+    }
+
+    // 3. دالة لإرسال إشعار ترحيبي محلي سريع للتجربة
+    function showWelcomeNotification() {
+        navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification('🚀 تم تفعيل الإشعارات الذكية', {
+                body: 'ستصلك الآن تنبيهات المسافرين والعائدين فوراً أعلى الجوال.',
+                icon: '/icon-192.png', // الأيقونة التي عرفناها في الـ manifest
+                vibrate: [200, 100, 200], // نمط الهزاز في الجوال (اهتزاز، توقف، اهتزاز)
+                badge: '/icon-192.png' // الأيقونة الصغيرة المرافقة للإشعار في شريط الحالة العلوي
+            });
         });
     }
 </script>
