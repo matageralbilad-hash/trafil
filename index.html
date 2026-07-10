@@ -52,41 +52,53 @@
         </section>
 
         <section id="reports-section" class="tab-content">
-            <div class="tables-grid">
-                <div class="table-holder">
-                    <h3 style="color: #f43f5e; margin-bottom: 12px;">🛫 رحلات مغادرة خلال الـ 48 ساعة القادمة</h3>
-                    <table id="departure-table">
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>رقم الحجز</th>
-                                <th>من -> إلى</th>
-                                <th>الإقلاع</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+            <div class="reports-summary-grid">
+                <div class="report-summary-card departure-card" onclick="openDetailedReport('departure')">
+                    <div class="card-icon">🛫</div>
+                    <div class="card-info">
+                        <h3>رحلات مغادرة خلال الـ 48 ساعة القادمة</h3>
+                        <p class="click-hint">اضغط هنا للبحث وعرض التفاصيل الكاملة</p>
+                    </div>
                 </div>
 
+                <div class="report-summary-card return-card" onclick="openDetailedReport('return')">
+                    <div class="card-icon">🛬</div>
+                    <div class="card-info">
+                        <h3>تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة)</h3>
+                        <p class="click-hint">اضغط هنا للبحث وعرض التفاصيل الكاملة</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="detailed-report-view" class="detailed-view-container" style="display: none;">
+                <div class="view-header">
+                    <h2 id="detailed-report-title">تقرير تفصيلي</h2>
+                    <button class="back-btn" onclick="closeDetailedReport()">➔ العودة للتقارير</button>
+                </div>
+                
+<div class="search-wrapper">
+    <input type="text" id="report-search-input" placeholder="🔍 بحث قوي فوري بالاسم، رقم الحجز، الوكيل، المصدر أو الوجهة...">
+</div>
+              
+
                 <div class="table-holder">
-                    <h3 style="color: #10b981; margin-bottom: 12px;">تذاكر العودة غير المفتوحة اقلاع خلال الـ 72 ساعة القادمة</h3>
-                    <table id="return-table">
+                    <table id="detailed-report-table">
                         <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>رقم الحجز</th>
-                                <th>المصدر</th>
-                                <th>العودة</th>
-                            </tr>
+                            <tr id="detailed-table-header">
+                                </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
-        </section>
+        </section> 
 
         <section id="table-section" class="tab-content">
-            <div class="table-holder full-width-table">
+         <div class="search-wrapper">
+                <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في جدول العمرة (الاسم، المصدر، المستفيد، الجهة)...">
+            </div>   
+<div class="table-holder full-width-table">
                 <table id="all-tickets-table">
                     <thead>
                         <tr>
@@ -105,8 +117,11 @@
         </section>
 
         <section id="umrah-table-section" class="tab-content">
-            <div class="table-holder full-width-table">
-                <table id="all-umrah-table">
+    <div class="search-wrapper">
+        <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في جدول العمرة (الاسم، المصدر، المستفيد، الجهة)...">
+    </div>   
+    <div class="table-holder full-width-table">
+        <table id="all-umrah-table">
                     <thead>
                         <tr>
                             <th>اسم المعتمر</th>
@@ -129,7 +144,32 @@
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active-content');
-            event.currentTarget.classList.add('active');
+            if(event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+            // إغلاق شاشة تفاصيل التقارير تلقائياً عند تغيير التبويب الرئيسي
+            closeDetailedReport();
+        }
+
+        // دالتين لإدارة إظهار وإخفاء شاشة البحث المتقدم داخل التقارير
+        function openDetailedReport(type) {
+            document.querySelector('.reports-summary-grid').style.display = 'none';
+            const detailedView = document.getElementById('detailed-report-view');
+            detailedView.style.display = 'block';
+            detailedView.setAttribute('data-current-type', type);
+            
+            // إرسال حدث مخصص لملف app.js ليعرف أي جدول يملأ وأي حقول يبحث فيها
+            const event = new CustomEvent('reportTypeChanged', { detail: { type: type } });
+            window.dispatchEvent(event);
+        }
+
+        function closeDetailedReport() {
+            const detailedView = document.getElementById('detailed-report-view');
+            if (detailedView) detailedView.style.display = 'none';
+            const summaryGrid = document.querySelector('.reports-summary-grid');
+            if (summaryGrid) summaryGrid.style.display = 'grid';
+            const searchInput = document.getElementById('report-search-input');
+            if (searchInput) searchInput.value = '';
         }
     </script>
     <script type="module" src="app.js"></script>

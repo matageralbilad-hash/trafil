@@ -188,3 +188,13 @@ onSnapshot(umrahQuery, snapshot => {
     snapshot.forEach(doc => umrahList.push({ id: doc.id, ...doc.data() }));
     processUmrah(umrahList);
 });
+// تشغيل البحث الفوري لجدول العمرة الشامل بشكل دقيق
+const umrahSearchField = document.querySelector("#umrah-table-section #umrah-search-input");
+if (umrahSearchField) {
+    umrahSearchField.addEventListener("input", (e) => {
+        const text = e.target.value.toLowerCase().trim();
+        document.querySelectorAll("#all-umrah-table tbody tr").forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(text) ? "" : "none";
+        });
+    });
+}
