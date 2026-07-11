@@ -1,5 +1,5 @@
 // تغيير اسم الكاش إلى v3 لإجبار المتصفح على تنظيف الكاش القديم واستقبال التعديلات فوراً
-const CACHE_NAME = 'travel-app-v4';
+const CACHE_NAME = 'travel-app-v5';
 
 // إضافة كافة الملفات الجديدة (بما فيها الـ admin) لضمان حفظ النظام كاملاً
 const ASSETS_TO_CACHE = [
