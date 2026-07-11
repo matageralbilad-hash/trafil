@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTickets();
     renderUmrah();
     renderVisas();
+    updateSmartReports(); // تشغيل التقارير الذكية فوراً عند فتح الصفحة
     setupSearchFilters();
 });
 
@@ -108,8 +109,66 @@ function renderVisas() {
     });
 }
 
-// تفعيل استماع الأحداث للتنقل الفرعي المباشر من واجهة الـ HTML
-window.addEventListener('filter-tickets', renderTickets);
+// 📋 [قسم التقارير الذكية] - حساب الرحلات المغادرة والعائدة تلقائياً من البيانات الجديدة
+function updateSmartReports() {
+    const departureTbody = document.querySelector('#departure-table tbody');
+    const returnTbody = document.querySelector('#return-table tbody');
+    if (!departureTbody || !returnTbody) return;
+
+    departureTbody.innerHTML = '';
+    returnTbody.innerHTML = '';
+
+    const now = new Date();
+    const fortyEightHoursLater = new Date(now.getTime() + (48 * 60 * 60 * 1000));
+    const seventyTwoHoursLater = new Date(now.getTime() + (72 * 60 * 60 * 1000));
+
+    let departureCount = 0;
+    let returnCount = 0;
+
+    ticketsData.forEach(ticket => {
+        // 1. حساب رحلات المغادرة (خلال 48 ساعة قادمة)
+        if (ticket.departure_date) {
+            const depDate = new Date(ticket.departure_date);
+            if (depDate >= now && depDate <= fortyEightHoursLater) {
+                departureCount++;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${ticket.passenger_name}</strong></td>
+                    <td><code>${ticket.booking_code}</code></td>
+                    <td>${ticket.from_location} ➔ ${ticket.to_location}</td>
+                    <td>${formatDate(ticket.departure_date)}</td>
+                `;
+                departureTbody.appendChild(row);
+            }
+        }
+
+        // 2. حساب رحلات العودة (خلال 72 ساعة قادمة)
+        if (ticket.return_date) {
+            const retDate = new Date(ticket.return_date);
+            if (retDate >= now && retDate <= seventyTwoHoursLater) {
+                returnCount++;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${ticket.passenger_name}</strong></td>
+                    <td><code>${ticket.booking_code}</code></td>
+                    <td>${ticket.source}</td>
+                    <td>${formatDate(ticket.return_date)}</td>
+                `;
+                returnTbody.appendChild(row);
+            }
+        }
+    });
+
+    // تحديث الأرقام الحية على كروت الواجهة الرئيسية
+    const depCardTitle = document.querySelector('.departure-card h3');
+    const retCardTitle = document.querySelector('.return-card h3');
+    
+    if (depCardTitle) depCardTitle.innerHTML = `رحلات مغادرة خلال الـ 48 ساعة القادمة (<span style="color: #38bdf8; font-weight: bold;">${departureCount}</span>)`;
+    if (retCardTitle) retCardTitle.innerHTML = `تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة) (<span style="color: #10b981; font-weight: bold;">${returnCount}</span>)`;
+}
+
+// تفعيل استماع الأحداث للتنقل الفرعي وتحديث التقارير تلقائياً عند تغيير الفلاتر
+window.addEventListener('filter-tickets', () => { renderTickets(); updateSmartReports(); });
 window.addEventListener('filter-umrah', renderUmrah);
 window.addEventListener('filter-visas', renderVisas);
 
@@ -118,6 +177,8 @@ function setupSearchFilters() {
     setupTableSearch('tickets-search-input', 'all-tickets-table');
     setupTableSearch('umrah-search-input', 'all-umrah-table');
     setupTableSearch('visas-search-input', 'all-visas-table');
+    setupTableSearch('departure-search-input', 'departure-table');
+    setupTableSearch('return-search-input', 'return-table');
 }
 
 function setupTableSearch(inputId, tableId) {
