@@ -1,33 +1,36 @@
-// تغيير اسم الكاش إلى v2 لإجبار المتصفح على استقبال التعديلات الجديدة فوراً
-const CACHE_NAME = 'travel-app-v2';
+// تغيير اسم الكاش إلى v3 لإجبار المتصفح على تنظيف الكاش القديم واستقبال التعديلات فوراً
+const CACHE_NAME = 'travel-app-v3';
 
+// إضافة كافة الملفات الجديدة (بما فيها الـ admin) لضمان حفظ النظام كاملاً
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
+  '/admin.html',
   '/style.css',
   '/app.js',
+  '/admin.js',
   '/manifest.json'
 ];
 
-// 1. حدث التثبيت
+// 1. حدث التثبيت وحفظ الملفات في الكاش الجديد
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('📦 جاري حفظ ملفات النظام في الذاكرة المؤقتة...');
+      console.log('📦 جاري حفظ ملفات النظام والتعديلات الجديدة في الذاكرة المؤقتة...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting(); // إجبار التحديث على العمل فوراً دون انتظار إغلاق المتصفح
 });
 
-// 2. حدث التشغيل وحذف الكاش القديم تلقائياً
+// 2. حدث التشغيل وحذف الكاش القديم تلقائياً (v2 وما قبله)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('🗑️ تنظيف الكاش القديم:', cache);
+            console.log('🗑️ تنظيف الكاش القديم لتفعيل الواجهات الجديدة:', cache);
             return caches.delete(cache);
           }
         })

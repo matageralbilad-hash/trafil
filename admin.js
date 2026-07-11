@@ -1,96 +1,144 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// تهيئة واستدعاء المصفوفات من السيرفر المحلي المتصفحي
+let ticketsData = JSON.parse(localStorage.getItem('ticketsData')) || [];
+let umrahData = JSON.parse(localStorage.getItem('umrahData')) || [];
+let visasData = JSON.parse(localStorage.getItem('visasData')) || [];
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
-  authDomain: "travel-agency-app-95c51.firebaseapp.com",
-  projectId: "travel-agency-app-95c51",
-  storageBucket: "travel-agency-app-95c51.firebasestorage.app",
-  messagingSenderId: "83193496753",
-  appId: "1:83193496753:web:b79eba52db8bfd43374e90",
-  measurementId: "G-803PP5Q1WT"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// حفظ التذاكر
-document.getElementById("ticket-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    try {
-        await addDoc(collection(db, "tickets"), {
-            passenger_name: document.getElementById("passenger_name").value,
-            booking_code: document.getElementById("booking_code").value,
-            departure_date: Timestamp.fromDate(new Date(document.getElementById("departure_date").value)),
-            return_date: document.getElementById("return_date").value ? Timestamp.fromDate(new Date(document.getElementById("return_date").value)) : null,
-            from_location: document.getElementById("from_location").value,
-            to_location: document.getElementById("to_location").value,
-            source: document.getElementById("source").value,
-            destination_agency: document.getElementById("destination_agency").value,
-            created_at: Timestamp.fromDate(new Date())
-        });
-        alert("✅ تم حفظ التذكرة بنجاح!");
-        document.getElementById("ticket-form").reset();
-    } catch (error) { alert("❌ خطأ أثناء الحفظ"); }
+document.addEventListener('DOMContentLoaded', () => {
+    setupFormSubmit();
+    renderAdminManageTable();
 });
 
-// حفظ العمرة بالحقول الجديدة
-document.getElementById("umrah-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    try {
-        await addDoc(collection(db, "umrah"), {
-            pilgrim_name: document.getElementById("pilgrim_name").value,
-            entry_date: Timestamp.fromDate(new Date(document.getElementById("entry_date").value)),
-            exit_date: Timestamp.fromDate(new Date(document.getElementById("exit_date").value)),
-            travel_type: document.getElementById("travel_type").value,
-            source: document.getElementById("umrah_source").value,
-            beneficiary: document.getElementById("beneficiary").value,
-            agency_type: document.getElementById("agency_type").value,
-            created_at: Timestamp.fromDate(new Date())
+// إدارة حفظ النماذج (التذاكر - العمرة - التأشيرات الجديدة)
+function setupFormSubmit() {
+    // 1. تذكرة جديدة
+    const ticketForm = document.getElementById('ticket-form');
+    if (ticketForm) {
+        ticketForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newTicket = {
+                id: 'ticket_' + Date.now(),
+                passenger_name: document.getElementById('passenger_name').value.trim(),
+                booking_code: document.getElementById('booking_code').value.trim().toUpperCase(),
+                departure_date: document.getElementById('departure_date').value,
+                from_location: document.getElementById('from_location').value.trim(),
+                to_location: document.getElementById('to_location').value.trim(),
+                return_date: document.getElementById('return_date').value || null,
+                source: document.getElementById('source').value.trim(),
+                destination_agency: document.getElementById('destination_agency').value.trim()
+            };
+            ticketsData.push(newTicket);
+            localStorage.setItem('ticketsData', JSON.stringify(ticketsData));
+            alert('✅ تم حفظ التذكرة بنجاح في قاعدة البيانات!');
+            ticketForm.reset();
+            renderAdminManageTable();
         });
-        alert("🕋 تم حفظ معاملة العمرة بنجاح!");
-        document.getElementById("umrah-form").reset();
-    } catch (error) { alert("❌ خطأ أثناء الحفظ"); }
-});
+    }
 
-// عرض الكل في جدول الإدارة للحذف
-const adminTableBody = document.querySelector("#admin-manage-table tbody");
-function updateAdminTable() {
-    adminTableBody.innerHTML = "";
-    
-    // جلب التذاكر
-    onSnapshot(query(collection(db, "tickets"), orderBy("created_at", "desc")), (snap) => {
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            adminTableBody.innerHTML += `<tr>
-                <td><strong>[تذكرة] ${data.passenger_name}</strong></td>
-                <td>${data.booking_code}</td>
-                <td>${data.departure_date?.toDate().toLocaleDateString('ar-YE')}</td>
-                <td>${data.source}</td>
-                <td><button class="delete-btn" onclick="deleteData('tickets', '${docSnap.id}')">❌ حذف</button></td>
-            </tr>`;
+    // 2. عمرة جديدة
+    const umrahForm = document.getElementById('umrah-form');
+    if (umrahForm) {
+        umrahForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUmrah = {
+                id: 'umrah_' + Date.now(),
+                pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
+                entry_date: document.getElementById('entry_date').value,
+                exit_date: document.getElementById('exit_date').value,
+                travel_type: document.getElementById('travel_type').value,
+                umrah_source: document.getElementById('umrah_source').value.trim(),
+                beneficiary: document.getElementById('beneficiary').value.trim(),
+                agency_type: document.getElementById('agency_type').value
+            };
+            umrahData.push(newUmrah);
+            localStorage.setItem('umrahData', JSON.stringify(umrahData));
+            alert('🕋 تم تسجيل معاملة العمرة بنجاح!');
+            umrahForm.reset();
+            renderAdminManageTable();
         });
-    });
+    }
 
-    // جلب العمرة
-    onSnapshot(query(collection(db, "umrah"), orderBy("created_at", "desc")), (snap) => {
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            adminTableBody.innerHTML += `<tr>
-                <td><strong>[عمرة] ${data.pilgrim_name}</strong></td>
-                <td>${data.travel_type}</td>
-                <td>${data.agency_type}</td>
-                <td>${data.source}</td>
-                <td><button class="delete-btn" onclick="deleteData('umrah', '${docSnap.id}')">❌ حذف</button></td>
-            </tr>`;
+    // 3. تأشيرة جديدة (القسم الجديد والمطلوب)
+    const visaForm = document.getElementById('visa-form');
+    if (visaForm) {
+        visaForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newVisa = {
+                id: 'visa_' + Date.now(),
+                visa_name: document.getElementById('visa_name').value.trim(),
+                visa_expiry_date: document.getElementById('visa_expiry_date').value,
+                visa_type: document.getElementById('visa_type').value,
+                visa_source: document.getElementById('visa_source').value.trim(),
+                visa_agent: document.getElementById('visa_agent').value.trim()
+            };
+            visasData.push(newVisa);
+            localStorage.setItem('visasData', JSON.stringify(visasData));
+            alert('🛂 تم حفظ التأشيرة الجديدة بنجاح في النظام!');
+            visaForm.reset();
+            renderAdminManageTable();
         });
-    });
-}
-
-window.deleteData = async (coll, id) => {
-    if (confirm("هل أنت متأكد من الحذف نهائياً؟")) {
-        await deleteDoc(doc(db, coll, id));
-        alert("🗑️ تم الحذف.");
     }
 }
-updateAdminTable();
+
+// عرض وإدارة جميع البيانات المدخلة في جدول الإدارة الموحد مع خيار الحذف ذكي
+function renderAdminManageTable() {
+    const tbody = document.querySelector('#admin-manage-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // عرض التذاكر
+    ticketsData.forEach(ticket => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>🎟️ ${ticket.passenger_name}</strong></td>
+            <td>تذكرة حجز (PNR: ${ticket.booking_code})</td>
+            <td>${ticket.destination_agency}</td>
+            <td>${ticket.source}</td>
+            <td><button class="delete-btn" onclick="deleteItem('${ticket.id}', 'ticket')">حذف ❌</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // عرض العمرة
+    umrahData.forEach(umrah => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>🕋 ${umrah.pilgrim_name}</strong></td>
+            <td>معاملة عمرة (${umrah.travel_type})</td>
+            <td>جهة: ${umrah.agency_type}</td>
+            <td>${umrah.umrah_source}</td>
+            <td><button class="delete-btn" onclick="deleteItem('${umrah.id}', 'umrah')">حذف ❌</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // عرض التأشيرات
+    visasData.forEach(visa => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>🛂 ${visa.visa_name}</strong></td>
+            <td>${visa.visa_type}</td>
+            <td>الوكيل: ${visa.visa_agent} | انتهاء: ${visa.visa_expiry_date}</td>
+            <td>${visa.visa_source}</td>
+            <td><button class="delete-btn" onclick="deleteItem('${visa.id}', 'visa')">حذف ❌</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// دالة الحذف الذكية من قاعدة البيانات
+window.deleteItem = function(id, type) {
+    if (!confirm('هل أنت متأكد تماماً من حذف هذا السجل نهائياً من النظام؟')) return;
+
+    if (type === 'ticket') {
+        ticketsData = ticketsData.filter(t => t.id !== id);
+        localStorage.setItem('ticketsData', JSON.stringify(ticketsData));
+    } else if (type === 'umrah') {
+        umrahData = umrahData.filter(u => u.id !== id);
+        localStorage.setItem('umrahData', JSON.stringify(umrahData));
+    } else if (type === 'visa') {
+        visasData = visasData.filter(v => v.id !== id);
+        localStorage.setItem('visasData', JSON.stringify(visasData));
+    }
+
+    renderAdminManageTable();
+};

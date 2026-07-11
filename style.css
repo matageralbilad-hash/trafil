@@ -34,7 +34,7 @@ header p {
     font-size: 0.85rem;
 }
 
-/* شريط التنقل */
+/* شريط التنقل الرئيسي */
 .tabs-navigation {
     display: flex;
     gap: 10px;
@@ -68,6 +68,40 @@ header p {
     color: #0f172a;
 }
 
+/* تصميم الأزرار الفرعية (Sub-Tabs) المحدثة */
+.sub-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #334155;
+}
+
+.sub-tab-btn {
+    background: #151f32;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.sub-tab-btn:hover {
+    color: #fff;
+    background: #1f2d44;
+    border-color: #475569;
+}
+
+.sub-tab-btn.active {
+    background: #334155;
+    color: #38bdf8;
+    border-color: #38bdf8;
+}
+
 /* محتوى التبويبات */
 .tab-content {
     display: none;
@@ -81,38 +115,48 @@ header p {
     display: block;
 }
 
-/* كروت الإحصائيات */
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+/* أدوات التحكم (البحث والطباعة) */
+.table-controls {
+    display: flex;
     gap: 15px;
+    margin-bottom: 15px;
+    align-items: center;
 }
 
-.stat-card {
+.table-controls input {
+    flex: 1;
     background: #151f32;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    border-bottom: 3px solid #38bdf8;
-}
-
-.stat-card h3 {
-    font-size: 0.9rem;
-    color: #94a3b8;
-    margin-bottom: 8px;
-}
-
-.stat-card p {
-    font-size: 1.5rem;
-    font-weight: 700;
+    border: 1px solid #334155;
     color: #f8fafc;
+    padding: 10px 15px;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
 }
 
-.ihram { border-color: #38bdf8; }
-.alamoudi { border-color: #f59e0b; }
-.sanabel { border-color: #10b981; }
+.table-controls input:focus {
+    border-color: #38bdf8;
+}
 
-/* الستايل الجديد لكروت التقارير الذكية المربعة الفخمة */
+/* زر الطباعة الفخم */
+.print-btn {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.print-btn:hover {
+    background: #059669;
+}
+
+/* كروت التقارير الذكية */
 .reports-summary-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -184,27 +228,6 @@ header p {
     background: #475569;
 }
 
-/* مغلفات البحث */
-.search-wrapper {
-    margin-bottom: 15px;
-}
-
-.search-wrapper input {
-    width: 100%;
-    background: #151f32;
-    border: 1px solid #334155;
-    color: #f8fafc;
-    padding: 12px 15px;
-    border-radius: 8px;
-    outline: none;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
-}
-
-.search-wrapper input:focus {
-    border-color: #38bdf8;
-}
-
 /* الجداول */
 .table-holder {
     overflow-x: auto;
@@ -236,7 +259,6 @@ tr:hover {
 @media (min-width: 768px) {
     body { padding: 30px; }
     header h1 { font-size: 2rem; }
-    .stats-grid { grid-template-columns: repeat(3, 1fr); }
     .reports-summary-grid { grid-template-columns: 1fr 1fr; }
     .tab-btn { font-size: 1.05rem; padding: 12px 20px; }
 }

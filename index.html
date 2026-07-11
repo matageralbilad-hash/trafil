@@ -6,6 +6,7 @@
     <title>نظام إدارة وإحصائيات السفر</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -16,37 +17,105 @@
         </header>
 
         <nav class="tabs-navigation">
-            <button class="tab-btn active" onclick="switchTab('stats-section')">📈 الإحصائيات العامة</button>
+            <button class="tab-btn active" onclick="switchTab('table-section')">🎟️ التذاكر</button>
+            <button class="tab-btn" onclick="switchTab('umrah-table-section')">🕋 جدول العمرة</button>
+            <button class="tab-btn" onclick="switchTab('visas-section')">🛂 التأشيرات</button>
             <button class="tab-btn" onclick="switchTab('reports-section')">📋 التقارير الذكية</button>
-            <button class="tab-btn" onclick="switchTab('table-section')">🗂️ الجدول الشامل</button>
-            <button class="tab-btn" onclick="switchTab('umrah-table-section')">🕋 جدول العمرة الشامل</button>
         </nav>
 
-        <section id="stats-section" class="tab-content active-content">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>تذاكر هذا الأسبوع</h3>
-                    <p id="weekly-tickets-count">0</p>
+        <section id="table-section" class="tab-content active-content">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="switchSubTab('tickets', 'yemenia')">اليمنية</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'fly-aden')">فلاي عدن</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arabia')">العربية</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'other-airlines')">شركات أخرى</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'all-tickets')">كل التذاكر</button>
+            </div>
+
+            <div class="sub-tab-content-wrapper">
+                <div class="table-controls">
+                    <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في التذاكر المعروضة...">
+                    <button class="print-btn" onclick="printTable('tickets-print-zone', 'تقرير_التذاكر')">🖨️ طباعة PDF</button>
                 </div>
-                <div class="stat-card">
-                    <h3>أكثر وجهة طلباً</h3>
-                    <p id="top-destination">-</p>
+                
+                <div class="table-holder full-width-table" id="tickets-print-zone">
+                    <table id="all-tickets-table">
+                        <thead>
+                            <tr>
+                                <th>اسم صاحب التذكرة</th>
+                                <th>رقم الحجز</th>
+                                <th>تاريخ الإقلاع</th>
+                                <th>من ... إلى ...</th>
+                                <th>تاريخ العودة</th>
+                                <th>المصدر</th>
+                                <th>الجهة (الطيران)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                <div class="stat-card">
-                    <h3>أكثر مصدر تذاكر</h3>
-                    <p id="top-source">-</p>
+            </div>
+        </section>
+
+        <section id="umrah-table-section" class="tab-content">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="switchSubTab('umrah', 'sanabel')">سنابل الخير</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'ihram')">إحرام</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'alamoudi')">العمودي</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'all-umrah')">كل تأشيرات العمرة</button>
+            </div>
+
+            <div class="sub-tab-content-wrapper">
+                <div class="table-controls">
+                    <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في تأشيرات العمرة الحالية...">
+                    <button class="print-btn" onclick="printTable('umrah-print-zone', 'تقرير_العمرة')">🖨️ طباعة PDF</button>
                 </div>
-                <div class="stat-card ihram">
-                    <h3>عمرة (إحرام)</h3>
-                    <p id="count-ihram">0</p>
+                
+                <div class="table-holder full-width-table" id="umrah-print-zone">
+                    <table id="all-umrah-table">
+                        <thead>
+                            <tr>
+                                <th>اسم المعتمر</th>
+                                <th>تاريخ الدخول</th>
+                                <th>تاريخ الخروج</th>
+                                <th>النوع</th>
+                                <th>المصدر</th>
+                                <th>المستفيد</th>
+                                <th>الجهة التابع لها</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                <div class="stat-card alamoudi">
-                    <h3>عمرة (العمودي)</h3>
-                    <p id="count-alamoudi">0</p>
+            </div>
+        </section>
+
+        <section id="visas-section" class="tab-content">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="switchSubTab('visas', 'security-approval')">الموافقات الأمنية</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('visas', 'oman-transit')">مرور عمان</button>
+                <button class="sub-tab-btn" onclick="switchSubTab('visas', 'other-visas')">تأشيرات أخرى</button>
+            </div>
+
+            <div class="sub-tab-content-wrapper">
+                <div class="table-controls">
+                    <input type="text" id="visas-search-input" placeholder="🔍 بحث سريع في التأشيرات...">
+                    <button class="print-btn" onclick="printTable('visas-print-zone', 'تقرير_التأشيرات')">🖨️ طباعة PDF</button>
                 </div>
-                <div class="stat-card sanabel">
-                    <h3>عمرة (سنابل الخير)</h3>
-                    <p id="count-sanabel">0</p>
+                
+                <div class="table-holder full-width-table" id="visas-print-zone">
+                    <table id="all-visas-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>تاريخ صلاحية التأشيرة</th>
+                                <th>نوع التأشيرة</th>
+                                <th>المصدر</th>
+                                <th>الوكيل</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -75,8 +144,9 @@
                     <h2>🛫 تفاصيل الرحلات المغادرة (48 ساعة)</h2>
                     <button class="back-btn" onclick="closeDetailedReport('departure')">➔ عودة للتقارير</button>
                 </div>
-                <div class="search-wrapper">
-                    <input type="text" id="departure-search-input" placeholder="🔍 بحث فوري في المغادرين بالاسم، الحجز، أو المسار...">
+                <div class="table-controls">
+                    <input type="text" id="departure-search-input" placeholder="🔍 بحث فوري في المغادرين...">
+                    <button class="print-btn" onclick="printTable('departure-report-view', 'تقرير_المغادرين_48_ساعة')">🖨️ طباعة</button>
                 </div>
                 <div class="table-holder">
                     <table id="departure-table">
@@ -98,8 +168,9 @@
                     <h2>🛬 تفاصيل رحلات العودة (72 ساعة)</h2>
                     <button class="back-btn" onclick="closeDetailedReport('return')">➔ عودة للتقارير</button>
                 </div>
-                <div class="search-wrapper">
-                    <input type="text" id="return-search-input" placeholder="🔍 بحث فوري في العائدين بالاسم، الحجز، أو المصدر...">
+                <div class="table-controls">
+                    <input type="text" id="return-search-input" placeholder="🔍 بحث فوري في العائدين...">
+                    <button class="print-btn" onclick="printTable('return-report-view', 'تقرير_العائدين_72_ساعة')">🖨️ طباعة</button>
                 </div>
                 <div class="table-holder">
                     <table id="return-table">
@@ -116,62 +187,42 @@
                 </div>
             </div>
         </section> 
-
-        <section id="table-section" class="tab-content">
-            <div class="search-wrapper">
-                <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في جدول التذاكر الشامل...">
-            </div>   
-            <div class="table-holder full-width-table">
-                <table id="all-tickets-table">
-                    <thead>
-                        <tr>
-                            <th>اسم صاحب التذكرة</th>
-                            <th>رقم الحجز</th>
-                            <th>تاريخ الإقلاع</th>
-                            <th>من ... إلى ...</th>
-                            <th>تاريخ العودة</th>
-                            <th>المصدر</th>
-                            <th>الجهة</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="umrah-table-section" class="tab-content">
-            <div class="search-wrapper">
-                <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في جدول العمرة (الاسم، المصدر، المستفيد)...">
-            </div>   
-            <div class="table-holder full-width-table">
-                <table id="all-umrah-table">
-                    <thead>
-                        <tr>
-                            <th>اسم المعتمر</th>
-                            <th>تاريخ الدخول</th>
-                            <th>تاريخ الخروج</th>
-                            <th>النوع</th>
-                            <th>المصدر</th>
-                            <th>المستفيد</th>
-                            <th>الجهة التابع لها</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
     </div>
 
     <script>
+        // المتغيرات العالمية للاحتفاظ بالتصنيفات الحالية للفلترة اللحظية في جافا سكريبت
+        window.currentAirlinesTab = 'yemenia';
+        window.currentUmrahTab = 'sanabel';
+        window.currentVisasTab = 'security-approval';
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => btn.classList.remove('active'));
+            
             document.getElementById(tabId).classList.add('active-content');
             if(event && event.currentTarget) {
                 event.currentTarget.classList.add('active');
             }
             closeDetailedReport('departure');
             closeDetailedReport('return');
+        }
+
+        function switchSubTab(section, subTabId) {
+            const btnContainer = event.currentTarget.parentElement;
+            btnContainer.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // حفظ التبويب النشط وإطلاق حدث مخصص ليقوم ملف app.js بإعادة الفرز فوراً
+            if (section === 'tickets') {
+                window.currentAirlinesTab = subTabId;
+                window.dispatchEvent(new CustomEvent('filter-tickets'));
+            } else if (section === 'umrah') {
+                window.currentUmrahTab = subTabId;
+                window.dispatchEvent(new CustomEvent('filter-umrah'));
+            } else if (section === 'visas') {
+                window.currentVisasTab = subTabId;
+                window.dispatchEvent(new CustomEvent('filter-visas'));
+            }
         }
 
         function openDetailedReport(type) {
@@ -188,9 +239,21 @@
             const searchInput = document.getElementById(`${type}-search-input`);
             if (searchInput) {
                 searchInput.value = '';
-                // إعادة إظهار الأسطر المخفية عند مسح البحث
                 document.querySelectorAll(`#${type}-table tbody tr`).forEach(row => row.style.display = "");
             }
+        }
+
+        // دالة تصدير وطباعة الجداول بجودة فخمة وعالية كملف PDF مخصص
+        function printTable(elementId, fileName) {
+            const element = document.getElementById(elementId);
+            const opt = {
+                margin:       10,
+                filename:     fileName + '.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, backgroundColor: '#1e293b' },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
     </script>
     <script type="module" src="app.js"></script>
@@ -199,29 +262,9 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then((reg) => {
-                        console.log('✅ تم تسجيل خادم الخلفية:', reg.scope);
-                        requestNotificationPermission();
+                        console.log('✅ تم تسجيل خادم الخلفية بنجاح');
                     })
                     .catch((err) => console.error('❌ فشل تسجيل خادم الخلفية:', err));
-            });
-        }
-
-        function requestNotificationPermission() {
-            if (Notification.permission === 'default') {
-                Notification.requestPermission().then((permission) => {
-                    if (permission === 'granted') showWelcomeNotification();
-                });
-            }
-        }
-
-        function showWelcomeNotification() {
-            navigator.serviceWorker.ready.then((registration) => {
-                registration.showNotification('🚀 تم تفعيل الإشعارات الذكية', {
-                    body: 'ستصلك تنبيهات المسافرين والعائدين فوراً على الجوال.',
-                    icon: '/icon-192.png',
-                    vibrate: [200, 100, 200],
-                    badge: '/icon-192.png'
-                });
             });
         }
     </script>
