@@ -22,6 +22,8 @@ function renderTickets() {
 
     // فلترة التذاكر حسب الجهة/شركة الطيران المحددة
     const filtered = ticketsData.filter(ticket => {
+        if (selectedTab === 'all-tickets') return true; // عرض كل التذاكر بدون شروط
+        
         const agency = (ticket.destination_agency || '').toLowerCase();
         if (selectedTab === 'yemenia') return agency.includes('اليمنية') || agency.includes('yemenia');
         if (selectedTab === 'fly-aden') return agency.includes('عدن') || agency.includes('aden');
@@ -31,7 +33,7 @@ function renderTickets() {
                    !agency.includes('عدن') && !agency.includes('aden') &&
                    !agency.includes('العربية') && !agency.includes('arabia');
         }
-        return true; // كل التذاكر
+        return true; 
     });
 
     filtered.forEach(ticket => {
@@ -43,7 +45,7 @@ function renderTickets() {
             <td>${ticket.from_location} ➔ ${ticket.to_location}</td>
             <td>${ticket.return_date ? formatDate(ticket.return_date) : '<span class="one-way">ذهاب فقط ✈️</span>'}</td>
             <td>${ticket.source}</td>
-            <td><span class="agency-tag">${ticket.destination_agency}</span></td>
+            <td><span class="agency-tag">${ticket.destination_agency || 'غير محدد'}</span></td>
         `;
         tbody.appendChild(row);
     });
@@ -58,11 +60,12 @@ function renderUmrah() {
     const selectedTab = window.currentUmrahTab || 'sanabel';
 
     const filtered = umrahData.filter(item => {
+        if (selectedTab === 'all-umrah') return true;
         const agency = (item.agency_type || '').toLowerCase();
         if (selectedTab === 'sanabel') return agency.includes('سنابل');
         if (selectedTab === 'ihram') return agency.includes('احرام') || agency.includes('إحرام');
         if (selectedTab === 'alamoudi') return agency.includes('العمودي');
-        return true; // كل تأشيرات العمرة
+        return true; 
     });
 
     filtered.forEach(item => {
@@ -109,7 +112,7 @@ function renderVisas() {
     });
 }
 
-// 📋 [قسم التقارير الذكية] - حساب الرحلات المغادرة والعائدة تلقائياً من البيانات الجديدة
+// 📋 [قسم التقارير الذكية] - حساب الرحلات المغادرة والعائدة تلقائياً
 function updateSmartReports() {
     const departureTbody = document.querySelector('#departure-table tbody');
     const returnTbody = document.querySelector('#return-table tbody');
@@ -126,7 +129,6 @@ function updateSmartReports() {
     let returnCount = 0;
 
     ticketsData.forEach(ticket => {
-        // 1. حساب رحلات المغادرة (خلال 48 ساعة قادمة)
         if (ticket.departure_date) {
             const depDate = new Date(ticket.departure_date);
             if (depDate >= now && depDate <= fortyEightHoursLater) {
@@ -142,7 +144,6 @@ function updateSmartReports() {
             }
         }
 
-        // 2. حساب رحلات العودة (خلال 72 ساعة قادمة)
         if (ticket.return_date) {
             const retDate = new Date(ticket.return_date);
             if (retDate >= now && retDate <= seventyTwoHoursLater) {
@@ -159,7 +160,6 @@ function updateSmartReports() {
         }
     });
 
-    // تحديث الأرقام الحية على كروت الواجهة الرئيسية
     const depCardTitle = document.querySelector('.departure-card h3');
     const retCardTitle = document.querySelector('.return-card h3');
     
@@ -167,8 +167,8 @@ function updateSmartReports() {
     if (retCardTitle) retCardTitle.innerHTML = `تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة) (<span style="color: #10b981; font-weight: bold;">${returnCount}</span>)`;
 }
 
-// تفعيل استماع الأحداث للتنقل الفرعي وتحديث التقارير تلقائياً عند تغيير الفلاتر
-window.addEventListener('filter-tickets', () => { renderTickets(); updateSmartReports(); });
+// تفعيل استماع الأحداث للتنقل الفرعي
+window.addEventListener('filter-tickets', renderTickets);
 window.addEventListener('filter-umrah', renderUmrah);
 window.addEventListener('filter-visas', renderVisas);
 
@@ -196,7 +196,6 @@ function setupTableSearch(inputId, tableId) {
     });
 }
 
-// دالة مساعدة لتنسيق وعرض التواريخ بشكل جميل وقصير
 function formatDate(dateString) {
     if (!dateString) return '';
     const d = new Date(dateString);
