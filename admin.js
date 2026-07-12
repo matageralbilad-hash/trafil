@@ -1,6 +1,6 @@
-// 1. استيراد مكتبات Firebase الحديثة التي تحتاجها
+// 1. استيراد مكتبات Firebase الحديثة التي تحتاجها فقط للإضافة
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // إعدادات Firebase الخاصة بمشروعك (مكتب السفريات)
 const firebaseConfig = {
@@ -17,47 +17,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// مصفوفات التخزين المؤقتة للعرض الداخلي في الجدول
-let ticketsData = [];
-let umrahData = [];
-let visasData = [];
-
 document.addEventListener('DOMContentLoaded', () => {
     setupFormSubmit();
-    listenToFirebaseData();
 });
 
-// 2. الاستماع الفوري والتلقائي للتغيرات في Firebase لربط الجدول
-function listenToFirebaseData() {
-    // جلب واستماع التذاكر
-    onValue(ref(database, 'tickets'), (snapshot) => {
-        ticketsData = [];
-        snapshot.forEach((childSnapshot) => {
-            ticketsData.push({ id: childSnapshot.key, ...childSnapshot.val() });
-        });
-        renderAdminManageTable();
-    });
-
-    // جلب واستماع بيانات العمرة
-    onValue(ref(database, 'umrah'), (snapshot) => {
-        umrahData = [];
-        snapshot.forEach((childSnapshot) => {
-            umrahData.push({ id: childSnapshot.key, ...childSnapshot.val() });
-        });
-        renderAdminManageTable();
-    });
-
-    // جلب واستماع التأشيرات الأخرى
-    onValue(ref(database, 'visas'), (snapshot) => {
-        visasData = [];
-        snapshot.forEach((childSnapshot) => {
-            visasData.push({ id: childSnapshot.key, ...childSnapshot.val() });
-        });
-        renderAdminManageTable();
-    });
-}
-
-// 3. معالجة إرسال النماذج وحفظها في Firebase
+// 2. معالجة إرسال النماذج وحفظها في Firebase
 function setupFormSubmit() {
     // إرسال تذكرة جديدة
     const ticketForm = document.getElementById('ticket-form');
@@ -129,70 +93,4 @@ function setupFormSubmit() {
                 .catch(err => alert('❌ خطأ في الحفظ: ' + err.message));
         });
     }
-}
-
-// 4. عرض البيانات الموحدة داخل جدول الإدارة
-function renderAdminManageTable() {
-    const tbody = document.querySelector('#admin-manage-table tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    // عرض التذاكر
-    ticketsData.forEach(ticket => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>🎟️ ${ticket.passenger_name}</strong></td>
-            <td>تذكرة حجز (PNR: ${ticket.booking_code})</td>
-            <td>${ticket.destination_agency}</td>
-            <td>${ticket.source}</td>
-            <td><button class="delete-btn" data-id="${ticket.id}" data-type="tickets">حذف ❌</button></td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // عرض العمرة
-    umrahData.forEach(umrah => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>🕋 ${umrah.pilgrim_name}</strong></td>
-            <td>معاملة عمرة (${umrah.travel_type})</td>
-            <td>جهة: ${umrah.agency_type}</td>
-            <td>${umrah.umrah_source}</td>
-            <td><button class="delete-btn" data-id="${umrah.id}" data-type="umrah">حذف ❌</button></td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // عرض التأشيرات
-    visasData.forEach(visa => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>🛂 ${visa.visa_name}</strong></td>
-            <td>${visa.visa_type}</td>
-            <td>الوكيل: ${visa.visa_agent} | انتهاء: ${visa.visa_expiry_date}</td>
-            <td>${visa.visa_source}</td>
-            <td><button class="delete-btn" data-id="${visa.id}" data-type="visas">حذف ❌</button></td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // ربط أحداث الحذف بأزرار الحذف بشكل آمن داخل الـ Module
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
-            const type = e.target.getAttribute('data-type');
-            deleteItem(id, type);
-        });
-    });
-}
-
-// 5. دالة الحذف المباشر من قاعدة بيانات Firebase
-function deleteItem(id, nodeName) {
-    if (!confirm('هل أنت متأكد تماماً من حذف هذا السجل نهائياً من سيرفر Firebase؟')) return;
-
-    remove(ref(database, `${nodeName}/${id}`))
-        .then(() => {
-            alert('🗑️ تم حذف السجل بنجاح من السيرفر!');
-        })
-        .catch(err => alert('❌ فشل الحذف: ' + err.message));
 }

@@ -35,7 +35,7 @@
             <button class="tab-btn active" onclick="switchTab('add-ticket-section')">🎟️ إضافة تذكرة</button>
             <button class="tab-btn" onclick="switchTab('add-umrah-section')">🕋 تأشيرات العمرة</button>
             <button class="tab-btn" onclick="switchTab('add-visa-section')">🛂 إضافة تأشيرة أخرى</button>
-            <button class="tab-btn" onclick="switchTab('manage-section')">🛠️ إدارة النظام</button>
+            
         </nav>
 
         <!-- 1️⃣ قسم إضافة تذكرة -->
@@ -43,11 +43,11 @@
             <form id="ticket-form">
                 <div class="form-group">
                     <label>اسم صاحب التذكرة</label>
-                    <input type="text" id="passenger_name" required placeholder="الاسم الكامل للمسافر">
+                    <input type="text" id="passenger_name" placeholder="الاسم الكامل للمسافر">
                 </div>
                 <div class="form-group">
                     <label>رقم الحجز (PNR)</label>
-                    <input type="text" id="booking_code" required placeholder="مثال: XZ98LL">
+                    <input type="text" id="booking_code" placeholder="مثال: XZ98LL">
                 </div>
                 <div class="form-group">
                     <label>تاريخ ووقت الاقلاع</label>
@@ -59,18 +59,18 @@
                 </div>
                 <div class="form-group">
                     <label>إلى (الوجهة)</label>
-                    <input type="text" id="to_location" required placeholder="مثال: جدة">
+                    <input type="text" id="to_location" placeholder="مثال: جدة">
                 </div>
                 <div class="form-group">
                     <label>تاريخ ووقت العودة (اتركه فارغاً إذا كان ذهاب فقط)</label>
                     <input type="datetime-local" id="return_date">
                 </div>
                 <div class="form-group">
-                    <label>المصدر (مكان صدور التذكرة)</label>
-                    <input type="text" id="source" required placeholder="مثال: مكتب سيئون الرئيسي / منصة B2B">
+                    <label>الوكيل </label>
+                    <input type="text" id="source" placeholder="مثال: مكتب سيئون الرئيسي / منصة B2B">
                 </div>
                 <div class="form-group">
-                    <label>الجهة (الشركة الناقلة / الوكيل)</label>
+                    <label>الجهة (الشركة الناقلة)</label>
                     <input type="text" id="destination_agency" required placeholder="مثال: اليمنية، فلاي عدن، العربية، أو شركات أخرى">
                 </div>
                 <button type="submit" class="submit-btn">💾 حفظ التذكرة في النظام</button>
@@ -82,19 +82,19 @@
             <form id="umrah-form">
                 <div class="form-group">
                     <label>اسم المعتمر</label>
-                    <input type="text" id="pilgrim_name" required placeholder="الاسم الكامل للمعتمر">
+                    <input type="text" id="pilgrim_name"  placeholder="الاسم الكامل للمعتمر">
                 </div>
                 <div class="form-group">
                     <label>تاريخ الدخول</label>
-                    <input type="date" id="entry_date" required>
+                    <input type="date" id="entry_date" >
                 </div>
                 <div class="form-group">
                     <label>تاريخ الخروج</label>
-                    <input type="date" id="exit_date" required>
+                    <input type="date" id="exit_date" >
                 </div>
                 <div class="form-group">
                     <label>النوع (وسيلة السفر)</label>
-                    <select id="travel_type" required>
+                    <select id="travel_type" >
                         <option value="">-- اختر النوع --</option>
                         <option value="جو">جو ✈️</option>
                         <option value="بر">بر 🚌</option>
@@ -102,11 +102,11 @@
                 </div>
                 <div class="form-group">
                     <label>المصدر</label>
-                    <input type="text" id="umrah_source" required placeholder="مصدر المعاملة">
+                    <input type="text" id="umrah_source"  placeholder="مصدر المعاملة">
                 </div>
                 <div class="form-group">
                     <label>المستفيد</label>
-                    <input type="text" id="beneficiary" required placeholder="اسم الجهة المستفيدة">
+                    <input type="text" id="beneficiary" placeholder="اسم الجهة المستفيدة">
                 </div>
                 <div class="form-group">
                     <label>الجهة التابع لها المعاملة</label>
@@ -126,11 +126,11 @@
             <form id="visa-form">
                 <div class="form-group">
                     <label>الاسم</label>
-                    <input type="text" id="visa_name" required placeholder="الاسم الكامل للمتقدم">
+                    <input type="text" id="visa_name" placeholder="الاسم الكامل للمتقدم">
                 </div>
                 <div class="form-group">
                     <label>تاريخ صلاحية التأشيرة</label>
-                    <input type="date" id="visa_expiry_date" required>
+                    <input type="date" id="visa_expiry_date" >
                 </div>
                 <div class="form-group">
                     <label>نوع التأشيرة</label>
@@ -153,26 +153,7 @@
             </form>
         </section>
 
-        <!-- 4️⃣ قسم إدارة وحذف البيانات الشامل -->
-        <section id="manage-section" class="tab-content">
-            <div class="table-holder full-width-table">
-                <table id="admin-manage-table">
-                    <thead>
-                        <tr>
-                            <th>الاسم / المستفيد</th>
-                            <th>النوع / التصنيف</th>
-                            <th>التاريخ / الجهة والوكيل</th>
-                            <th>المصدر</th>
-                            <th>إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- سيتم إنشاؤها برمجياً بواسطة ملف admin.js -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
+            
 
     <script>
         // تنقل بسيط وسلس بين التبويبات بدون تحميل الصفحة
