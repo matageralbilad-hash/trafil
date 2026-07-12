@@ -1,22 +1,79 @@
-// استدعاء أو تهيئة قاعدة البيانات المحلية من المتصفح لضمان استقرار وحفظ البيانات
-let ticketsData = JSON.parse(localStorage.getItem('ticketsData')) || [];
-let umrahData = JSON.parse(localStorage.getItem('umrahData')) || [];
-let visasData = JSON.parse(localStorage.getItem('visasData')) || [];
+// 1️⃣ استيراد مكتبات Firebase الحديثة بنظام الـ Modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// الدالة الرئيسية لتشغيل الفلاتر وعرض البيانات عند تحميل الصفحة
+// 2️⃣ إعدادات Firebase الخاصة بمشروعك (مطابقة تماماً للوحة الأدمن)
+const firebaseConfig = {
+  apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
+  authDomain: "travel-agency-app-95c51.firebaseapp.com",
+  projectId: "travel-agency-app-95c51",
+  storageBucket: "travel-agency-app-95c51.firebasestorage.app",
+  messagingSenderId: "83193496753",
+  appId: "1:83193496753:web:b79eba52db8bfd43374e90",
+  measurementId: "G-803PP5Q1WT"
+};
+
+// تهيئة Firebase وقاعدة البيانات
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+// مصفوفات فارغة لتخزين البيانات القادمة حياً من السيرفر
+let ticketsData = [];
+let umrahData = [];
+let visasData = [];
+
+// 3️⃣ الاتصال الفوري والمباشر بقاعدة البيانات (Realtime Listeners)
 document.addEventListener('DOMContentLoaded', () => {
-    renderTickets();
-    renderUmrah();
-    renderVisas();
-    updateSmartReports(); // تشغيل التقارير الذكية فوراً عند فتح الصفحة
-    setupSearchFilters();
+    setupSearchFilters(); // تشغيل محرك البحث الفوري
+
+    // 👈 استماع فوري للتذاكر
+    const ticketsRef = ref(database, 'tickets');
+    onValue(ticketsRef, (snapshot) => {
+        ticketsData = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                ticketsData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            });
+        }
+        renderTickets();
+        updateSmartReports(); // تحديث التقارير الذكية فوراً عند تغير التذاكر
+    });
+
+    // 👈 استماع فوري لمعاملات العمرة
+    const umrahRef = ref(database, 'umrah');
+    onValue(umrahRef, (snapshot) => {
+        umrahData = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                umrahData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            });
+        }
+        renderUmrah();
+    });
+
+    // 👈 استماع فوري للتأشيرات
+    const visasRef = ref(database, 'visas');
+    onValue(visasRef, (snapshot) => {
+        visasData = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                visasData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            });
+        }
+        renderVisas();
+    });
 });
 
-// 🎟️ [قسم التذاكر] - جلب البيانات وتصفيتها بناءً على الزر الفرعي النشط
+// 🎟️ [قسم التذاكر] - عرض وتصفية البيانات بناءً على الشركة النشطة
 function renderTickets() {
     const tbody = document.querySelector('#all-tickets-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (ticketsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تذاكر مسجلة حالياً في النظام.</td></tr>';
+        return;
+    }
 
     const selectedTab = window.currentAirlinesTab || 'yemenia';
 
@@ -35,6 +92,11 @@ function renderTickets() {
         return true; 
     });
 
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
+        return;
+    }
+
     filtered.forEach(ticket => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -50,11 +112,16 @@ function renderTickets() {
     });
 }
 
-// 🕋 [قسم جدول العمرة] - جلب البيانات وتصفيتها بناءً على الوكيل أو الجهة
+// 🕋 [قسم جدول العمرة] - عرض وتصفية البيانات بناءً على الجهة
 function renderUmrah() {
     const tbody = document.querySelector('#all-umrah-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (umrahData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد معاملات عمرة مسجلة.</td></tr>';
+        return;
+    }
 
     const selectedTab = window.currentUmrahTab || 'sanabel';
 
@@ -66,6 +133,11 @@ function renderUmrah() {
         if (selectedTab === 'alamoudi') return agency.includes('العمودي');
         return true; 
     });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
+        return;
+    }
 
     filtered.forEach(item => {
         const row = document.createElement('tr');
@@ -82,11 +154,16 @@ function renderUmrah() {
     });
 }
 
-// 🛂 [قسم التأشيرات الجديد] - جلب وعرض الموافقات ومرور عمان
+// 🛂 [قسم التأشيرات] - عرض الموافقات ومرور عمان والتأشيرات الأخرى
 function renderVisas() {
     const tbody = document.querySelector('#all-visas-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (visasData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تأشيرات مسجلة.</td></tr>';
+        return;
+    }
 
     const selectedTab = window.currentVisasTab || 'security-approval';
 
@@ -97,6 +174,11 @@ function renderVisas() {
         if (selectedTab === 'other-visas') return type.includes('تأشيرات أخرى');
         return true;
     });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
+        return;
+    }
 
     filtered.forEach(visa => {
         const row = document.createElement('tr');
@@ -111,7 +193,7 @@ function renderVisas() {
     });
 }
 
-// 📋 [قسم التقارير الذكية] - حساب الرحلات المغادرة والعائدة تلقائياً
+// 📋 [قسم التقارير الذكية] - معالجة حساب الرحلات القريبة والعودة تلقائياً
 function updateSmartReports() {
     const departureTbody = document.querySelector('#departure-table tbody');
     const returnTbody = document.querySelector('#return-table tbody');
@@ -159,6 +241,9 @@ function updateSmartReports() {
         }
     });
 
+    if (departureCount === 0) departureTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">لا توجد رحلات مغادرة قريبة.</td></tr>';
+    if (returnCount === 0) returnTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">لا توجد رحلات عودة قريبة مسجلة.</td></tr>';
+
     const depCardTitle = document.querySelector('.departure-card h3');
     const retCardTitle = document.querySelector('.return-card h3');
     
@@ -166,7 +251,7 @@ function updateSmartReports() {
     if (retCardTitle) retCardTitle.innerHTML = `تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة) (<span style="color: #10b981; font-weight: bold;">${returnCount}</span>)`;
 }
 
-// تفعيل استماع الأحداث للتنقل الفرعي
+// 🔄 تفعيل استماع الأحداث للتنقل الفرعي والأزرار الموجودة في ملف HTML الافتراضي
 window.addEventListener('filter-tickets', renderTickets);
 window.addEventListener('filter-umrah', renderUmrah);
 window.addEventListener('filter-visas', renderVisas);
@@ -189,19 +274,22 @@ function setupTableSearch(inputId, tableId) {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
 
         rows.forEach(row => {
+            // للتأكد من عدم إخفاء أسطر الرسائل الفارغة الافتراضية
+            if (row.cells.length === 1) return; 
             const text = row.innerText.toLowerCase();
             row.style.display = text.includes(filter) ? '' : 'none';
         });
     });
 }
 
+// دالة تنسيق الوقت والتاريخ بشكل جميل ومقروء
 function formatDate(dateString) {
     if (!dateString) return '';
     const d = new Date(dateString);
     return `${d.toLocaleDateString('ar-YE')} ${d.toLocaleTimeString('ar-YE', {hour: '2-digit', minute:'2-digit'})}`;
 }
 
-// 🔥 رفع الدوال الهامة لـ window لضمان تشغيلها عند استدعاء كود الـ module من الـ HTML
+// 🔥 رفع الدوال لنطاق الـ window لضمان بقاء عمل أزرار الـ HTML الفرعية بشكل مستقر
 window.renderTickets = renderTickets;
 window.renderUmrah = renderUmrah;
 window.renderVisas = renderVisas;

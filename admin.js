@@ -1,22 +1,70 @@
-// تهيئة واستدعاء المصفوفات من السيرفر المحلي المتصفحي
-let ticketsData = JSON.parse(localStorage.getItem('ticketsData')) || [];
-let umrahData = JSON.parse(localStorage.getItem('umrahData')) || [];
-let visasData = JSON.parse(localStorage.getItem('visasData')) || [];
+// 1. استيراد مكتبات Firebase الحديثة التي تحتاجها
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// إعدادات Firebase الخاصة بمشروعك (مكتب السفريات)
+const firebaseConfig = {
+  apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
+  authDomain: "travel-agency-app-95c51.firebaseapp.com",
+  projectId: "travel-agency-app-95c51",
+  storageBucket: "travel-agency-app-95c51.firebasestorage.app",
+  messagingSenderId: "83193496753",
+  appId: "1:83193496753:web:b79eba52db8bfd43374e90",
+  measurementId: "G-803PP5Q1WT"
+};
+
+// تهيئة Firebase وقاعدة البيانات
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+// مصفوفات التخزين المؤقتة للعرض الداخلي في الجدول
+let ticketsData = [];
+let umrahData = [];
+let visasData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     setupFormSubmit();
-    renderAdminManageTable();
+    listenToFirebaseData();
 });
 
-// إدارة حفظ النماذج (التذاكر - العمرة - التأشيرات الجديدة)
+// 2. الاستماع الفوري والتلقائي للتغيرات في Firebase لربط الجدول
+function listenToFirebaseData() {
+    // جلب واستماع التذاكر
+    onValue(ref(database, 'tickets'), (snapshot) => {
+        ticketsData = [];
+        snapshot.forEach((childSnapshot) => {
+            ticketsData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+        });
+        renderAdminManageTable();
+    });
+
+    // جلب واستماع بيانات العمرة
+    onValue(ref(database, 'umrah'), (snapshot) => {
+        umrahData = [];
+        snapshot.forEach((childSnapshot) => {
+            umrahData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+        });
+        renderAdminManageTable();
+    });
+
+    // جلب واستماع التأشيرات الأخرى
+    onValue(ref(database, 'visas'), (snapshot) => {
+        visasData = [];
+        snapshot.forEach((childSnapshot) => {
+            visasData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+        });
+        renderAdminManageTable();
+    });
+}
+
+// 3. معالجة إرسال النماذج وحفظها في Firebase
 function setupFormSubmit() {
-    // 1. تذكرة جديدة
+    // إرسال تذكرة جديدة
     const ticketForm = document.getElementById('ticket-form');
     if (ticketForm) {
         ticketForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newTicket = {
-                id: 'ticket_' + Date.now(),
                 passenger_name: document.getElementById('passenger_name').value.trim(),
                 booking_code: document.getElementById('booking_code').value.trim().toUpperCase(),
                 departure_date: document.getElementById('departure_date').value,
@@ -26,21 +74,22 @@ function setupFormSubmit() {
                 source: document.getElementById('source').value.trim(),
                 destination_agency: document.getElementById('destination_agency').value.trim()
             };
-            ticketsData.push(newTicket);
-            localStorage.setItem('ticketsData', JSON.stringify(ticketsData));
-            alert('✅ تم حفظ التذكرة بنجاح في قاعدة البيانات!');
-            ticketForm.reset();
-            renderAdminManageTable();
+
+            push(ref(database, 'tickets'), newTicket)
+                .then(() => {
+                    alert('✅ تم حفظ التذكرة بنجاح في سيرفر Firebase!');
+                    ticketForm.reset();
+                })
+                .catch(err => alert('❌ خطأ في الحفظ: ' + err.message));
         });
     }
 
-    // 2. عمرة جديدة
+    // إرسال معاملة عمرة جديدة
     const umrahForm = document.getElementById('umrah-form');
     if (umrahForm) {
         umrahForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newUmrah = {
-                id: 'umrah_' + Date.now(),
                 pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
                 entry_date: document.getElementById('entry_date').value,
                 exit_date: document.getElementById('exit_date').value,
@@ -49,37 +98,40 @@ function setupFormSubmit() {
                 beneficiary: document.getElementById('beneficiary').value.trim(),
                 agency_type: document.getElementById('agency_type').value
             };
-            umrahData.push(newUmrah);
-            localStorage.setItem('umrahData', JSON.stringify(umrahData));
-            alert('🕋 تم تسجيل معاملة العمرة بنجاح!');
-            umrahForm.reset();
-            renderAdminManageTable();
+
+            push(ref(database, 'umrah'), newUmrah)
+                .then(() => {
+                    alert('🕋 تم تسجيل معاملة العمرة في سيرفر Firebase!');
+                    umrahForm.reset();
+                })
+                .catch(err => alert('❌ خطأ في الحفظ: ' + err.message));
         });
     }
 
-    // 3. تأشيرة جديدة (القسم الجديد والمطلوب)
+    // إرسال تأشيرة جديدة
     const visaForm = document.getElementById('visa-form');
     if (visaForm) {
         visaForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newVisa = {
-                id: 'visa_' + Date.now(),
                 visa_name: document.getElementById('visa_name').value.trim(),
                 visa_expiry_date: document.getElementById('visa_expiry_date').value,
                 visa_type: document.getElementById('visa_type').value,
                 visa_source: document.getElementById('visa_source').value.trim(),
                 visa_agent: document.getElementById('visa_agent').value.trim()
             };
-            visasData.push(newVisa);
-            localStorage.setItem('visasData', JSON.stringify(visasData));
-            alert('🛂 تم حفظ التأشيرة الجديدة بنجاح في النظام!');
-            visaForm.reset();
-            renderAdminManageTable();
+
+            push(ref(database, 'visas'), newVisa)
+                .then(() => {
+                    alert('🛂 تم حفظ التأشيرة الجديدة في سيرفر Firebase!');
+                    visaForm.reset();
+                })
+                .catch(err => alert('❌ خطأ في الحفظ: ' + err.message));
         });
     }
 }
 
-// عرض وإدارة جميع البيانات المدخلة في جدول الإدارة الموحد مع خيار الحذف ذكي
+// 4. عرض البيانات الموحدة داخل جدول الإدارة
 function renderAdminManageTable() {
     const tbody = document.querySelector('#admin-manage-table tbody');
     if (!tbody) return;
@@ -93,7 +145,7 @@ function renderAdminManageTable() {
             <td>تذكرة حجز (PNR: ${ticket.booking_code})</td>
             <td>${ticket.destination_agency}</td>
             <td>${ticket.source}</td>
-            <td><button class="delete-btn" onclick="deleteItem('${ticket.id}', 'ticket')">حذف ❌</button></td>
+            <td><button class="delete-btn" data-id="${ticket.id}" data-type="tickets">حذف ❌</button></td>
         `;
         tbody.appendChild(row);
     });
@@ -106,7 +158,7 @@ function renderAdminManageTable() {
             <td>معاملة عمرة (${umrah.travel_type})</td>
             <td>جهة: ${umrah.agency_type}</td>
             <td>${umrah.umrah_source}</td>
-            <td><button class="delete-btn" onclick="deleteItem('${umrah.id}', 'umrah')">حذف ❌</button></td>
+            <td><button class="delete-btn" data-id="${umrah.id}" data-type="umrah">حذف ❌</button></td>
         `;
         tbody.appendChild(row);
     });
@@ -119,26 +171,28 @@ function renderAdminManageTable() {
             <td>${visa.visa_type}</td>
             <td>الوكيل: ${visa.visa_agent} | انتهاء: ${visa.visa_expiry_date}</td>
             <td>${visa.visa_source}</td>
-            <td><button class="delete-btn" onclick="deleteItem('${visa.id}', 'visa')">حذف ❌</button></td>
+            <td><button class="delete-btn" data-id="${visa.id}" data-type="visas">حذف ❌</button></td>
         `;
         tbody.appendChild(row);
     });
+
+    // ربط أحداث الحذف بأزرار الحذف بشكل آمن داخل الـ Module
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = e.target.getAttribute('data-id');
+            const type = e.target.getAttribute('data-type');
+            deleteItem(id, type);
+        });
+    });
 }
 
-// دالة الحذف الذكية من قاعدة البيانات
-window.deleteItem = function(id, type) {
-    if (!confirm('هل أنت متأكد تماماً من حذف هذا السجل نهائياً من النظام؟')) return;
+// 5. دالة الحذف المباشر من قاعدة بيانات Firebase
+function deleteItem(id, nodeName) {
+    if (!confirm('هل أنت متأكد تماماً من حذف هذا السجل نهائياً من سيرفر Firebase؟')) return;
 
-    if (type === 'ticket') {
-        ticketsData = ticketsData.filter(t => t.id !== id);
-        localStorage.setItem('ticketsData', JSON.stringify(ticketsData));
-    } else if (type === 'umrah') {
-        umrahData = umrahData.filter(u => u.id !== id);
-        localStorage.setItem('umrahData', JSON.stringify(umrahData));
-    } else if (type === 'visa') {
-        visasData = visasData.filter(v => v.id !== id);
-        localStorage.setItem('visasData', JSON.stringify(visasData));
-    }
-
-    renderAdminManageTable();
-};
+    remove(ref(database, `${nodeName}/${id}`))
+        .then(() => {
+            alert('🗑️ تم حذف السجل بنجاح من السيرفر!');
+        })
+        .catch(err => alert('❌ فشل الحذف: ' + err.message));
+}
