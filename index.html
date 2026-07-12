@@ -190,7 +190,6 @@
     </div>
 
     <script>
-        // المتغيرات العالمية للتحكم بالتبويبات والفرز والفلترة
         window.currentAirlinesTab = 'yemenia';
         window.currentUmrahTab = 'sanabel';
         window.currentVisasTab = 'security-approval';
@@ -212,7 +211,6 @@
             btnContainer.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
 
-            // حفظ التبويب النشط وإطلاق أحداث الفرز ليتجاوب معها ملف app.js
             if (section === 'tickets') {
                 window.currentAirlinesTab = subTabId;
                 window.dispatchEvent(new CustomEvent('filter-tickets'));
@@ -243,33 +241,28 @@
             }
         }
 
-        // دالة تصدير وطباعة الجداول كملف PDF
+        // دالة الطباعة المحدثة والذكية لحل مشكلة توقف الإنترنت
         function printTable(elementId, fileName) {
             const element = document.getElementById(elementId);
-            const opt = {
-                margin:       10,
-                filename:     fileName + '.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, backgroundColor: '#1e293b' },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
-            html2pdf().set(opt).from(element).save();
+            
+            // التحقق من وجود المكتبة أولاً لتجنب توقف النظام بالكامل
+            if (typeof html2pdf !== 'undefined') {
+                const opt = {
+                    margin:       10,
+                    filename:     fileName + '.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, backgroundColor: '#1e293b' },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(element).save();
+            } else {
+                // إذا لم تتحمل المكتبة بسبب الإنترنت، يتم استخدام طباعة المتصفح الذكية البديلة تلقائياً
+                alert("⚠️ تنبيه: تعذر الاتصال بمكتبة PDF الخارجية. سيتم فتح نافذة طباعة المتصفح الافتراضية بدلاً منها.");
+                window.print();
+            }
         }
     </script>
 
     <script src="app.js"></script>
-
-    <script>
-        // تسجيل السيرفس وركر في حال رغبت في تفعيله لاحقاً
-        if ('serviceWorker' in navigator && 'Notification' in window) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((reg) => {
-                        console.log('✅ تم تسجيل خادم الخلفية بنجاح');
-                    })
-                    .catch((err) => console.error('❌ فشل تسجيل خادم الخلفية:', err));
-            });
-        }
-    </script>
 </body>
 </html>
