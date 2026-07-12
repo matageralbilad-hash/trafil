@@ -20,9 +20,8 @@ function renderTickets() {
 
     const selectedTab = window.currentAirlinesTab || 'yemenia';
 
-    // فلترة التذاكر حسب الجهة/شركة الطيران المحددة
     const filtered = ticketsData.filter(ticket => {
-        if (selectedTab === 'all-tickets') return true; // عرض كل التذاكر بدون شروط
+        if (selectedTab === 'all-tickets') return true; 
         
         const agency = (ticket.destination_agency || '').toLowerCase();
         if (selectedTab === 'yemenia') return agency.includes('اليمنية') || agency.includes('yemenia');
@@ -201,3 +200,9 @@ function formatDate(dateString) {
     const d = new Date(dateString);
     return `${d.toLocaleDateString('ar-YE')} ${d.toLocaleTimeString('ar-YE', {hour: '2-digit', minute:'2-digit'})}`;
 }
+
+// 🔥 رفع الدوال الهامة لـ window لضمان تشغيلها عند استدعاء كود الـ module من الـ HTML
+window.renderTickets = renderTickets;
+window.renderUmrah = renderUmrah;
+window.renderVisas = renderVisas;
+window.updateSmartReports = updateSmartReports;
