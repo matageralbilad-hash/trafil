@@ -68,7 +68,7 @@ header p {
     color: #0f172a;
 }
 
-/* تصميم الأزرار الفرعية (Sub-Tabs) المحدثة */
+/* تصميم الأزرار الفرعية (Sub-Tabs) */
 .sub-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -259,7 +259,6 @@ tr:hover {
 /* 🖨️ تنسيقات نافذة الفلترة ومعاينة الطباعة المخصصة */
 /* ======================================================== */
 
-/* قم بتحديث كلاس .print-modal في ملف الـ CSS الخاص بك إلى هذا */
 .print-modal {
     display: none; 
     position: fixed;
@@ -272,7 +271,7 @@ tr:hover {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    backdrop-filter: blur(5px); /* إضافة تأثير ضبابي خلف النافذة المنبثقة */
+    backdrop-filter: blur(5px);
     transition: all 0.3s ease;
 }
 
@@ -392,7 +391,6 @@ tr:hover {
     border: 2px dashed #38bdf8;
 }
 
-/* تنسيق جداول الطباعة لتظهر باللون الأسود والأبيض الرسمي */
 .preview-area table {
     width: 100%;
     border-collapse: collapse;
@@ -460,19 +458,19 @@ tr:hover {
     .close-modal,
     #wizard-modal-title,
     .modal-body h4 {
-        display: none !important; /* إخفاء تام بقوة واجبارية */
+        display: none !important; 
     }
 
-    /* 2. تحضير جسم الصفحة ليكون خلفية بيضاء ناصعة بدون ألوان مظلمة للكونتينر */
+    /* 2. تحضير جسم الصفحة ليكون خلفية بيضاء ناصعة */
     body {
         background: #ffffff !important;
         color: #000000 !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Cairo', sans-serif;
     }
 
-    /* 3. جعل صندوق المعاينة الخاص بالمودال يملأ الصفحة بالكامل ويلغي مظهر النافذة المنبثقة */
+    /* 3. جعل صندوق المعاينة يلغي مظهر المودال ويظهر كصفحة رسمية ممتدة */
     .print-modal {
         position: absolute !important;
         left: 0 !important;
@@ -480,73 +478,36 @@ tr:hover {
         width: 100% !important;
         height: auto !important;
         background: transparent !important;
-        display: block !important; /* يظهر إجبارياً أثناء الطباعة */
+        display: block !important;
         box-shadow: none !important;
         padding: 0 !important;
         margin: 0 !important;
+        backdrop-filter: none !important;
     }
 
     .modal-content {
         border: none !important;
+        background: transparent !important;
         box-shadow: none !important;
-        width: 100% !important;
         max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: transparent !important;
-    }
-
-    /* 4. إخراج جدول المعاينة من الصندوق الضيق ليمتد بكامل عرض الورقة */
-    .preview-area {
-        border: none !important;
-        background: transparent !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-height: none !important; /* إلغاء السكرول بار السكني */
+        max-height: none !important;
         overflow: visible !important;
     }
 
-    /* 5. تنسيق الجدول ليكون فائق الوضوح باللون الأسود والحدود الرمادية المناسبة للطباعة */
-    table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-top: 15px !important;
+    .modal-body {
+        padding: 0 !important;
+        overflow: visible !important;
     }
 
-    th {
-        background-color: #f1f5f9 !important; /* رمادي خفيف جداً لرأس الجدول */
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        font-size: 12px !important;
-        padding: 8px !important;
-    }
-
-    td {
-        border: 1px solid #e2e8f0 !important;
-        font-size: 11px !important;
-        padding: 6px 8px !important;
-        color: #000000 !important;
-    }
-
-    /* سطر الـ PNR أو كود الحجز */
-    .pnr-code {
-        background: none !important;
+    .preview-area {
         border: none !important;
         padding: 0 !important;
-        font-weight: bold !important;
-        color: #000000 !important;
+        background: transparent !important;
     }
 
-    /* تلوين الـ Tags بلون خفيف مدعوم في الطباعة */
-    .agency-tag {
-        background: none !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #000000 !important;
-        padding: 2px 5px !important;
-    }
-
-    /* 6. منع قطع السطور في منتصف الصفحة عند الانتقال لورقة أخرى */
-    tr {
-        page-break-inside: avoid !important;
+    /* تهيئة أبعاد الهوامش في الطباعة */
+    @page {
+        size: auto;
+        margin: 20mm;
     }
 }
