@@ -271,12 +271,15 @@ function updateSmartReports() {
 // 5️⃣ دوال التحكم وربطها بـ window لتعمل في الـ HTML الرئيسي
 // =================================================================
 
-// 📱 التبديل بين التبويبات الكبرى (تذاكر / عمرة / تأشيرات / تقارير)
+// 📱 التبديل بين التبويبات الكبرى
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
     document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => btn.classList.remove('active'));
     
-    document.getElementById(tabId).classList.add('active-content');
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) {
+        targetTab.classList.add('active-content');
+    }
     if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
     }
@@ -284,11 +287,13 @@ window.switchTab = function(tabId) {
     window.closeDetailedReport('return');
 };
 
-// 📂 التبديل بين التبويبات الفرعية الداخلية وتصفية الجداول فوراً
+// 📂 التبديل بين التبويبات الفرعية
 window.switchSubTab = function(section, subTabId) {
-    const btnContainer = event.currentTarget.parentElement;
-    btnContainer.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if (event && event.currentTarget) {
+        const btnContainer = event.currentTarget.parentElement;
+        btnContainer.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
 
     if (section === 'tickets') {
         window.currentAirlinesTab = subTabId;
@@ -308,7 +313,7 @@ window.openDetailedReport = function(type) {
     document.getElementById(`${type}-report-view`).style.display = 'block';
 };
 
-// ↩️ إغلاق تفاصيل التقارير والعودة للقائمة الرئيسية للتقارير
+// ↩️ إغلاق تفاصيل التقارير والعودة للقائمة الرئيسية
 window.closeDetailedReport = function(type) {
     const reportView = document.getElementById(`${type}-report-view`);
     if(reportView) reportView.style.display = 'none';
@@ -326,7 +331,7 @@ window.closeDetailedReport = function(type) {
 // 6️⃣ نظام الفلترة الذكية وتجهيز معاينة الـ PDF قبل الطباعة
 // =================================================================
 
-// فتح نافذة منسق الطباعة والـ PDF
+// فتح نافذة منسق الطباعة
 window.openPrintWizard = function(category) {
     activePrintCategory = category;
     document.getElementById('filter-date-type').value = 'all';
@@ -399,8 +404,156 @@ window.generatePrintPreview = function() {
         return;
     }
 
-    // استنساخ الجدول الأصلي لكي نعدل عليه في المعاينة دون التأثير على الجدول الفعلي في الصفحة
     const tableCloned = originalTable.cloneNode(true);
     tableCloned.removeAttribute('id');
     
-    const rows = tableCloned.
+    const rows = tableCloned.querySelectorAll('tbody tr');
+    let matchedRowsCount = 0;
+
+    rows.forEach(row => {
+        if (row.cells.length <= 1) return; 
+
+        if (dateType === 'range' && startMonthVal && endMonthVal) {
+            const rawDateText = row.cells[dateColumnIndex]?.innerText || '';
+            const rowDate = parseArabicOrStandardDate(rawDateText);
+            
+            if (rowDate) {
+                const rowYearMonth = `${rowDate.getFullYear()}-${String(rowDate.getMonth() + 1).padStart(2, '0')}`;
+                if (rowYearMonth >= startMonthVal && rowYearMonth <= endMonthVal) {
+                    row.style.display = '';
+                    matchedRowsCount++;
+                } else {
+                    row.remove(); 
+                }
+            } else {
+                row.remove(); 
+            }
+        } else {
+            row.style.display = '';
+            matchedRowsCount++;
+        }
+    });
+
+    if (activePrintCategory === 'umrah') {
+        const umrahSourceIndex = 4;
+        const headerCells = tableCloned.querySelectorAll('thead tr th');
+        if (headerCells[umrahSourceIndex]) {
+            headerCells[umrahSourceIndex].style.display = 'none';
+        }
+        tableCloned.querySelectorAll('tbody tr').forEach(row => {
+            if (row.cells[umrahSourceIndex]) {
+                row.cells[umrahSourceIndex].style.display = 'none';
+            }
+        });
+    }
+
+    if (matchedRowsCount === 0 && dateType === 'range') {
+        previewContainer.innerHTML = `
+            <div style="text-align:center; padding: 40px 10px; color: #64748b;">
+                <h4>⚠️ لا توجد بيانات مسجلة تطابق النطاق المحدد!</h4>
+                <p style="font-size: 0.85rem; margin-top: 5px;">يرجى تصفح فترات أخرى أو اختيار طباعة كافة البيانات.</p>
+            </div>`;
+        return;
+    }
+
+    const currentDateStr = new Date().toLocaleDateString('ar-YE');
+    previewContainer.innerHTML = `
+        <div class="preview-title" style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px;">
+            <h2 style="color:#0f172a; margin: 0;">${titleText}</h2>
+            <p style="font-size: 11px; margin-top: 5px; color: #475569;">تاريخ استخراج التقرير: ${currentDateStr} | مكتب السفريات لإدارة الحجوزات</p>
+        </div>
+        <div class="table-print-preview-wrapper" style="width:100%; overflow-x:auto;">
+            ${tableCloned.outerHTML}
+        </div>
+    `;
+};
+
+// تحليل التواريخ المدخلة للفلترة
+function parseArabicOrStandardDate(dateStr) {
+    if (!dateStr) return null;
+    let cleanStr = dateStr.replace(/[^\d/:\-\s]/g, '').trim();
+    let parts = cleanStr.split(/[\/\-\s]/);
+    if (parts.length >= 3) {
+        let year = parseInt(parts[0]);
+        let month = parseInt(parts[1]);
+        let day = parseInt(parts[2]);
+        
+        if (year < 100) { 
+            day = parseInt(parts[0]);
+            month = parseInt(parts[1]);
+            year = parseInt(parts[2]);
+        }
+        
+        if (!isNaN(year) && !isNaN(month)) {
+            return new Date(year, month - 1, day || 1);
+        }
+    }
+    const parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+// تصدير المعاينة المحضرة بصيغة PDF
+window.executeFinalPDF = function() {
+    const previewElement = document.getElementById('print-preview-container');
+    const dateType = document.getElementById('filter-date-type').value;
+    const startVal = document.getElementById('filter-start-month').value;
+    const endVal = document.getElementById('filter-end-month').value;
+    
+    let fileSuffix = 'كامل';
+    if (dateType === 'range' && startVal && endVal) {
+        fileSuffix = `من_${startVal}_إلى_${endVal}`;
+    }
+
+    const fileName = `تقرير_${activePrintCategory}_${fileSuffix}`;
+
+    if (typeof html2pdf !== 'undefined') {
+        const opt = {
+            margin:       10,
+            filename:     fileName + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2.5, backgroundColor: '#ffffff' }, 
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } 
+        };
+        
+        html2pdf().set(opt).from(previewElement).save().then(() => {
+            window.closePrintWizard();
+        });
+    } else {
+        alert("⚠️ تعذر تشغيل مكتبة PDF حالياً، سيتم توجيهك لطباعة المتصفح لحفظها يدوياً.");
+        window.print();
+    }
+};
+
+// =================================================================
+// 7️⃣ محرك البحث الفوري في الجداول (تصفية حية أثناء الكتابة)
+// =================================================================
+function setupSearchFilters() {
+    setupTableSearch('tickets-search-input', 'all-tickets-table');
+    setupTableSearch('umrah-search-input', 'all-umrah-table');
+    setupTableSearch('visas-search-input', 'all-visas-table');
+    setupTableSearch('departure-search-input', 'departure-table');
+    setupTableSearch('return-search-input', 'return-table');
+}
+
+function setupTableSearch(inputId, tableId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+
+        rows.forEach(row => {
+            if (row.cells.length === 1) return; 
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+}
+
+// دالة منسق تواريخ الوقت واليوم الجميل
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    return `${d.toLocaleDateString('ar-YE')} ${d.toLocaleTimeString('ar-YE', {hour: '2-digit', minute:'2-digit'})}`;
+}
