@@ -439,75 +439,94 @@ tr:hover {
 }
 
 /* =================================================================
-    📥 قواعد التنسيق الخاصة بالطباعة والحفظ كـ PDF (أوفلاين بالكامل)
+    📥 قواعد التنسيق الخاصة بالطباعة المصلحة والمنظمة بالكامل 
    ================================================================= */
 @media print {
-    /* 1. إخفاء كل العناصر التفاعلية التي لا نريدها أن تظهر في الورقة المطبوعة */
+    /* 1. إخفاء كل العناصر التفاعلية والواجهات الملونة */
     header, 
     .tabs-navigation, 
     .sub-tabs, 
     .table-controls, 
     .print-btn, 
     .back-btn, 
-    .print-modal .modal-header .close-modal,
+    .print-modal .modal-header,
     .print-modal .modal-footer,
     .click-hint,
     .filter-options,
-    .modal-header,
-    .modal-footer,
-    .close-modal,
-    #wizard-modal-title,
-    .modal-body h4 {
+    #wizard-modal-title {
         display: none !important; 
     }
 
-    /* 2. تحضير جسم الصفحة ليكون خلفية بيضاء ناصعة */
-    body {
+    /* 2. تصفير وإعادة تعيين جسم الصفحة بالكامل للون الأبيض */
+    html, body {
         background: #ffffff !important;
         color: #000000 !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-family: 'Cairo', sans-serif;
+        font-family: 'Cairo', sans-serif !important;
+        width: 100% !important;
     }
 
-    /* 3. جعل صندوق المعاينة يلغي مظهر المودال ويظهر كصفحة رسمية ممتدة */
+    /* 3. إلغاء تموضع المودال (الذي كان يسبب تداخل النصوص) وتحويله لعنصر عادي */
     .print-modal {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
+        display: block !important;
+        position: relative !important; /* تحويله لعنصر طبيعي في تدفق الصفحة */
+        z-index: auto !important;
+        left: auto !important;
+        top: auto !important;
         width: 100% !important;
         height: auto !important;
         background: transparent !important;
-        display: block !important;
         box-shadow: none !important;
         padding: 0 !important;
         margin: 0 !important;
         backdrop-filter: none !important;
     }
 
+    /* 4. إلغاء خصائص الـ Flex لضمان عدم عصر وتداخل الجداول */
     .modal-content {
+        display: block !important; /* إلغاء الـ flex */
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
+        width: 100% !important;
         max-width: 100% !important;
         max-height: none !important;
         overflow: visible !important;
     }
 
     .modal-body {
+        display: block !important;
         padding: 0 !important;
         overflow: visible !important;
     }
 
+    /* 5. تهيئة جدول المعاينة ليتمدد بوضوح ومرونة */
     .preview-area {
         border: none !important;
         padding: 0 !important;
+        margin: 0 !important;
         background: transparent !important;
+        width: 100% !important;
+        overflow: visible !important;
     }
 
-    /* تهيئة أبعاد الهوامش في الطباعة */
+    .preview-area table {
+        width: 100% !important;
+        table-layout: auto !important; /* يسمح للمتصفح بحساب أحجام الأعمدة بناءً على النص */
+        border-collapse: collapse !important;
+    }
+
+    .preview-area th, .preview-area td {
+        word-break: keep-all !important; /* منع كسر الكلمات بشكل عشوائي */
+        white-space: nowrap !important;  /* يمنع الكلمات من النزول لسطر جديد وتكديس الصفوف */
+        padding: 8px 6px !important;
+        font-size: 11px !important; /* حجم خط مثالي لورق الطباعة */
+    }
+
+    /* تهيئة حجم الصفحة والهوامش */
     @page {
-        size: auto;
-        margin: 20mm;
+        size: A4 portrait; /* جعل الورقة بحجم A4 طولي افتراضياً */
+        margin: 15mm 10mm 15mm 10mm; /* هوامش متزنة لمنع قطع النصوص من الحواف */
     }
 }
