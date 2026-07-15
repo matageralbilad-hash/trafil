@@ -442,18 +442,14 @@ tr:hover {
     📥 قواعد التنسيق الخاصة بالطباعة المصلحة والمنظمة بالكامل 
    ================================================================= */
 @media print {
-    /* 1. إخفاء كل العناصر التفاعلية والواجهات الملونة */
+    /* 1. السحر الحقيقي لمنع التكرار: إخفاء واجهة الموقع الأساسية بالكامل */
+    .dashboard-container, 
     header, 
     .tabs-navigation, 
     .sub-tabs, 
     .table-controls, 
     .print-btn, 
-    .back-btn, 
-    .print-modal .modal-header,
-    .print-modal .modal-footer,
-    .click-hint,
-    .filter-options,
-    #wizard-modal-title {
+    .back-btn {
         display: none !important; 
     }
 
@@ -467,10 +463,10 @@ tr:hover {
         width: 100% !important;
     }
 
-    /* 3. إلغاء تموضع المودال (الذي كان يسبب تداخل النصوص) وتحويله لعنصر عادي */
+    /* 3. إظهار المودال فقط كصفحة رئيسية وحيدة ومنع تداخله */
     .print-modal {
         display: block !important;
-        position: relative !important; /* تحويله لعنصر طبيعي في تدفق الصفحة */
+        position: relative !important;
         z-index: auto !important;
         left: auto !important;
         top: auto !important;
@@ -483,9 +479,16 @@ tr:hover {
         backdrop-filter: none !important;
     }
 
-    /* 4. إلغاء خصائص الـ Flex لضمان عدم عصر وتداخل الجداول */
+    /* إخفاء ترويسة المودال وأزراره التفاعلية أثناء الطباعة */
+    .print-modal .modal-header,
+    .print-modal .modal-footer,
+    .filter-options,
+    #wizard-modal-title {
+        display: none !important;
+    }
+
     .modal-content {
-        display: block !important; /* إلغاء الـ flex */
+        display: block !important;
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
@@ -501,7 +504,6 @@ tr:hover {
         overflow: visible !important;
     }
 
-    /* 5. تهيئة جدول المعاينة ليتمدد بوضوح ومرونة */
     .preview-area {
         border: none !important;
         padding: 0 !important;
@@ -513,20 +515,30 @@ tr:hover {
 
     .preview-area table {
         width: 100% !important;
-        table-layout: auto !important; /* يسمح للمتصفح بحساب أحجام الأعمدة بناءً على النص */
+        table-layout: auto !important;
         border-collapse: collapse !important;
     }
 
     .preview-area th, .preview-area td {
-        word-break: keep-all !important; /* منع كسر الكلمات بشكل عشوائي */
-        white-space: nowrap !important;  /* يمنع الكلمات من النزول لسطر جديد وتكديس الصفوف */
+        word-break: keep-all !important;
+        white-space: nowrap !important;
         padding: 8px 6px !important;
-        font-size: 11px !important; /* حجم خط مثالي لورق الطباعة */
+        font-size: 11px !important;
     }
 
-    /* تهيئة حجم الصفحة والهوامش */
-    @page {
-        size: A4 portrait; /* جعل الورقة بحجم A4 طولي افتراضياً */
-        margin: 15mm 10mm 15mm 10mm; /* هوامش متزنة لمنع قطع النصوص من الحواف */
+    /* 4. تفعيل إخفاء عمود المصدر في العمرة بشكل صارم عند الطباعة */
+    .hide-source-col {
+        display: none !important;
     }
+
+    /* تهيئة حجم الصفحة والهوامش للـ A4 */
+    @page {
+        size: A4 portrait;
+        margin: 15mm 10mm 15mm 10mm;
+    }
+}
+
+/* إضافة كود للتأكد من إخفاء العمود داخل صندوق المعاينة على الشاشة أيضاً إذا لزم الأمر */
+.hide-source-col {
+    display: none !important;
 }
