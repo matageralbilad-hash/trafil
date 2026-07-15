@@ -449,16 +449,15 @@ window.generatePrintPreview = function() {
         }
     });
 
-    // 🌟 [إصلاح حاسم لعمر المعتمرين]: تصفية وإلغاء عمود المصدر تلقائياً من الجدول المستنسخ عند معاينة وطباعة العمرة
     if (activePrintCategory === 'umrah') {
-        const umrahSourceIndex = 4; // الاندكس الفعلي لعمود "المصدر" في جدول العمرة
+        const umrahSourceIndex = 4;
         const headerCells = tableCloned.querySelectorAll('thead tr th');
         if (headerCells[umrahSourceIndex]) {
-            headerCells[umrahSourceIndex].classList.add('hide-source-col');
+            headerCells[umrahSourceIndex].style.display = 'none';
         }
         tableCloned.querySelectorAll('tbody tr').forEach(row => {
             if (row.cells[umrahSourceIndex]) {
-                row.cells[umrahSourceIndex].classList.add('hide-source-col');
+                row.cells[umrahSourceIndex].style.display = 'none';
             }
         });
     }
@@ -476,7 +475,7 @@ window.generatePrintPreview = function() {
     previewContainer.innerHTML = `
         <div class="preview-title" style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px;">
             <h2 style="color:#0f172a; margin: 0; font-family: sans-serif;">${titleText}</h2>
-            <p style="font-size: 11px; margin-top: 5px; color: #475569;">تاريخ استخراج التقرير: ${currentDateStr} | مكتب السفريات لإدارة الحجوزات</p>
+            <p style="font-size: 11px; margin-top: 5px; color: #475569;">تاريخ استخراج التقرير: ${currentDateStr} | مكتب وفاء سيئون</p>
         </div>
         <div class="table-print-preview-wrapper" style="width:100%;">
             ${tableCloned.outerHTML}
