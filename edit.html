@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل السجل - مكتب وفاء سيئون</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* تنسيقات خاصة إضافية بصفحة التعديل لتظهر الحقول بشكل عمودي رائع */
+        .edit-card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+            border-top: 4px solid #38bdf8;
+        }
+        .edit-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .edit-form-group label {
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .edit-form-group input, .edit-form-group select {
+            background: #151f32;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Cairo', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .edit-form-group input:focus, .edit-form-group select:focus {
+            border-color: #38bdf8;
+        }
+        .action-buttons-grid {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn-action {
+            flex: 1;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .btn-save {
+            background: #10b981;
+            color: #fff;
+        }
+        .btn-save:hover {
+            background: #059669;
+        }
+        .btn-delete {
+            background: #ef4444;
+            color: #fff;
+        }
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+        .loading-overlay {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div style="text-align: right;">
+            <h1 id="edit-title">جاري تحميل البيانات...</h1>
+            <p id="edit-subtitle">تعديل أو حذف السجل المحدد من قاعدة بيانات Firebase</p>
+        </div>
+        <button onclick="goBack()" class="back-btn" style="padding: 10px 20px; font-size: 0.95rem;">
+            🔙 العودة للخلف
+        </button>
+    </header>
+
+    <div class="edit-card">
+        <div id="loading-view" class="loading-overlay">
+            🔄 جاري جلب تفاصيل السجل من السيرفر...
+        </div>
+
+        <form id="edit-form" style="display: none;">
+            <div id="fields-container"></div>
+
+            <div class="action-buttons-grid">
+                <button type="button" id="save-btn" class="btn-action btn-save">💾 حفظ التعديلات</button>
+                <button type="button" id="delete-btn" class="btn-action btn-delete">🗑️ حذف هذا السجل نهائياً</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // إعدادات Firebase الخاصة بمشروعك
+    const firebaseConfig = {
+      apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
+      authDomain: "travel-agency-app-95c51.firebaseapp.com",
+      projectId: "travel-agency-app-95c51",
+      storageBucket: "travel-agency-app-95c51.firebasestorage.app",
+      messagingSenderId: "83193496753",
+      appId: "1:83193496753:web:b79eba52db8bfd43374e90",
+      measurementId: "G-803PP5Q1WT"
+    };
+
+    // تهيئة السيرفر
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // استخراج المتغيرات من الرابط (URL Parameters)
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category'); // tickets, umrah, visas
+    const id = urlParams.get('id');
+    const backTab = urlParams.get('backTab') || 'tickets';
+    const backSub = urlParams.get('backSub') || '';
+
+    // ربط عناصر الصفحة
+    const editTitle = document.getElementById('edit-title');
+    const fieldsContainer = document.getElementById('fields-container');
+    const editForm = document.getElementById('edit-form');
+    const loadingView = document.getElementById('loading-view');
+    const saveBtn = document.getElementById('save-btn');
+    const deleteBtn = document.getElementById('delete-btn');
+
+    // كائن لحفظ البيانات المسترجعة
+    let originalData = {};
+
+    // خريطة أسماء الحقول لعرضها باللغة العربية
+    const labelsMap = {
+        passenger_name: 'اسم الراكب الثنائي/الثلاثي',
+        booking_code: 'رمز الحجز (PNR)',
+        departure_date: 'تاريخ ووقت المغادرة',
+        from_location: 'من منطقة (مكان الإقلاع)',
+        to_location: 'إلى منطقة (مكان الوصول)',
+        return_date: 'تاريخ العودة (اتركه فارغاً للذهاب فقط)',
+        source: 'المصدر (جهة الشراء أو الحجز)',
+        destination_agency: 'شركة الطيران الناقلة',
+        
+        pilgrim_name: 'اسم المعتمر الكامل',
+        entry_date: 'تاريخ الدخول للسعودية',
+        exit_date: 'تاريخ الخروج المتوقع',
+        travel_type: 'طريقة السفر المحددة',
+        umrah_source: 'مصدر معاملة العمرة',
+        beneficiary: 'المستفيد الرئيسي',
+        agency_type: 'وكيل العمرة المسجل لدينا',
+
+        visa_name: 'اسم صاحب التأشيرة',
+        visa_expiry_date: 'تاريخ انتهاء صلاحية التأشيرة',
+        visa_type: 'نوع التأشيرة المقررة',
+        visa_source: 'مصدر التأشيرة الرئيسي',
+        visa_agent: 'اسم الوكيل أو المندوب المباشر'
+    };
+
+    // التحقق من وجود المعرف والنوع أولاً
+    if (!category || !id) {
+        alert('❌ خطأ: لم يتم تحديد السجل المطلوب تعديله بالشكل الصحيح!');
+        window.location.href = 'index.html';
+    } else {
+        fetchRecordDetails();
+    }
+
+    // جلب بيانات العنصر من Firebase
+    async function fetchRecordDetails() {
+        try {
+            const dbRef = ref(database, `${category}/${id}`);
+            const snapshot = await get(dbRef);
+
+            if (snapshot.exists()) {
+                originalData = snapshot.val();
+                setupEditForm(originalData);
+            } else {
+                alert('❌ عذراً، هذا السجل غير موجود أو تم حذفه مسبقاً!');
+                goBack();
+            }
+        } catch (error) {
+            alert('❌ خطأ أثناء الاتصال بقاعدة البيانات: ' + error.message);
+            goBack();
+        }
+    }
+
+    // بناء النموذج ديناميكياً وعمودياً بناءً على تصنيف البيانات
+    function setupEditForm(data) {
+        // تحديد عنوان الصفحة بناء على القسم
+        const categoryTitles = {
+            'tickets': '🎟️ تعديل تذكرة سفر',
+            'umrah': '🕋 تعديل معاملة معتمر',
+            'visas': '🛂 تعديل مستند تأشيرة'
+        };
+        editTitle.innerText = categoryTitles[category] || 'تعديل السجل';
+
+        fieldsContainer.innerHTML = '';
+
+        // الدوران على الحقول وبنائها عمودياً
+        for (const [key, value] of Object.entries(data)) {
+            const friendlyLabel = labelsMap[key] || key;
+            const formGroup = document.createElement('div');
+            formGroup.className = 'edit-form-group';
+
+            let inputElementHtml = '';
+
+            // تخصيص نوع الحقل بناء على المفتاح
+            if (key === 'travel_type') {
+                inputElementHtml = `
+                    <select id="${key}">
+                        <option value="بر" ${value === 'بر' ? 'selected' : ''}>بر 🚌</option>
+                        <option value="جو" ${value === 'جو' ? 'selected' : ''}>جو ✈️</option>
+                    </select>
+                `;
+            } else if (key === 'agency_type') {
+                inputElementHtml = `
+                    <select id="${key}">
+                        <option value="سنابل" ${value === 'سنابل' ? 'selected' : ''}>سنابل</option>
+                        <option value="إحرام" ${value === 'إحرام' || value === 'احرام' ? 'selected' : ''}>إحرام</option>
+                        <option value="العمودي" ${value === 'العمودي' ? 'selected' : ''}>العمودي</option>
+                    </select>
+                `;
+            } else if (key === 'visa_type') {
+                inputElementHtml = `
+                    <select id="${key}">
+                        <option value="موافقة أمنية" ${value.includes('موافقة أمنية') ? 'selected' : ''}>موافقة أمنية</option>
+                        <option value="مرور عمان" ${value.includes('مرور عمان') ? 'selected' : ''}>مرور عمان</option>
+                        <option value="تأشيرات أخرى" ${value.includes('تأشيرات أخرى') ? 'selected' : ''}>تأشيرات أخرى</option>
+                    </select>
+                `;
+            } else if (key.includes('date')) {
+                // للتواريخ (سواء عادية أو datetime-local للتذاكر)
+                const isDateTime = (key === 'departure_date' || key === 'return_date');
+                const inputType = isDateTime ? 'datetime-local' : 'date';
+                inputElementHtml = `<input type="${inputType}" id="${key}" value="${value || ''}">`;
+            } else {
+                // الحقول النصية العادية
+                inputElementHtml = `<input type="text" id="${key}" value="${value || ''}">`;
+            }
+
+            formGroup.innerHTML = `
+                <label for="${key}">${friendlyLabel}</label>
+                ${inputElementHtml}
+            `;
+            fieldsContainer.appendChild(formGroup);
+        }
+
+        // إخفاء مؤشر التحميل وإظهار الفورم
+        loadingView.style.display = 'none';
+        editForm.style.display = 'block';
+    }
+
+    // دالة حفظ التحديثات وحفظها في Firebase
+    saveBtn.addEventListener('click', async () => {
+        if (!confirm('هل أنت متأكد من حفظ التعديلات الجديدة على هذا السجل؟')) return;
+
+        const updatedData = {};
+        // استخلاص القيم المعدلة من الحقول
+        for (const key of Object.keys(originalData)) {
+            const element = document.getElementById(key);
+            if (element) {
+                let val = element.value.trim();
+                if (key === 'booking_code') val = val.toUpperCase(); // حجز الـ PNR يظل كابيتال دائماً
+                updatedData[key] = val || null;
+            }
+        }
+
+        try {
+            const dbRef = ref(database, `${category}/${id}`);
+            await update(dbRef, updatedData);
+            alert('✅ تم تحديث بيانات السجل بنجاح في السيرفر!');
+            goBack();
+        } catch (error) {
+            alert('❌ فشل في حفظ البيانات: ' + error.message);
+        }
+    });
+
+    // دالة الحذف النهائي
+    deleteBtn.addEventListener('click', async () => {
+        const confirmDelete = confirm('⛔ تحذير أمني هام:\nهل أنت متأكد تماماً من رغبتك في حذف هذا السجل نهائياً من سيرفرات Firebase؟\nلا يمكن التراجع عن هذا الإجراء!');
+        if (!confirmDelete) return;
+
+        try {
+            const dbRef = ref(database, `${category}/${id}`);
+            await remove(dbRef);
+            alert('🗑️ تم حذف السجل بالكامل بنجاح من قاعدة البيانات.');
+            goBack();
+        } catch (error) {
+            alert('❌ فشل في إتمام عملية الحذف: ' + error.message);
+        }
+    });
+
+    // دالة الرجوع الذكي مع الاحتفاظ بحالة التبويب النشط
+    window.goBack = function() {
+        // بناء رابط رجوع ذكي يتضمن التبويب الحالي والفرعي ليبقى العميل في مكانه
+        let returnUrl = 'index.html';
+        if (backTab) {
+            returnUrl += `?activeTab=${backTab}`;
+            if (backSub) {
+                returnUrl += `&activeSub=${backSub}`;
+            }
+        }
+        window.location.href = returnUrl;
+    };
+</script>
+
+</body>
+</html>
