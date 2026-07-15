@@ -449,15 +449,16 @@ window.generatePrintPreview = function() {
         }
     });
 
+    // 🌟 [إصلاح حاسم لعمر المعتمرين]: تصفية وإلغاء عمود المصدر تلقائياً من الجدول المستنسخ عند معاينة وطباعة العمرة
     if (activePrintCategory === 'umrah') {
-        const umrahSourceIndex = 4;
+        const umrahSourceIndex = 4; // الاندكس الفعلي لعمود "المصدر" في جدول العمرة
         const headerCells = tableCloned.querySelectorAll('thead tr th');
         if (headerCells[umrahSourceIndex]) {
-            headerCells[umrahSourceIndex].style.display = 'none';
+            headerCells[umrahSourceIndex].classList.add('hide-source-col');
         }
         tableCloned.querySelectorAll('tbody tr').forEach(row => {
             if (row.cells[umrahSourceIndex]) {
-                row.cells[umrahSourceIndex].style.display = 'none';
+                row.cells[umrahSourceIndex].classList.add('hide-source-col');
             }
         });
     }
