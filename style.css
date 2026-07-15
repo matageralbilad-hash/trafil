@@ -254,6 +254,179 @@ th {
 tr:hover {
     background: #1f2d44;
 }
+/* ======================================================== */
+/* 🖨️ تنسيقات نافذة الفلترة ومعاينة الطباعة المخصصة */
+/* ======================================================== */
+
+.print-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.85);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background: #151f32;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #38bdf8;
+    font-size: 1.2rem;
+}
+
+.close-modal {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.close-modal:hover { 
+    color: #f43f5e; 
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.filter-options {
+    background: #151f32;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.filter-group select, .filter-group input {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Cairo', sans-serif;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    background: #151f32;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+}
+
+.btn-secondary { 
+    background: #475569; 
+    color: #fff; 
+}
+
+.btn-primary { 
+    background: #38bdf8; 
+    color: #0f172a; 
+}
+
+/* منطقة معاينة الصفحة البيضاء للـ PDF */
+.preview-area {
+    background: #ffffff;
+    color: #000000;
+    padding: 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    min-height: 200px;
+    border: 2px dashed #38bdf8;
+}
+
+/* تنسيق جداول الطباعة لتظهر باللون الأسود والأبيض الرسمي */
+.preview-area table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #000000 !important;
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+}
+
+.preview-area th, .preview-area td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 10px 8px !important;
+    text-align: right !important;
+    font-size: 12px !important;
+    color: #000000 !important;
+}
+
+.preview-area th {
+    background-color: #f1f5f9 !important;
+    font-weight: bold !important;
+}
+
+.preview-area tr {
+    background: transparent !important;
+}
+
+.preview-title {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: #0f172a;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 10px;
+}
+
+/* كلاس خاص لإخفاء عمود المصدر أثناء معاينة وطباعة العمرة */
+.hide-source-col {
+    display: none !important;
+}
 
 /* الشاشات الكبيرة للكمبيوتر */
 @media (min-width: 768px) {

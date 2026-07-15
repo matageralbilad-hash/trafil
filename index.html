@@ -35,7 +35,7 @@
             <div class="sub-tab-content-wrapper">
                 <div class="table-controls">
                     <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في التذاكر المعروضة...">
-                    <button class="print-btn" onclick="printTable('tickets-print-zone', 'تقرير_التذاكر')">🖨️ طباعة PDF</button>
+                    <button class="print-btn" onclick="openPrintWizard('tickets')">🖨️ طباعة PDF</button>
                 </div>
                 
                 <div class="table-holder full-width-table" id="tickets-print-zone">
@@ -68,7 +68,7 @@
             <div class="sub-tab-content-wrapper">
                 <div class="table-controls">
                     <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في تأشيرات العمرة الحالية...">
-                    <button class="print-btn" onclick="printTable('umrah-print-zone', 'تقرير_العمرة')">🖨️ طباعة PDF</button>
+                    <button class="print-btn" onclick="openPrintWizard('umrah')">🖨️ طباعة PDF</button>
                 </div>
                 
                 <div class="table-holder full-width-table" id="umrah-print-zone">
@@ -79,7 +79,7 @@
                                 <th>تاريخ الدخول</th>
                                 <th>تاريخ الخروج</th>
                                 <th>النوع</th>
-                                <th>المصدر</th>
+                                <th class="umrah-source-col">المصدر</th>
                                 <th>المستفيد</th>
                                 <th>الجهة التابع لها</th>
                             </tr>
@@ -100,7 +100,7 @@
             <div class="sub-tab-content-wrapper">
                 <div class="table-controls">
                     <input type="text" id="visas-search-input" placeholder="🔍 بحث سريع في التأشيرات...">
-                    <button class="print-btn" onclick="printTable('visas-print-zone', 'تقرير_التأشيرات')">🖨️ طباعة PDF</button>
+                    <button class="print-btn" onclick="openPrintWizard('visas')">🖨️ طباعة PDF</button>
                 </div>
                 
                 <div class="table-holder full-width-table" id="visas-print-zone">
@@ -146,7 +146,7 @@
                 </div>
                 <div class="table-controls">
                     <input type="text" id="departure-search-input" placeholder="🔍 بحث فوري في المغادرين...">
-                    <button class="print-btn" onclick="printTable('departure-table', 'تقرير_المغادرين_48_ساعة')">🖨️ طباعة</button>
+                    <button class="print-btn" onclick="openPrintWizard('departure')">🖨️ طباعة</button>
                 </div>
                 <div class="table-holder">
                     <table id="departure-table">
@@ -170,7 +170,7 @@
                 </div>
                 <div class="table-controls">
                     <input type="text" id="return-search-input" placeholder="🔍 بحث فوري في العائدين...">
-                    <button class="print-btn" onclick="printTable('return-table', 'تقرير_العائدين_72_ساعة')">🖨️ طباعة</button>
+                    <button class="print-btn" onclick="openPrintWizard('return')">🖨️ طباعة</button>
                 </div>
                 <div class="table-holder">
                     <table id="return-table">
@@ -189,79 +189,45 @@
         </section> 
     </div>
 
-    <script>
-        window.currentAirlinesTab = 'yemenia';
-        window.currentUmrahTab = 'sanabel';
-        window.currentVisasTab = 'security-approval';
+    <div id="printWizardModal" class="print-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="wizard-modal-title">🖨️ إعدادات وتخصيص الطباعة</h3>
+                <button class="close-modal" onclick="closePrintWizard()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <label>طريقة الفلترة بالتاريخ:</label>
+                        <select id="filter-date-type" onchange="toggleDateInputs()">
+                            <option value="all">🗂️ طباعة كافة البيانات (بدون تصفية تاريخية)</option>
+                            <option value="range">📅 تحديد نطاق شهري مخصص (من شهر ... إلى شهر ...)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group date-input-group" style="display: none;">
+                        <label>من شهر:</label>
+                        <input type="month" id="filter-start-month">
+                    </div>
+                    <div class="filter-group date-input-group" style="display: none;">
+                        <label>إلى شهر:</label>
+                        <input type="month" id="filter-end-month">
+                    </div>
+                    <div class="filter-group">
+                        <label style="visibility: hidden;">تحديث</label>
+                        <button class="modal-btn btn-primary" style="padding: 7px 15px; font-size:0.85rem;" onclick="generatePrintPreview()">🔄 تحديث المعاينة</button>
+                    </div>
+                </div>
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
-            document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active-content');
-            if(event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-            }
-            closeDetailedReport('departure');
-            closeDetailedReport('return');
-        }
-
-        function switchSubTab(section, subTabId) {
-            const btnContainer = event.currentTarget.parentElement;
-            btnContainer.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            if (section === 'tickets') {
-                window.currentAirlinesTab = subTabId;
-                window.dispatchEvent(new CustomEvent('filter-tickets'));
-            } else if (section === 'umrah') {
-                window.currentUmrahTab = subTabId;
-                window.dispatchEvent(new CustomEvent('filter-umrah'));
-            } else if (section === 'visas') {
-                window.currentVisasTab = subTabId;
-                window.dispatchEvent(new CustomEvent('filter-visas'));
-            }
-        }
-
-        function openDetailedReport(type) {
-            document.querySelector('.reports-summary-grid').style.display = 'none';
-            document.getElementById(`${type}-report-view`).style.display = 'block';
-        }
-
-        function closeDetailedReport(type) {
-            const reportView = document.getElementById(`${type}-report-view`);
-            if(reportView) reportView.style.display = 'none';
-            const summaryGrid = document.querySelector('.reports-summary-grid');
-            if(summaryGrid) summaryGrid.style.display = 'grid';
-            
-            const searchInput = document.getElementById(`${type}-search-input`);
-            if (searchInput) {
-                searchInput.value = '';
-                document.querySelectorAll(`#${type}-table tbody tr`).forEach(row => row.style.display = "");
-            }
-        }
-
-        // دالة الطباعة المحدثة والذكية لحل مشكلة توقف الإنترنت
-        function printTable(elementId, fileName) {
-            const element = document.getElementById(elementId);
-            
-            // التحقق من وجود المكتبة أولاً لتجنب توقف النظام بالكامل
-            if (typeof html2pdf !== 'undefined') {
-                const opt = {
-                    margin:       10,
-                    filename:     fileName + '.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, backgroundColor: '#1e293b' },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                };
-                html2pdf().set(opt).from(element).save();
-            } else {
-                // إذا لم تتحمل المكتبة بسبب الإنترنت، يتم استخدام طباعة المتصفح الذكية البديلة تلقائياً
-                alert("⚠️ تنبيه: تعذر الاتصال بمكتبة PDF الخارجية. سيتم فتح نافذة طباعة المتصفح الافتراضية بدلاً منها.");
-                window.print();
-            }
-        }
-    </script>
+                <h4 style="color: #38bdf8; margin-bottom: 10px;">👀 معاينة ورقة الطباعة الرسمية (PDF):</h4>
+                <div class="preview-area" id="print-preview-container">
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn btn-secondary" onclick="closePrintWizard()">إلغاء</button>
+                <button class="modal-btn btn-primary" onclick="executeFinalPDF()">💾 تصدير وحفظ كـ PDF</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="app.js"></script>
 </body>
