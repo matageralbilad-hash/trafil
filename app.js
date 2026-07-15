@@ -1,25 +1,34 @@
 // =================================================================
-// 1️⃣ استيراد مكتبات Firebase الحديثة بنظام الـ Modules
+// 1️⃣ استيراد مكتبات Firebase بأمان (مغلفة لحماية التطبيق أوفلاين)
 // =================================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+let database = null;
 
-// =================================================================
-// 2️⃣ إعدادات Firebase الخاصة بمشروعك
-// =================================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
-  authDomain: "travel-agency-app-95c51.firebaseapp.com",
-  projectId: "travel-agency-app-95c51",
-  storageBucket: "travel-agency-app-95c51.firebasestorage.app",
-  messagingSenderId: "83193496753",
-  appId: "1:83193496753:web:b79eba52db8bfd43374e90",
-  measurementId: "G-803PP5Q1WT"
-};
+async function initializeFirebase() {
+    try {
+        // محاولة تحميل موديولات فايربيس بشكل ديناميكي لتجنب توقف الموقع كاملاً عند انقطاع الشبكة
+        const firebaseAppModule = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+        const firebaseDatabaseModule = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
 
-// تهيئة Firebase وقاعدة البيانات
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+        const firebaseConfig = {
+          apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
+          authDomain: "travel-agency-app-95c51.firebaseapp.com",
+          projectId: "travel-agency-app-95c51",
+          storageBucket: "travel-agency-app-95c51.firebasestorage.app",
+          messagingSenderId: "83193496753",
+          appId: "1:83193496753:web:b79eba52db8bfd43374e90",
+          measurementId: "G-803PP5Q1WT"
+        };
+
+        const app = firebaseAppModule.initializeApp(firebaseConfig);
+        database = firebaseDatabaseModule.getDatabase(app);
+        
+        startDatabaseListeners(firebaseDatabaseModule);
+        console.log("⚡ تم الاتصال بـ Firebase بنجاح!");
+    } catch (error) {
+        // في حال تعذر الاتصال (حظر أو أوفلاين) ستستمر بقية أزرار الموقع بالعمل دون أي مشاكل
+        console.warn("⚠️ تعذر الاتصال بـ Firebase (قد تكون أوفلاين)، لكن جميع أزرار لوحة التحكم مستمرة بالعمل محلياً.");
+    }
+}
 
 // مصفوفات فارغة لتخزين البيانات القادمة حياً من السيرفر
 let ticketsData = [];
@@ -33,14 +42,20 @@ window.currentVisasTab = 'security-approval';
 let activePrintCategory = ''; // لتحديد القسم المراد طباعته حالياً
 
 // =================================================================
-// 3️⃣ الاتصال بقاعدة البيانات والانتظار الفوري للتحديثات
+// 2️⃣ بدء التطبيق بمجرد تحميل الصفحة (حل مشكلة switchTab is not defined للابد)
 // =================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    setupSearchFilters(); // تشغيل محرك البحث الفوري
+    setupSearchFilters(); // تشغيل محركات البحث الفورية في الجداول
+    initializeFirebase(); // بدء تشغيل الفايربيس في الخلفية بأمان
+});
+
+// دالة بدء الاستماع لقاعدة البيانات عند توفر الإنترنت
+function startDatabaseListeners(dbModule) {
+    if (!database) return;
 
     // 👈 استماع فوري للتذاكر
-    const ticketsRef = ref(database, 'tickets');
-    onValue(ticketsRef, (snapshot) => {
+    const ticketsRef = dbModule.ref(database, 'tickets');
+    dbModule.onValue(ticketsRef, (snapshot) => {
         ticketsData = [];
         if (snapshot.exists()) {
             snapshot.forEach((childSnapshot) => {
@@ -52,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 👈 استماع فوري لمعاملات العمرة
-    const umrahRef = ref(database, 'umrah');
-    onValue(umrahRef, (snapshot) => {
+    const umrahRef = dbModule.ref(database, 'umrah');
+    dbModule.onValue(umrahRef, (snapshot) => {
         umrahData = [];
         if (snapshot.exists()) {
             snapshot.forEach((childSnapshot) => {
@@ -64,8 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 👈 استماع فوري للتأشيرات
-    const visasRef = ref(database, 'visas');
-    onValue(visasRef, (snapshot) => {
+    const visasRef = dbModule.ref(database, 'visas');
+    dbModule.onValue(visasRef, (snapshot) => {
         visasData = [];
         if (snapshot.exists()) {
             snapshot.forEach((childSnapshot) => {
@@ -74,10 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderVisas();
     });
-});
+}
 
 // =================================================================
-// 4️⃣ دوال المعالجة والعرض في الجداول (Rendering)
+// 3️⃣ دوال العرض في الجداول وتحديث الواجهات (Rendering)
 // =================================================================
 
 // 🎟️ [عرض وتصفية التذاكر]
@@ -268,7 +283,7 @@ function updateSmartReports() {
 }
 
 // =================================================================
-// 5️⃣ دوال التحكم وربطها بـ window لتعمل في الـ HTML الرئيسي
+// 4️⃣ دوال التحكم وربطها بـ window لتعمل في الـ HTML الرئيسي
 // =================================================================
 
 // 📱 التبديل بين التبويبات الكبرى
@@ -328,10 +343,10 @@ window.closeDetailedReport = function(type) {
 };
 
 // =================================================================
-// 6️⃣ نظام الفلترة الذكية وتجهيز معاينة الـ PDF قبل الطباعة
+// 5️⃣ فلترة البيانات وتجهيز المعاينة قبل الطباعة
 // =================================================================
 
-// فتح نافذة منسق الطباعة
+// فتح نافذة منسق الطباعة (المودال)
 window.openPrintWizard = function(category) {
     activePrintCategory = category;
     document.getElementById('filter-date-type').value = 'all';
@@ -365,7 +380,7 @@ window.toggleDateInputs = function() {
     });
 };
 
-// إنشاء المعاينة المباشرة لجدول الطباعة
+// إنشاء المعاينة المباشرة لجدول الطباعة داخل المودال
 window.generatePrintPreview = function() {
     const previewContainer = document.getElementById('print-preview-container');
     const dateType = document.getElementById('filter-date-type').value;
@@ -459,10 +474,10 @@ window.generatePrintPreview = function() {
     const currentDateStr = new Date().toLocaleDateString('ar-YE');
     previewContainer.innerHTML = `
         <div class="preview-title" style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px;">
-            <h2 style="color:#0f172a; margin: 0;">${titleText}</h2>
+            <h2 style="color:#0f172a; margin: 0; font-family: sans-serif;">${titleText}</h2>
             <p style="font-size: 11px; margin-top: 5px; color: #475569;">تاريخ استخراج التقرير: ${currentDateStr} | مكتب السفريات لإدارة الحجوزات</p>
         </div>
-        <div class="table-print-preview-wrapper" style="width:100%; overflow-x:auto;">
+        <div class="table-print-preview-wrapper" style="width:100%;">
             ${tableCloned.outerHTML}
         </div>
     `;
@@ -492,36 +507,13 @@ function parseArabicOrStandardDate(dateStr) {
     return isNaN(parsed.getTime()) ? null : parsed;
 }
 
-// تصدير المعاينة المحضرة بصيغة PDF
+// =================================================================
+// 6️⃣ دالة الطباعة النهائية الأوفلاين السلسة للأبد
+// =================================================================
 window.executeFinalPDF = function() {
-    const previewElement = document.getElementById('print-preview-container');
-    const dateType = document.getElementById('filter-date-type').value;
-    const startVal = document.getElementById('filter-start-month').value;
-    const endVal = document.getElementById('filter-end-month').value;
-    
-    let fileSuffix = 'كامل';
-    if (dateType === 'range' && startVal && endVal) {
-        fileSuffix = `من_${startVal}_إلى_${endVal}`;
-    }
-
-    const fileName = `تقرير_${activePrintCategory}_${fileSuffix}`;
-
-    if (typeof html2pdf !== 'undefined') {
-        const opt = {
-            margin:       10,
-            filename:     fileName + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2.5, backgroundColor: '#ffffff' }, 
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } 
-        };
-        
-        html2pdf().set(opt).from(previewElement).save().then(() => {
-            window.closePrintWizard();
-        });
-    } else {
-        alert("⚠️ تعذر تشغيل مكتبة PDF حالياً، سيتم توجيهك لطباعة المتصفح لحفظها يدوياً.");
-        window.print();
-    }
+    // تشغيل أمر طباعة المتصفح الافتراضي الذي سيتعاون مع أكواد CSS لإخفاء كل ما هو غير مرغوب
+    window.print();
+    window.closePrintWizard();
 };
 
 // =================================================================
@@ -551,7 +543,7 @@ function setupTableSearch(inputId, tableId) {
     });
 }
 
-// دالة منسق تواريخ الوقت واليوم الجميل
+// دالة تنسيق التاريخ ليكون مقروءاً وجميلاً
 function formatDate(dateString) {
     if (!dateString) return '';
     const d = new Date(dateString);
