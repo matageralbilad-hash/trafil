@@ -21,8 +21,8 @@ let ticketsData = [];
 let umrahData = [];
 let visasData = [];
 
-// المتغيرات لحفظ التبويبات النشطة الحالية
-window.currentAirlinesTab = 'yemenia';
+// 👈 تحديث التبويب الافتراضي ليكون عالم الطويلة بدلاً من اليمنية
+window.currentAirlinesTab = 'tawilat';
 window.currentUmrahTab = 'sanabel';
 window.currentVisasTab = 'security-approval';
 window.currentMainTab = 'table-section';
@@ -33,22 +33,19 @@ window.currentMainTab = 'table-section';
 document.addEventListener('DOMContentLoaded', () => {
     setupSearchFilters(); // تفعيل محرك البحث السريع
 
-    // 👈 استرجاع التبويب النشط بذكاء عند الرجوع من صفحة التعديل
+    // استرجاع التبويب النشط بذكاء عند الرجوع من صفحة التعديل
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('activeTab');
     const activeSub = urlParams.get('activeSub');
 
     if (activeTab) {
         setTimeout(() => {
-            // تفعيل التبويب الرئيسي المخزن
             const targetBtn = document.querySelector(`.tabs-navigation .tab-btn[onclick*="${activeTab}"]`);
             if (targetBtn) {
                 targetBtn.click();
             }
             
-            // تفعيل التبويب الفرعي المخزن إن وجد
             if (activeSub) {
-                // نبحث عن أزرار التبويبات الفرعية في الأقسام الثلاثة ونفعل المطابق لـ activeSub
                 const subBtns = document.querySelectorAll('.sub-tabs .sub-tab-btn');
                 subBtns.forEach(btn => {
                     if (btn.getAttribute('onclick').includes(activeSub)) {
@@ -59,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200); 
     }
 
-    initializeFirebase(); // بدء تهيئة الفايربيس
+    initializeFirebase();
 });
 
 // =================================================================
@@ -70,7 +67,6 @@ function initializeFirebase() {
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // أ) مراقبة تذاكر الطيران وجلبها تلقائياً
         onValue(ref(database, 'tickets'), (snapshot) => {
             ticketsData = [];
             if (snapshot.exists()) {
@@ -78,12 +74,11 @@ function initializeFirebase() {
                 ticketsData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             }
             renderTickets();
-            renderReports(); // تحديث التقارير الذكية عند تغير البيانات
+            renderReports();
         }, (error) => {
             console.error("خطأ في مزامنة التذاكر:", error);
         });
 
-        // ب) مراقبة معاملات العمرة
         onValue(ref(database, 'umrah'), (snapshot) => {
             umrahData = [];
             if (snapshot.exists()) {
@@ -95,7 +90,6 @@ function initializeFirebase() {
             console.error("خطأ في مزامنة العمرة:", error);
         });
 
-        // ج) مراقبة مستندات التأشيرات
         onValue(ref(database, 'visas'), (snapshot) => {
             visasData = [];
             if (snapshot.exists()) {
@@ -113,10 +107,10 @@ function initializeFirebase() {
 }
 
 // =================================================================
-// 3️⃣ دوال العرض الذكية ورسم الجداول التفاعلية (قابلة للنقر للذهاب إلى edit.html)
+// 3️⃣ دوال العرض ورسم الجداول التفاعلية
 // =================================================================
 
-// 🎟️ [عرض وتصفية التذاكر]
+// 🎟️ [عرض وتصفية التذاكر المحدثة لشركات الطيران الجديدة]
 window.renderTickets = function() {
     const tbody = document.querySelector('#all-tickets-table tbody');
     if (!tbody) return;
@@ -129,17 +123,27 @@ window.renderTickets = function() {
 
     const selectedTab = window.currentAirlinesTab;
 
+    // 👈 منطق الفلترة والفرز الجديد
     const filtered = ticketsData.filter(ticket => {
         if (selectedTab === 'all-tickets') return true; 
         
         const agency = (ticket.destination_agency || '').toLowerCase();
-        if (selectedTab === 'yemenia') return agency.includes('اليمنية') || agency.includes('yemenia');
-        if (selectedTab === 'fly-aden') return agency.includes('عدن') || agency.includes('aden');
-        if (selectedTab === 'arabia') return agency.includes('العربية') || agency.includes('arabia');
+        
+        if (selectedTab === 'tawilat') {
+            return agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
+        }
+        if (selectedTab === 'arab-sky') {
+            return agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky');
+        }
+        if (selectedTab === 'arabia') {
+            return agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+        }
         if (selectedTab === 'other-airlines') {
-            return !agency.includes('اليمنية') && !agency.includes('yemenia') &&
-                   !agency.includes('عدن') && !agency.includes('aden') &&
-                   !agency.includes('العربية') && !agency.includes('arabia');
+            const isTawilat = agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
+            const isArabSky = agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky');
+            const isArabia = agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+            
+            return !isTawilat && !isArabSky && !isArabia;
         }
         return true; 
     });
@@ -154,7 +158,6 @@ window.renderTickets = function() {
         row.style.cursor = 'pointer'; 
         row.title = "اضغط لتعديل أو حذف التذكرة ✏️";
         
-        // عند النقر يتم الانتقال لصفحة التعديل مع حفظ التبويب النشط والتبويب الفرعي
         row.onclick = () => {
             window.location.href = `edit.html?category=tickets&id=${ticket.id}&backTab=table-section&backSub=${selectedTab}`;
         };
@@ -170,8 +173,9 @@ window.renderTickets = function() {
         `;
         tbody.appendChild(row);
     });
-}
-// 🕋 [عرض وتصفية العمرة المحدثة]
+};
+
+// 🕋 [عرض وتصفية العمرة]
 window.renderUmrah = function() {
     const tbody = document.querySelector('#all-umrah-table tbody');
     if (!tbody) return;
@@ -180,7 +184,6 @@ window.renderUmrah = function() {
     const selectedTab = window.currentUmrahTab;
     const showAllColumns = (selectedTab === 'all-umrah');
 
-    // إظهار أو إخفاء عناوين الأعمدة الثلاثة في الترويسة
     const extraHeaders = document.querySelectorAll('#all-umrah-table .umrah-extra-col');
     extraHeaders.forEach(th => {
         th.style.display = showAllColumns ? '' : 'none';
@@ -192,7 +195,6 @@ window.renderUmrah = function() {
         return;
     }
 
-    // تصفية البيانات المعتادة
     const filtered = umrahData.filter(item => {
         if (selectedTab === 'all-umrah') return true;
         const agency = (item.agency_type || '').toLowerCase();
@@ -217,7 +219,6 @@ window.renderUmrah = function() {
             window.location.href = `edit.html?category=umrah&id=${item.id}&backTab=umrah-table-section&backSub=${selectedTab}`;
         };
 
-        // عرض الصف بناءً على التبويب المختار
         if (showAllColumns) {
             row.innerHTML = `
                 <td><strong>${item.pilgrim_name}</strong></td>
@@ -239,7 +240,6 @@ window.renderUmrah = function() {
         tbody.appendChild(row);
     });
 };
-
 
 // 🛂 [عرض وتصفية التأشيرات]
 window.renderVisas = function() {
@@ -288,10 +288,9 @@ window.renderVisas = function() {
 }
 
 // =================================================================
-// 4️⃣ محركات البحث الفورية والفلترة بالوقت الحقيقي للجداول
+// 4️⃣ محركات البحث الفورية والفلترة
 // =================================================================
 function setupSearchFilters() {
-    // محرك البحث لتذاكر الطيران (مربوط مع المعرف tickets-search-input المذكور في index.html)
     const searchTicketInput = document.getElementById('tickets-search-input');
     if (searchTicketInput) {
         searchTicketInput.addEventListener('input', (e) => {
@@ -300,7 +299,6 @@ function setupSearchFilters() {
         });
     }
 
-    // محرك البحث لمعاملات العمرة (مربوط مع المعرف umrah-search-input المذكور في index.html)
     const searchUmrahInput = document.getElementById('umrah-search-input');
     if (searchUmrahInput) {
         searchUmrahInput.addEventListener('input', (e) => {
@@ -309,7 +307,6 @@ function setupSearchFilters() {
         });
     }
 
-    // محرك البحث للتأشيرات (مربوط مع المعرف visas-search-input المذكور في index.html)
     const searchVisaInput = document.getElementById('visas-search-input');
     if (searchVisaInput) {
         searchVisaInput.addEventListener('input', (e) => {
@@ -318,7 +315,6 @@ function setupSearchFilters() {
         });
     }
 
-    // بحث فوري في تقرير المغادرين
     const searchDepInput = document.getElementById('departure-search-input');
     if (searchDepInput) {
         searchDepInput.addEventListener('input', (e) => {
@@ -327,7 +323,6 @@ function setupSearchFilters() {
         });
     }
 
-    // بحث فوري في تقرير العائدين
     const searchRetInput = document.getElementById('return-search-input');
     if (searchRetInput) {
         searchRetInput.addEventListener('input', (e) => {
@@ -337,7 +332,6 @@ function setupSearchFilters() {
     }
 }
 
-// دالة تصفية الأسطر
 function filterTableRows(tbodySelector, query) {
     const rows = document.querySelectorAll(`${tbodySelector} tr`);
     rows.forEach(row => {
@@ -348,21 +342,17 @@ function filterTableRows(tbodySelector, query) {
 }
 
 // =================================================================
-// 5️⃣ نظام التنقل الأساسي والفرعي بين التبويبات (Tabs Navigation)
+// 5️⃣ نظام التنقل بين التبويبات
 // =================================================================
 
-// تغيير التبويب الرئيسي (مربوط بـ index.html)
 window.switchTab = function(tabId) {
-    // تحديث أزرار التنقل الرئيسية
     document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => {
         btn.classList.remove('active');
-        // مطابقة الكليك عبر الـ onclick
         if (btn.getAttribute('onclick').includes(tabId)) {
             btn.classList.add('active');
         }
     });
 
-    // تفعيل نافذة المحتوى المطلوبة وإخفاء الأخريات
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active-content');
     });
@@ -374,7 +364,6 @@ window.switchTab = function(tabId) {
     }
 };
 
-// التنقل بين التبويبات الفرعية (مربوط بـ index.html عبر switchSubTab('category', 'subTab'))
 window.switchSubTab = function(category, subTabName) {
     let subTabButtonsSelector = '';
     
@@ -392,7 +381,6 @@ window.switchSubTab = function(category, subTabName) {
         renderVisas();
     }
 
-    // تحديث الشكل النشط للزر الفرعي المختار
     if (subTabButtonsSelector) {
         document.querySelectorAll(subTabButtonsSelector).forEach(btn => {
             btn.classList.remove('active');
@@ -404,7 +392,7 @@ window.switchSubTab = function(category, subTabName) {
 };
 
 // =================================================================
-// 6️⃣ تفاصيل وتوليد التقارير الذكية (مغادرة وعودة)
+// 6️⃣ التقارير الذكية
 // =================================================================
 
 window.openDetailedReport = function(type) {
@@ -425,17 +413,15 @@ window.closeDetailedReport = function(type) {
     }
 };
 
-// دالة تعبئة وعرض جداول التقارير بالبيانات المفلترة بالوقت
 function renderReports() {
     const depTbody = document.querySelector('#departure-table tbody');
     const retTbody = document.querySelector('#return-table tbody');
     if (!depTbody || !retTbody) return;
 
     const now = new Date();
-    const limitDeparture = new Date(now.getTime() + (48 * 60 * 60 * 1000)); // 48 ساعة قادمة
-    const limitReturn = new Date(now.getTime() + (72 * 60 * 60 * 1000));    // 72 ساعة قادمة
+    const limitDeparture = new Date(now.getTime() + (48 * 60 * 60 * 1000));
+    const limitReturn = new Date(now.getTime() + (72 * 60 * 60 * 1000));
 
-    // تصفية المغادرين
     const departures = ticketsData.filter(ticket => {
         if (!ticket.departure_date) return false;
         const depDate = new Date(ticket.departure_date);
@@ -462,7 +448,6 @@ function renderReports() {
         });
     }
 
-    // تصفية العائدين
     const returns = ticketsData.filter(ticket => {
         if (!ticket.return_date) return false;
         const retDate = new Date(ticket.return_date);
@@ -491,7 +476,7 @@ function renderReports() {
 }
 
 // =================================================================
-// 7️⃣ معالج الطباعة الاحترافي والـ PDF المخصص للمودال المكتوب في الـ HTML
+// 7️⃣ معالج الطباعة المحدث
 // =================================================================
 
 window.openPrintWizard = function(categoryType) {
@@ -501,7 +486,6 @@ window.openPrintWizard = function(categoryType) {
     modal.dataset.category = categoryType;
     modal.style.display = 'flex';
 
-    // تهيئة مسميات عنوان المعاينة
     const titleElement = document.getElementById('wizard-modal-title');
     if (categoryType === 'tickets') {
         titleElement.innerText = "🖨️ طباعة وتصدير تقرير تذاكر السفر المفلترة";
@@ -515,11 +499,9 @@ window.openPrintWizard = function(categoryType) {
         titleElement.innerText = "🖨️ طباعة تقرير العودة السريع (72 ساعة)";
     }
 
-    // إخفاء حقول التاريخ كخيار مبدئي
     document.getElementById('filter-date-type').value = 'all';
     toggleDateInputs();
     
-    // تشغيل المعاينة المبدئية مباشرة داخل المودال
     generatePrintPreview();
 };
 
@@ -535,27 +517,43 @@ window.toggleDateInputs = function() {
         el.style.display = (dateType === 'range') ? 'block' : 'none';
     });
 };
+
 window.generatePrintPreview = function() {
     const modal = document.getElementById('printWizardModal');
     const category = modal.dataset.category;
     const dateType = document.getElementById('filter-date-type').value;
 
-    let startMonthStr = document.getElementById('filter-start-month').value; // YYYY-MM
+    let startMonthStr = document.getElementById('filter-start-month').value;
     let endMonthStr = document.getElementById('filter-end-month').value;
 
     let recordsToPrint = [];
     let reportTitle = 'تقرير عام';
 
-    // 1️⃣ تصفية البيانات المراد طباعتها
+    // 1️⃣ تصفية التذاكر المحدثة لطباعة المعاينة
     if (category === 'tickets') {
-        reportTitle = `تقرير تذاكر السفر لـ (${window.currentAirlinesTab === 'all-tickets' ? 'كل الطيران' : window.currentAirlinesTab})`;
+        const agencyNameMap = {
+            'tawilat': 'عالم الطويلة',
+            'arab-sky': 'عرب سكاي',
+            'arabia': 'العربية',
+            'other-airlines': 'شركات أخرى',
+            'all-tickets': 'كل الشركات'
+        };
+        const selectedTab = window.currentAirlinesTab;
+        
+        reportTitle = `تقرير تذاكر السفر لـ (${agencyNameMap[selectedTab] || selectedTab})`;
+
         recordsToPrint = ticketsData.filter(ticket => {
             const agency = (ticket.destination_agency || '').toLowerCase();
-            const selectedTab = window.currentAirlinesTab;
-            if (selectedTab === 'yemenia' && !(agency.includes('اليمنية') || agency.includes('yemenia'))) return false;
-            if (selectedTab === 'fly-aden' && !(agency.includes('عدن') || agency.includes('aden'))) return false;
-            if (selectedTab === 'arabia' && !(agency.includes('العربية') || agency.includes('arabia'))) return false;
-            if (selectedTab === 'other-airlines' && (agency.includes('اليمنية') || agency.includes('عدن') || agency.includes('العربية'))) return false;
+            
+            if (selectedTab === 'tawilat' && !(agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat'))) return false;
+            if (selectedTab === 'arab-sky' && !(agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky'))) return false;
+            if (selectedTab === 'arabia' && !(agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia'))) return false;
+            if (selectedTab === 'other-airlines') {
+                const isTawilat = agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
+                const isArabSky = agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky');
+                const isArabia = agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+                if (isTawilat || isArabSky || isArabia) return false;
+            }
 
             if (dateType === 'range' && ticket.departure_date) {
                 const depDate = ticket.departure_date.substring(0, 7);
@@ -567,7 +565,6 @@ window.generatePrintPreview = function() {
     } 
     else if (category === 'umrah') {
         const selectedTab = window.currentUmrahTab;
-        const isAll = (selectedTab === 'all-umrah');
         
         const agencyTitleMap = {
             'sanabel': 'سنابل الخير',
@@ -638,7 +635,6 @@ window.generatePrintPreview = function() {
         return;
     }
 
-    // 2️⃣ بناء عناوين الهيدر لجدول المعاينة والطباعة
     const showAllUmrahCols = (category === 'umrah' && window.currentUmrahTab === 'all-umrah');
 
     let printTableHtml = `
@@ -669,7 +665,6 @@ window.generatePrintPreview = function() {
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الخروج</th>
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">طريقة السفر</th>
         `;
-        // إظهار الأعمدة الثلاثة الإضافية فقط في حال اختيار "كل تأشيرات العمرة"
         if (showAllUmrahCols) {
             printTableHtml += `
                 <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
@@ -693,7 +688,6 @@ window.generatePrintPreview = function() {
                 <tbody>
     `;
 
-    // 3️⃣ تعبئة بيانات الصفوف للطباعة والمعاينة
     recordsToPrint.forEach(item => {
         printTableHtml += `<tr style="border-bottom: 1px solid #e2e8f0;">`;
         if (category === 'tickets' || category === 'departure' || category === 'return') {
@@ -740,7 +734,6 @@ window.generatePrintPreview = function() {
     previewArea.innerHTML = printTableHtml;
 };
 
-// استدعاء نافذة الطباعة الحقيقية لنسخ محتويات منطقة المعاينة وتصديرها كـ PDF
 window.executeFinalPDF = function() {
     const previewContent = document.getElementById('print-preview-container').innerHTML;
     if (!previewContent || previewContent.includes('تحديث وتجهيز')) {
@@ -748,7 +741,6 @@ window.executeFinalPDF = function() {
         return;
     }
 
-    // فتح نافذة طباعة مخصصة ومصممة للتصميم الورقي الأبيض الفاخر
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html lang="ar" dir="rtl">
@@ -780,7 +772,7 @@ window.executeFinalPDF = function() {
 };
 
 // =================================================================
-// 8️⃣ مصنع تنسيق التواريخ والجماليات
+// 8️⃣ مصنع تنسيق التواريخ
 // =================================================================
 function formatDate(dateTimeStr) {
     if (!dateTimeStr) return '';
