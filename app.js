@@ -171,20 +171,28 @@ window.renderTickets = function() {
         tbody.appendChild(row);
     });
 }
-
-// 🕋 [عرض وتصفية العمرة]
+// 🕋 [عرض وتصفية العمرة المحدثة]
 window.renderUmrah = function() {
     const tbody = document.querySelector('#all-umrah-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    const selectedTab = window.currentUmrahTab;
+    const showAllColumns = (selectedTab === 'all-umrah');
+
+    // إظهار أو إخفاء عناوين الأعمدة الثلاثة في الترويسة
+    const extraHeaders = document.querySelectorAll('#all-umrah-table .umrah-extra-col');
+    extraHeaders.forEach(th => {
+        th.style.display = showAllColumns ? '' : 'none';
+    });
+
     if (umrahData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد معاملات عمرة مسجلة.</td></tr>';
+        const colSpan = showAllColumns ? 7 : 4;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد معاملات عمرة مسجلة.</td></tr>`;
         return;
     }
 
-    const selectedTab = window.currentUmrahTab;
-
+    // تصفية البيانات المعتادة
     const filtered = umrahData.filter(item => {
         if (selectedTab === 'all-umrah') return true;
         const agency = (item.agency_type || '').toLowerCase();
@@ -195,7 +203,8 @@ window.renderUmrah = function() {
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
+        const colSpan = showAllColumns ? 7 : 4;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>`;
         return;
     }
 
@@ -208,18 +217,29 @@ window.renderUmrah = function() {
             window.location.href = `edit.html?category=umrah&id=${item.id}&backTab=umrah-table-section&backSub=${selectedTab}`;
         };
 
-        row.innerHTML = `
-            <td><strong>${item.pilgrim_name}</strong></td>
-            <td>${item.entry_date}</td>
-            <td>${item.exit_date}</td>
-            <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
-            <td class="umrah-source-col">${item.umrah_source}</td>
-            <td>${item.beneficiary}</td>
-            <td><span class="agency-tag">${item.agency_type}</span></td>
-        `;
+        // عرض الصف بناءً على التبويب المختار
+        if (showAllColumns) {
+            row.innerHTML = `
+                <td><strong>${item.pilgrim_name}</strong></td>
+                <td>${item.entry_date || '-'}</td>
+                <td>${item.exit_date || '-'}</td>
+                <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
+                <td>${item.umrah_source || '-'}</td>
+                <td>${item.beneficiary || '-'}</td>
+                <td><span class="agency-tag">${item.agency_type || '-'}</span></td>
+            `;
+        } else {
+            row.innerHTML = `
+                <td><strong>${item.pilgrim_name}</strong></td>
+                <td>${item.entry_date || '-'}</td>
+                <td>${item.exit_date || '-'}</td>
+                <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
+            `;
+        }
         tbody.appendChild(row);
     });
-}
+};
+
 
 // 🛂 [عرض وتصفية التأشيرات]
 window.renderVisas = function() {
@@ -515,7 +535,6 @@ window.toggleDateInputs = function() {
         el.style.display = (dateType === 'range') ? 'block' : 'none';
     });
 };
-
 window.generatePrintPreview = function() {
     const modal = document.getElementById('printWizardModal');
     const category = modal.dataset.category;
@@ -527,11 +546,10 @@ window.generatePrintPreview = function() {
     let recordsToPrint = [];
     let reportTitle = 'تقرير عام';
 
-    // تصفية البيانات المراد طباعتها
+    // 1️⃣ تصفية البيانات المراد طباعتها
     if (category === 'tickets') {
         reportTitle = `تقرير تذاكر السفر لـ (${window.currentAirlinesTab === 'all-tickets' ? 'كل الطيران' : window.currentAirlinesTab})`;
         recordsToPrint = ticketsData.filter(ticket => {
-            // تصفية فرعية أولاً
             const agency = (ticket.destination_agency || '').toLowerCase();
             const selectedTab = window.currentAirlinesTab;
             if (selectedTab === 'yemenia' && !(agency.includes('اليمنية') || agency.includes('yemenia'))) return false;
@@ -539,9 +557,8 @@ window.generatePrintPreview = function() {
             if (selectedTab === 'arabia' && !(agency.includes('العربية') || agency.includes('arabia'))) return false;
             if (selectedTab === 'other-airlines' && (agency.includes('اليمنية') || agency.includes('عدن') || agency.includes('العربية'))) return false;
 
-            // تصفية حسب التاريخ
             if (dateType === 'range' && ticket.departure_date) {
-                const depDate = ticket.departure_date.substring(0, 7); // استخراج YYYY-MM
+                const depDate = ticket.departure_date.substring(0, 7);
                 if (startMonthStr && depDate < startMonthStr) return false;
                 if (endMonthStr && depDate > endMonthStr) return false;
             }
@@ -549,12 +566,22 @@ window.generatePrintPreview = function() {
         });
     } 
     else if (category === 'umrah') {
-        reportTitle = `كشف المعتمرين لوكالة (${window.currentUmrahTab === 'all-umrah' ? 'كل الوكلاء' : window.currentUmrahTab})`;
+        const selectedTab = window.currentUmrahTab;
+        const isAll = (selectedTab === 'all-umrah');
+        
+        const agencyTitleMap = {
+            'sanabel': 'سنابل الخير',
+            'ihram': 'إحرام',
+            'alamoudi': 'العمودي',
+            'all-umrah': 'كل الوكلاء'
+        };
+        
+        reportTitle = `كشف المعتمرين - وكالة (${agencyTitleMap[selectedTab] || selectedTab})`;
+
         recordsToPrint = umrahData.filter(item => {
             const agency = (item.agency_type || '').toLowerCase();
-            const selectedTab = window.currentUmrahTab;
             if (selectedTab === 'sanabel' && !agency.includes('سنابل')) return false;
-            if (selectedTab === 'ihram' && !agency.includes('إحرام')) return false;
+            if (selectedTab === 'ihram' && (!agency.includes('إحرام') && !agency.includes('احرام'))) return false;
             if (selectedTab === 'alamoudi' && !agency.includes('العمودي')) return false;
 
             if (dateType === 'range' && item.entry_date) {
@@ -611,7 +638,9 @@ window.generatePrintPreview = function() {
         return;
     }
 
-    // بناء الجدول المناسب للمعاينة والطباعة
+    // 2️⃣ بناء عناوين الهيدر لجدول المعاينة والطباعة
+    const showAllUmrahCols = (category === 'umrah' && window.currentUmrahTab === 'all-umrah');
+
     let printTableHtml = `
         <div style="background: white; color: black; padding: 20px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
             <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
@@ -626,29 +655,35 @@ window.generatePrintPreview = function() {
 
     if (category === 'tickets' || category === 'departure' || category === 'return') {
         printTableHtml += `
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">الاسم بالكامل</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">رقم الحجز (PNR)</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الرحلة</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الإقلاع</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">العودة</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">الاسم بالكامل</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">رقم الحجز (PNR)</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الرحلة</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الإقلاع</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">العودة</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
         `;
     } else if (category === 'umrah') {
         printTableHtml += `
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم المعتمر</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الدخول</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الخروج</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">طريقة السفر</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المستفيد</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الوكالة</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم المعتمر</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الدخول</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الخروج</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">طريقة السفر</th>
         `;
+        // إظهار الأعمدة الثلاثة الإضافية فقط في حال اختيار "كل تأشيرات العمرة"
+        if (showAllUmrahCols) {
+            printTableHtml += `
+                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
+                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المستفيد</th>
+                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الجهة التابع لها</th>
+            `;
+        }
     } else if (category === 'visas') {
         printTableHtml += `
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم المعني</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">صلاحية التأشيرة</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">نوع التأشيرة</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الوكيل</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم المعني</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">صلاحية التأشيرة</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">نوع التأشيرة</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الوكيل</th>
         `;
     }
 
@@ -658,7 +693,7 @@ window.generatePrintPreview = function() {
                 <tbody>
     `;
 
-    // تعبئة البيانات في صفوف الجدول
+    // 3️⃣ تعبئة بيانات الصفوف للطباعة والمعاينة
     recordsToPrint.forEach(item => {
         printTableHtml += `<tr style="border-bottom: 1px solid #e2e8f0;">`;
         if (category === 'tickets' || category === 'departure' || category === 'return') {
@@ -673,19 +708,24 @@ window.generatePrintPreview = function() {
         } else if (category === 'umrah') {
             printTableHtml += `
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;"><strong>${item.pilgrim_name}</strong></td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.entry_date}</td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.exit_date}</td>
+                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.entry_date || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.exit_date || '-'}</td>
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.beneficiary}</td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.agency_type}</td>
             `;
+            if (showAllUmrahCols) {
+                printTableHtml += `
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.umrah_source || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.beneficiary || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.agency_type || '-'}</td>
+                `;
+            }
         } else if (category === 'visas') {
             printTableHtml += `
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;"><strong>${item.visa_name}</strong></td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_expiry_date}</td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_type}</td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_source}</td>
-                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_agent}</td>
+                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_expiry_date || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_type || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_source || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.visa_agent || '-'}</td>
             `;
         }
         printTableHtml += `</tr>`;
