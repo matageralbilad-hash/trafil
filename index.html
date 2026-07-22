@@ -59,38 +59,40 @@
             </div>
         </section>
 
-        <section id="umrah-table-section" class="tab-content">
-            <div class="sub-tabs">
-                <button class="sub-tab-btn active" onclick="switchSubTab('umrah', 'sanabel')">سنابل الخير</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'ihram')">إحرام</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'alamoudi')">العمودي</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'all-umrah')">كل تأشيرات العمرة</button>
-            </div>
+        <!-- قسم جدول العمرة المحدث -->
+<section id="umrah-table-section" class="tab-content">
+    <div class="sub-tabs">
+        <button class="sub-tab-btn active" onclick="switchSubTab('umrah', 'sanabel')">سنابل الخير</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'ihram')">إحرام</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'alamoudi')">العمودي</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'all-umrah')">كل تأشيرات العمرة</button>
+    </div>
 
-            <div class="sub-tab-content-wrapper">
-                <div class="table-controls">
-                    <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في تأشيرات العمرة الحالية...">
-                    <button class="print-btn" onclick="openPrintWizard('umrah')">🖨️ طباعة PDF</button>
-                </div>
-                
-                <div class="table-holder full-width-table" id="umrah-print-zone">
-                    <table id="all-umrah-table">
-                        <thead>
-                            <tr>
-                                <th>اسم المعتمر</th>
-                                <th>تاريخ الدخول</th>
-                                <th>تاريخ الخروج</th>
-                                <th>النوع</th>
-                                <th class="umrah-source-col">المصدر</th>
-                                <th>المستفيد</th>
-                                <th>الجهة التابع لها</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    <div class="sub-tab-content-wrapper">
+        <div class="table-controls">
+            <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في تأشيرات العمرة الحالية...">
+            <button class="print-btn" onclick="openPrintWizard('umrah')">🖨️ طباعة PDF</button>
+        </div>
+        
+        <div class="table-holder full-width-table" id="umrah-print-zone">
+            <table id="all-umrah-table">
+                <thead>
+                    <tr>
+                        <th>اسم المعتمر</th>
+                        <th>تاريخ الدخول</th>
+                        <th>تاريخ الخروج</th>
+                        <th>النوع</th>
+                        <!-- إضافة كلاس للتحكم الإضافي بالأعمدة الثلاثة -->
+                        <th class="umrah-extra-col">المصدر</th>
+                        <th class="umrah-extra-col">المستفيد</th>
+                        <th class="umrah-extra-col">الجهة التابع لها</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</section>
 
         <section id="visas-section" class="tab-content">
             <div class="sub-tabs">
