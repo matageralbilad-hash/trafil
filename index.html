@@ -25,39 +25,40 @@
             <button class="tab-btn" onclick="switchTab('reports-section')">📋 التقارير الذكية</button>
         </nav>
 
-        <section id="table-section" class="tab-content active-content">
-            <div class="sub-tabs">
-                <button class="sub-tab-btn active" onclick="switchSubTab('tickets', 'yemenia')">اليمنية</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'fly-aden')">فلاي عدن</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arabia')">العربية</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'other-airlines')">شركات أخرى</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'all-tickets')">كل التذاكر</button>
-            </div>
+        <!-- قسم جدول التذاكر المحدث -->
+<section id="table-section" class="tab-content active-content">
+    <div class="sub-tabs">
+        <button class="sub-tab-btn active" onclick="switchSubTab('tickets', 'tawilat')">عالم الطويلة</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arab-sky')">عرب سكاي</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arabia')">العربية</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'other-airlines')">شركات أخرى</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'all-tickets')">كل التذاكر</button>
+    </div>
 
-            <div class="sub-tab-content-wrapper">
-                <div class="table-controls">
-                    <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في التذاكر المعروضة...">
-                    <button class="print-btn" onclick="openPrintWizard('tickets')">🖨️ طباعة PDF</button>
-                </div>
-                
-                <div class="table-holder full-width-table" id="tickets-print-zone">
-                    <table id="all-tickets-table">
-                        <thead>
-                            <tr>
-                                <th>اسم صاحب التذكرة</th>
-                                <th>رقم الحجز</th>
-                                <th>تاريخ الإقلاع</th>
-                                <th>من ... إلى ...</th>
-                                <th>تاريخ العودة</th>
-                                <th>المصدر</th>
-                                <th>الجهة (الطيران)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    <div class="sub-tab-content-wrapper">
+        <div class="table-controls">
+            <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في التذاكر المعروضة...">
+            <button class="print-btn" onclick="openPrintWizard('tickets')">🖨️ طباعة PDF</button>
+        </div>
+        
+        <div class="table-holder full-width-table" id="tickets-print-zone">
+            <table id="all-tickets-table">
+                <thead>
+                    <tr>
+                        <th>اسم صاحب التذكرة</th>
+                        <th>رقم الحجز</th>
+                        <th>تاريخ الإقلاع</th>
+                        <th>من ... إلى ...</th>
+                        <th>تاريخ العودة</th>
+                        <th>المصدر</th>
+                        <th>الجهة (الطيران)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</section>
 
         <!-- قسم جدول العمرة المحدث -->
 <section id="umrah-table-section" class="tab-content">
