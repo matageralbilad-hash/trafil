@@ -35,7 +35,6 @@
             <button class="tab-btn active" onclick="switchTab('add-ticket-section')">🎟️ إضافة تذكرة</button>
             <button class="tab-btn" onclick="switchTab('add-umrah-section')">🕋 تأشيرات العمرة</button>
             <button class="tab-btn" onclick="switchTab('add-visa-section')">🛂 إضافة تأشيرة أخرى</button>
-            
         </nav>
 
         <!-- 1️⃣ قسم إضافة تذكرة -->
@@ -43,11 +42,11 @@
             <form id="ticket-form">
                 <div class="form-group">
                     <label>اسم صاحب التذكرة</label>
-                    <input type="text" id="passenger_name" placeholder="الاسم الكامل للمسافر">
+                    <input type="text" id="passenger_name" placeholder="الاسم الكامل للمسافر" required>
                 </div>
                 <div class="form-group">
                     <label>رقم الحجز (PNR)</label>
-                    <input type="text" id="booking_code" placeholder="مثال: XZ98LL">
+                    <input type="text" id="booking_code" placeholder="مثال: XZ98LL" required>
                 </div>
                 <div class="form-group">
                     <label>تاريخ ووقت الاقلاع</label>
@@ -66,12 +65,18 @@
                     <input type="datetime-local" id="return_date">
                 </div>
                 <div class="form-group">
-                    <label>الوكيل </label>
+                    <label>الوكيل</label>
                     <input type="text" id="source" placeholder="مثال: مكتب سيئون الرئيسي / منصة B2B">
                 </div>
                 <div class="form-group">
                     <label>الجهة (الشركة الناقلة)</label>
-                    <input type="text" id="destination_agency" required placeholder="مثال: اليمنية، فلاي عدن، العربية، أو شركات أخرى">
+                    <select id="destination_agency" required>
+                        <option value="">-- اختر الشركة الناقلة --</option>
+                        <option value="عالم الطويلة">عالم الطويلة</option>
+                        <option value="عرب سكاي">عرب سكاي</option>
+                        <option value="العربية">العربية</option>
+                        <option value="شركات أخرى">شركات أخرى</option>
+                    </select>
                 </div>
                 <button type="submit" class="submit-btn">💾 حفظ التذكرة في النظام</button>
             </form>
@@ -82,19 +87,19 @@
             <form id="umrah-form">
                 <div class="form-group">
                     <label>اسم المعتمر</label>
-                    <input type="text" id="pilgrim_name"  placeholder="الاسم الكامل للمعتمر">
+                    <input type="text" id="pilgrim_name" placeholder="الاسم الكامل للمعتمر" required>
                 </div>
                 <div class="form-group">
                     <label>تاريخ الدخول</label>
-                    <input type="date" id="entry_date" >
+                    <input type="date" id="entry_date">
                 </div>
                 <div class="form-group">
                     <label>تاريخ الخروج</label>
-                    <input type="date" id="exit_date" >
+                    <input type="date" id="exit_date">
                 </div>
                 <div class="form-group">
                     <label>النوع (وسيلة السفر)</label>
-                    <select id="travel_type" >
+                    <select id="travel_type">
                         <option value="">-- اختر النوع --</option>
                         <option value="جو">جو ✈️</option>
                         <option value="بر">بر 🚌</option>
@@ -102,7 +107,7 @@
                 </div>
                 <div class="form-group">
                     <label>المصدر</label>
-                    <input type="text" id="umrah_source"  placeholder="مصدر المعاملة">
+                    <input type="text" id="umrah_source" placeholder="مصدر المعاملة">
                 </div>
                 <div class="form-group">
                     <label>المستفيد</label>
@@ -112,7 +117,7 @@
                     <label>الجهة التابع لها المعاملة</label>
                     <select id="agency_type" required>
                         <option value="">-- اختر الجهة --</option>
-                        <option value="احرام">إحرام</option>
+                        <option value="إحرام">إحرام</option>
                         <option value="العمودي">العمودي</option>
                         <option value="سنابل الخير">سنابل الخير</option>
                     </select>
@@ -126,11 +131,11 @@
             <form id="visa-form">
                 <div class="form-group">
                     <label>الاسم</label>
-                    <input type="text" id="visa_name" placeholder="الاسم الكامل للمتقدم">
+                    <input type="text" id="visa_name" placeholder="الاسم الكامل للمتقدم" required>
                 </div>
                 <div class="form-group">
                     <label>تاريخ صلاحية التأشيرة</label>
-                    <input type="date" id="visa_expiry_date" >
+                    <input type="date" id="visa_expiry_date">
                 </div>
                 <div class="form-group">
                     <label>نوع التأشيرة</label>
@@ -153,10 +158,9 @@
             </form>
         </section>
 
-            
+    </div>
 
     <script>
-        // تنقل بسيط وسلس بين التبويبات بدون تحميل الصفحة
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
             document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -168,7 +172,7 @@
         }
     </script>
 
-    <!-- استدعاء ملف الـ JS كـ Module للربط المباشر مع Firebase V10 -->
+    <!-- استدعاء ملف الـ JS كـ Module للربط المباشر مع Firebase -->
     <script type="module" src="admin.js"></script>
 </body>
 </html>
