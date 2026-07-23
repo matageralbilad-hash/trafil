@@ -125,24 +125,31 @@
         </section>
 
         <section id="reports-section" class="tab-content">
-            <div class="reports-summary-grid">
-                <div class="report-summary-card departure-card" onclick="openDetailedReport('departure')">
-                    <div class="card-icon">🛫</div>
-                    <div class="card-info">
-                        <h3>رحلات مغادرة خلال الـ 48 ساعة القادمة</h3>
-                        <p class="click-hint">اضغط هنا لعرض الجدول وتصفية البيانات</p>
-                    </div>
-                </div>
+           <div class="reports-summary-grid">
+    <div class="report-summary-card departure-card" onclick="openDetailedReport('departure')">
+        <div class="card-icon">🛫</div>
+        <div class="card-info">
+            <h3>رحلات مغادرة خلال الـ 48 ساعة القادمة</h3>
+            <p class="click-hint">اضغط هنا لعرض الجدول وتصفية البيانات</p>
+        </div>
+    </div>
 
-                <div class="report-summary-card return-card" onclick="openDetailedReport('return')">
-                    <div class="card-icon">🛬</div>
-                    <div class="card-info">
-                        <h3>تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة)</h3>
-                        <p class="click-hint">اضغط هنا لعرض الجدول وتصفية البيانات</p>
-                    </div>
-                </div>
-            </div>
+    <div class="report-summary-card return-card" onclick="openDetailedReport('return')">
+        <div class="card-icon">🛬</div>
+        <div class="card-info">
+            <h3>تذاكر العودة غير المفتوحة (خلال الـ 72 ساعة القادمة)</h3>
+            <p class="click-hint">اضغط هنا لعرض الجدول وتصفية البيانات</p>
+        </div>
+    </div>
 
+    <div class="report-summary-card" style="border-right-color: #a855f7;" onclick="window.location.href='taqarir.html'">
+        <div class="card-icon">📈</div>
+        <div class="card-info">
+            <h3>التقارير الشهرية المفصلة</h3>
+            <p class="click-hint">اضغط هنا لفرز واستخراج كشوفات الأشهر</p>
+        </div>
+    </div>
+</div>
             <div id="departure-report-view" class="detailed-view-container" style="display: none; margin-top: 20px;">
                 <div class="view-header">
                     <h2>🛫 تفاصيل الرحلات المغادرة (48 ساعة)</h2>
