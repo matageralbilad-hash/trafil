@@ -22,15 +22,14 @@ let allVisas = [];
 
 // مصفوفة الأشهر المطلوبة (من يوليو 2026 إلى ديسمبر 2027 كمثال واسع)
 const monthsList = [
-    { value: '2026-07', label: 'يوليو 2026' }, { value: '2026-08', label: 'أغسطس 2026' },
-    { value: '2026-09', label: 'سبتمبر 2026' }, { value: '2026-10', label: 'أكتوبر 2026' },
-    { value: '2026-11', label: 'نوفمبر 2026' }, { value: '2026-12', label: 'ديسمبر 2026' },
-    { value: '2027-01', label: 'يناير 2027' }, { value: '2027-02', label: 'فبراير 2027' },
-    { value: '2027-03', label: 'مارس 2027' }, { value: '2027-04', label: 'أبريل 2027' },
-    { value: '2027-05', label: 'مايو 2027' }, { value: '2027-06', label: 'يونيو 2027' },
-    { value: '2027-07', label: 'يوليو 2027' }, { value: '2027-08', label: 'أغسطس 2027' }
+    { value: '2026-08', label: 'أغسطس 2026' }, { value: '2026-09', label: 'سبتمبر 2026' },
+    { value: '2026-10', label: 'أكتوبر 2026' }, { value: '2026-11', label: 'نوفمبر 2026' },
+    { value: '2026-12', label: 'ديسمبر 2026' }, { value: '2027-01', label: 'يناير 2027' },
+    { value: '2027-02', label: 'فبراير 2027' }, { value: '2027-03', label: 'مارس 2027' },
+    { value: '2027-04', label: 'أبريل 2027' }, { value: '2027-05', label: 'مايو 2027' },
+    { value: '2027-06', label: 'يونيو 2027' }, { value: '2027-07', label: 'يوليو 2027' },
+    { value: '2027-08', label: 'أغسطس 2027' }
 ];
-
 document.addEventListener('DOMContentLoaded', async () => {
     generateMonthFolders();
     await fetchAllData();
@@ -105,11 +104,10 @@ window.openReportForMonth = function(monthValue, monthLabel) {
     document.getElementById('report-title').innerText = `التقرير الإحصائي الشامل - ${monthLabel}`;
     document.getElementById('report-timestamp').innerText = `تاريخ استخراج التقرير: ${new Date().toLocaleString('ar-YE')}`;
 
-    // فلترة بيانات الشهر بناءً على التاريخ
-    const tMonth = allTickets.filter(t => t.departure_date && t.departure_date.startsWith(monthValue));
-    const uMonth = allUmrah.filter(u => u.entry_date && u.entry_date.startsWith(monthValue));
-    const vMonth = allVisas.filter(v => v.visa_expiry_date && v.visa_expiry_date.startsWith(monthValue));
-
+    // فلترة بيانات الشهر بناءً على تاريخ الإدخال الفعلي للنظام حصراً
+const tMonth = allTickets.filter(t => t.created_at && t.created_at.startsWith(monthValue));
+const uMonth = allUmrah.filter(u => u.created_at && u.created_at.startsWith(monthValue));
+const vMonth = allVisas.filter(v => v.created_at && v.created_at.startsWith(monthValue));
     // الإحصائيات والأرقام
     const tCount = tMonth.length;
     const uCount = uMonth.length;
