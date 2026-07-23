@@ -29,15 +29,16 @@ function setupFormSubmit() {
         ticketForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newTicket = {
-                passenger_name: document.getElementById('passenger_name').value.trim(),
-                booking_code: document.getElementById('booking_code').value.trim().toUpperCase(),
-                departure_date: document.getElementById('departure_date').value,
-                from_location: document.getElementById('from_location').value.trim(),
-                to_location: document.getElementById('to_location').value.trim(),
-                return_date: document.getElementById('return_date').value || null,
-                source: document.getElementById('source').value.trim(),
-                destination_agency: document.getElementById('destination_agency').value.trim()
-            };
+            passenger_name: document.getElementById('passenger_name').value.trim(),
+            booking_code: document.getElementById('booking_code').value.trim().toUpperCase(),
+            departure_date: document.getElementById('departure_date').value,
+            from_location: document.getElementById('from_location').value.trim(),
+            to_location: document.getElementById('to_location').value.trim(),
+            return_date: document.getElementById('return_date').value || null,
+            source: document.getElementById('source').value.trim(),
+            destination_agency: document.getElementById('destination_agency').value.trim(),
+            created_at: new Date().toISOString()
+        };
 
             push(ref(database, 'tickets'), newTicket)
                 .then(() => {
@@ -52,15 +53,16 @@ function setupFormSubmit() {
     if (umrahForm) {
         umrahForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const newUmrah = {
-                pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
-                entry_date: document.getElementById('entry_date').value,
-                exit_date: document.getElementById('exit_date').value,
-                travel_type: document.getElementById('travel_type').value,
-                beneficiary: document.getElementById('beneficiary').value.trim(),
-                agency_type: document.getElementById('agency_type').value
-            };
-
+            
+const newUmrah = {
+            pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
+            entry_date: document.getElementById('entry_date').value,
+            exit_date: document.getElementById('exit_date').value,
+            travel_type: document.getElementById('travel_type').value,
+            beneficiary: document.getElementById('beneficiary').value.trim(),
+            agency_type: document.getElementById('agency_type').value,
+            created_at: new Date().toISOString()
+        };
             push(ref(database, 'umrah'), newUmrah)
                 .then(() => {
                     alert('🕋 تم تسجيل معاملة العمرة في سيرفر Firebase!');
@@ -75,13 +77,13 @@ function setupFormSubmit() {
         visaForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newVisa = {
-                visa_name: document.getElementById('visa_name').value.trim(),
-                visa_expiry_date: document.getElementById('visa_expiry_date').value,
-                visa_type: document.getElementById('visa_type').value,
-                visa_source: document.getElementById('visa_source').value.trim(),
-                visa_agent: document.getElementById('visa_agent').value.trim()
-            };
-
+            visa_name: document.getElementById('visa_name').value.trim(),
+            visa_expiry_date: document.getElementById('visa_expiry_date').value,
+            visa_type: document.getElementById('visa_type').value,
+            visa_source: document.getElementById('visa_source').value.trim(),
+            visa_agent: document.getElementById('visa_agent').value.trim(),
+            created_at: new Date().toISOString()
+        };
             push(ref(database, 'visas'), newVisa)
                 .then(() => {
                     alert('🛂 تم حفظ التأشيرة الجديدة في سيرفر Firebase!');
