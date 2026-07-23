@@ -663,13 +663,12 @@ window.generatePrintPreview = function() {
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الخروج</th>
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">طريقة السفر</th>
         `;
-        if (showAllUmrahCols) {
-            printTableHtml += `
-                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
-                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المستفيد</th>
-                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الجهة التابع لها</th>
-            `;
-        }
+       if (showAllUmrahCols) {
+    printTableHtml += `
+        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المستفيد</th>
+        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الجهة التابع لها</th>
+    `;
+}
     } else if (category === 'visas') {
         printTableHtml += `
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم المعني</th>
@@ -704,13 +703,12 @@ window.generatePrintPreview = function() {
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.exit_date || '-'}</td>
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
             `;
-            if (showAllUmrahCols) {
-                printTableHtml += `
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.umrah_source || '-'}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.beneficiary || '-'}</td>
-                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.agency_type || '-'}</td>
-                `;
-            }
+           if (showAllUmrahCols) {
+    printTableHtml += `
+        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.beneficiary || '-'}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.agency_type || '-'}</td>
+    `;
+}
         } else if (category === 'visas') {
             printTableHtml += `
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;"><strong>${item.visa_name}</strong></td>
