@@ -47,22 +47,20 @@ function setupFormSubmit() {
                 .catch(err => alert('❌ خطأ في الحفظ: ' + err.message));
         });
     }
-
+const newUmrah = {
+    pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
+    entry_date: document.getElementById('entry_date').value,
+    exit_date: document.getElementById('exit_date').value,
+    travel_type: document.getElementById('travel_type').value,
+    beneficiary: document.getElementById('beneficiary').value.trim(),
+    agency_type: document.getElementById('agency_type').value
+};
     // إرسال معاملة عمرة جديدة
     const umrahForm = document.getElementById('umrah-form');
     if (umrahForm) {
         umrahForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const newUmrah = {
-                pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
-                entry_date: document.getElementById('entry_date').value,
-                exit_date: document.getElementById('exit_date').value,
-                travel_type: document.getElementById('travel_type').value,
-                umrah_source: document.getElementById('umrah_source').value.trim(),
-                beneficiary: document.getElementById('beneficiary').value.trim(),
-                agency_type: document.getElementById('agency_type').value
-            };
-
+            
             push(ref(database, 'umrah'), newUmrah)
                 .then(() => {
                     alert('🕋 تم تسجيل معاملة العمرة في سيرفر Firebase!');
