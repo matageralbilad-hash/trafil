@@ -190,7 +190,7 @@ window.renderUmrah = function() {
     });
 
     if (umrahData.length === 0) {
-        const colSpan = showAllColumns ? 7 : 4;
+        const colSpan = showAllColumns ? 6 : 4;
         tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد معاملات عمرة مسجلة.</td></tr>`;
         return;
     }
@@ -205,7 +205,7 @@ window.renderUmrah = function() {
     });
 
     if (filtered.length === 0) {
-        const colSpan = showAllColumns ? 7 : 4;
+        const colSpan = showAllColumns ? 6 : 4;
         tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>`;
         return;
     }
@@ -214,7 +214,7 @@ window.renderUmrah = function() {
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';
         row.title = "اضغط لتعديل أو حذف المعاملة ✏️";
-        
+
         row.onclick = () => {
             window.location.href = `edit.html?category=umrah&id=${item.id}&backTab=umrah-table-section&backSub=${selectedTab}`;
         };
@@ -225,7 +225,6 @@ window.renderUmrah = function() {
                 <td>${item.entry_date || '-'}</td>
                 <td>${item.exit_date || '-'}</td>
                 <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
-                <td>${item.umrah_source || '-'}</td>
                 <td>${item.beneficiary || '-'}</td>
                 <td><span class="agency-tag">${item.agency_type || '-'}</span></td>
             `;
@@ -240,7 +239,6 @@ window.renderUmrah = function() {
         tbody.appendChild(row);
     });
 };
-
 // 🛂 [عرض وتصفية التأشيرات]
 window.renderVisas = function() {
     const tbody = document.querySelector('#all-visas-table tbody');
