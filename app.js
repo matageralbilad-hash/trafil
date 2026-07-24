@@ -637,10 +637,16 @@ window.generatePrintPreview = function() {
 
     let printTableHtml = `
         <div style="background: white; color: black; padding: 20px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
-            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-                <h2 style="margin: 0; color: #0f172a;">مكتب وفاء للسفريات والسياحة - سيئون</h2>
-                <h3 style="margin: 5px 0 0 0; font-weight: normal; color: #475569;">${reportTitle}</h3>
-                <span style="font-size: 11px;">تاريخ استخراج التقرير: ${new Date().toLocaleDateString('ar-YE')}</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; direction: rtl;">
+                <div style="flex: 1; text-align: right;">
+                    <img src="icon-512.png" alt="شعار المكتب" style="max-height: 75px; width: auto;" onerror="this.style.display='none'">
+                </div>
+                <div style="flex: 2; text-align: center;">
+                    <h2 style="margin: 0; color: #0f172a; font-size: 1.25rem; font-weight: bold;">مكتب وفاء سيئون للسفريات والسياحة</h2>
+                    <h3 style="margin: 5px 0 0 0; font-size: 1rem; font-weight: 600; color: #334155;">${reportTitle}</h3>
+                    <span style="font-size: 11px; color: #475569; display: block; margin-top: 4px;">تاريخ إصدار التقرير: ${new Date().toLocaleDateString('ar-YE')}</span>
+                </div>
+                <div style="flex: 1;"></div>
             </div>
             <table class="preview-print-table" style="width: 100%; border-collapse: collapse; color: black;">
                 <thead>
@@ -743,9 +749,13 @@ window.executeFinalPDF = function() {
         <head>
             <title>طباعة تقرير الكشف - مكتب وفاء</title>
             <style>
-                body { font-family: 'Cairo', system-ui, -apple-system, sans-serif; background: #fff; color: #000; padding: 20px; }
+                @page {
+                    size: A4 portrait;
+                    margin: 10mm;
+                }
+                body { font-family: 'Cairo', system-ui, -apple-system, sans-serif; background: #fff; color: #000; padding: 10px; direction: rtl; }
                 table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                th, td { border: 1px solid #94a3b8; padding: 8px 12px; text-align: right; font-size: 13px; }
+                th, td { border: 1px solid #94a3b8; padding: 8px 10px; text-align: right; font-size: 12px; color: #000; }
                 th { background-color: #f1f5f9; font-weight: bold; }
                 @media print {
                     body { padding: 0; }
@@ -766,7 +776,6 @@ window.executeFinalPDF = function() {
     `);
     printWindow.document.close();
 };
-
 // =================================================================
 // 8️⃣ مصنع تنسيق التواريخ
 // =================================================================
