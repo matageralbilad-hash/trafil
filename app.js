@@ -288,54 +288,56 @@ window.renderVisas = function() {
 // =================================================================
 // 4️⃣ محركات البحث الفورية والفلترة
 // =================================================================
-function setupSearchFilters() {
-    const searchTicketInput = document.getElementById('tickets-search-input');
-    if (searchTicketInput) {
-        searchTicketInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            filterTableRows('#all-tickets-table tbody', query);
-        });
-    }
-
-    const searchUmrahInput = document.getElementById('umrah-search-input');
-    if (searchUmrahInput) {
-        searchUmrahInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            filterTableRows('#all-umrah-table tbody', query);
-        });
-    }
-
-    const searchVisaInput = document.getElementById('visas-search-input');
-    if (searchVisaInput) {
-        searchVisaInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            filterTableRows('#all-visas-table tbody', query);
-        });
-    }
-
-    const searchDepInput = document.getElementById('departure-search-input');
-    if (searchDepInput) {
-        searchDepInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            filterTableRows('#departure-table tbody', query);
-        });
-    }
-
-    const searchRetInput = document.getElementById('return-search-input');
-    if (searchRetInput) {
-        searchRetInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            filterTableRows('#return-table tbody', query);
-        });
-    }
+// دالة تطهير وتوحيد النصوص العربية والإنجليزية
+function normalizeText(text) {
+    if (!text) return '';
+    return text.toString()
+        .toLowerCase()
+        // توحيد همزات الألف
+        .replace(/[أإآ]/g, 'ا')
+        // توحيد التاء المربوطة والهاء
+        .replace(/ة/g, 'ه')
+        // توحيد الياء والألف المقصورة
+        .replace(/ى/g, 'ي')
+        // إزالة الحركات والتنوين
+        .replace(/[\u064B-\u0652]/g, '')
+        .trim();
 }
 
-function filterTableRows(tbodySelector, query) {
+function setupSearchFilters() {
+    const searchInputs = [
+        { inputId: 'tickets-search-input', tableSelector: '#all-tickets-table tbody' },
+        { inputId: 'umrah-search-input', tableSelector: '#all-umrah-table tbody' },
+        { inputId: 'visas-search-input', tableSelector: '#all-visas-table tbody' },
+        { inputId: 'departure-search-input', tableSelector: '#departure-table tbody' },
+        { inputId: 'return-search-input', tableSelector: '#return-table tbody' }
+    ];
+
+    searchInputs.forEach(({ inputId, tableSelector }) => {
+        const inputEl = document.getElementById(inputId);
+        if (inputEl) {
+            inputEl.addEventListener('input', (e) => {
+                const query = e.target.value;
+                filterTableRowsSmart(tableSelector, query);
+            });
+        }
+    });
+}
+
+function filterTableRowsSmart(tbodySelector, query) {
     const rows = document.querySelectorAll(`${tbodySelector} tr`);
+    const normalizedQuery = normalizeText(query);
+
     rows.forEach(row => {
         if (row.cells.length <= 1 && row.textContent.includes('لا توجد')) return;
-        const textContent = row.textContent.toLowerCase();
-        row.style.display = textContent.includes(query) ? '' : 'none';
+        
+        const rowText = normalizeText(row.textContent);
+        
+        // البحث بالعبارة الكاملة أو الكلمات المنفصلة
+        const queryWords = normalizedQuery.split(' ').filter(w => w.length > 0);
+        const isMatch = queryWords.every(word => rowText.includes(word));
+
+        row.style.display = isMatch ? '' : 'none';
     });
 }
 
