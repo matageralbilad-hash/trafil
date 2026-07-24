@@ -306,41 +306,51 @@ function normalizeText(text) {
 
 function setupSearchFilters() {
     const searchInputs = [
-        { inputId: 'tickets-search-input', tableSelector: '#all-tickets-table tbody' },
-        { inputId: 'umrah-search-input', tableSelector: '#all-umrah-table tbody' },
-        { inputId: 'visas-search-input', tableSelector: '#all-visas-table tbody' },
-        { inputId: 'departure-search-input', tableSelector: '#departure-table tbody' },
-        { inputId: 'return-search-input', tableSelector: '#return-table tbody' }
+        { textId: 'tickets-search-input', dateId: 'tickets-date-input', tableSelector: '#all-tickets-table tbody' },
+        { textId: 'umrah-search-input', dateId: 'umrah-date-input', tableSelector: '#all-umrah-table tbody' },
+        { textId: 'visas-search-input', dateId: 'visas-date-input', tableSelector: '#all-visas-table tbody' },
+        { textId: 'departure-search-input', dateId: null, tableSelector: '#departure-table tbody' },
+        { textId: 'return-search-input', dateId: null, tableSelector: '#return-table tbody' }
     ];
 
-    searchInputs.forEach(({ inputId, tableSelector }) => {
-        const inputEl = document.getElementById(inputId);
-        if (inputEl) {
-            inputEl.addEventListener('input', (e) => {
-                const query = e.target.value;
-                filterTableRowsSmart(tableSelector, query);
-            });
-        }
+    searchInputs.forEach(({ textId, dateId, tableSelector }) => {
+        const textEl = document.getElementById(textId);
+        const dateEl = dateId ? document.getElementById(dateId) : null;
+
+        const triggerFilter = () => {
+            const queryText = textEl ? textEl.value : '';
+            const queryDate = dateEl ? dateEl.value : '';
+            filterTableRowsSmart(tableSelector, queryText, queryDate);
+        };
+
+        if (textEl) textEl.addEventListener('input', triggerFilter);
+        if (dateEl) dateEl.addEventListener('change', triggerFilter);
     });
 }
 
-function filterTableRowsSmart(tbodySelector, query) {
+function filterTableRowsSmart(tbodySelector, queryText, queryDate) {
     const rows = document.querySelectorAll(`${tbodySelector} tr`);
-    const normalizedQuery = normalizeText(query);
+    const normalizedQuery = normalizeText(queryText);
 
     rows.forEach(row => {
         if (row.cells.length <= 1 && row.textContent.includes('لا توجد')) return;
         
         const rowText = normalizeText(row.textContent);
         
-        // البحث بالعبارة الكاملة أو الكلمات المنفصلة
+        // 1️⃣ مطابقة النص والكلمات المرنة
         const queryWords = normalizedQuery.split(' ').filter(w => w.length > 0);
-        const isMatch = queryWords.every(word => rowText.includes(word));
+        const isTextMatch = queryWords.every(word => rowText.includes(word));
 
-        row.style.display = isMatch ? '' : 'none';
+        // 2️⃣ مطابقة التاريخ (إذا اختار الموظف تاريخاً معنياً)
+        let isDateMatch = true;
+        if (queryDate) {
+            isDateMatch = row.textContent.includes(queryDate);
+        }
+
+        // إظهار الصف فقط إذا تطابق النص والتاريخ معاً
+        row.style.display = (isTextMatch && isDateMatch) ? '' : 'none';
     });
 }
-
 // =================================================================
 // 5️⃣ نظام التنقل بين التبويبات
 // =================================================================
