@@ -346,7 +346,8 @@ function filterTableRows(tbodySelector, query) {
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.getAttribute('onclick').includes(tabId)) {
+        // الحل هنا: أضفنا علامات التنصيص (' ') حول المتغير لتكون المطابقة دقيقة 100% ولا تتداخل الكلمات
+        if (btn.getAttribute('onclick').includes(`'${tabId}'`)) {
             btn.classList.add('active');
         }
     });
