@@ -542,3 +542,9 @@ tr:hover {
 .hide-source-col {
     display: none !important;
 }
+/* إصلاح مشكلة ظهور تاريخ الجوال المشوه */
+input[type="date"] {
+    direction: ltr !important;
+    text-align: center;
+    font-family: monospace;
+}

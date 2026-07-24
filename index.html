@@ -35,10 +35,12 @@
         <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'all-tickets')">كل التذاكر</button>
     </div>
 
-    <div class="sub-tab-content-wrapper">
-        <div class="table-controls">
+   <div class="table-controls">
     <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في التذاكر المعروضة...">
-    <input type="date" id="tickets-date-input" title="فلترة بالتاريخ" style="width: auto; background: #151f32; border: 1px solid #334155; color: #fff; padding: 8px 12px; border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 5px; background: #151f32; border: 1px solid #334155; padding: 4px 8px; border-radius: 8px;">
+        <span style="font-size: 1.1rem;">📅</span>
+        <input type="date" id="tickets-date-input" title="تاريخ الرحلة" style="background: transparent; border: none; color: #38bdf8; outline: none; padding: 4px; font-weight: bold;">
+    </div>
     <button class="print-btn" onclick="openPrintWizard('tickets')">🖨️ طباعة PDF</button>
 </div>
         
@@ -70,9 +72,12 @@
         <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'all-umrah')">كل تأشيرات العمرة</button>
     </div>
 
-   <div class="table-controls">
+<div class="table-controls">
     <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في تأشيرات العمرة الحالية...">
-    <input type="date" id="umrah-date-input" title="فلترة بالتاريخ" style="width: auto; background: #151f32; border: 1px solid #334155; color: #fff; padding: 8px 12px; border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 5px; background: #151f32; border: 1px solid #334155; padding: 4px 8px; border-radius: 8px;">
+        <span style="font-size: 1.1rem;">📅</span>
+        <input type="date" id="umrah-date-input" title="تاريخ الدخول" style="background: transparent; border: none; color: #38bdf8; outline: none; padding: 4px; font-weight: bold;">
+    </div>
     <button class="print-btn" onclick="openPrintWizard('umrah')">🖨️ طباعة PDF</button>
 </div>
         
@@ -104,9 +109,12 @@
 
            <div class="table-controls">
     <input type="text" id="visas-search-input" placeholder="🔍 بحث سريع في التأشيرات...">
-    <input type="date" id="visas-date-input" title="فلترة بالتاريخ" style="width: auto; background: #151f32; border: 1px solid #334155; color: #fff; padding: 8px 12px; border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 5px; background: #151f32; border: 1px solid #334155; padding: 4px 8px; border-radius: 8px;">
+        <span style="font-size: 1.1rem;">📅</span>
+        <input type="date" id="visas-date-input" title="تاريخ الانتهاء" style="background: transparent; border: none; color: #38bdf8; outline: none; padding: 4px; font-weight: bold;">
+    </div>
     <button class="print-btn" onclick="openPrintWizard('visas')">🖨️ طباعة PDF</button>
-</div>                
+</div>
                 <div class="table-holder full-width-table" id="visas-print-zone">
                     <table id="all-visas-table">
                         <thead>
