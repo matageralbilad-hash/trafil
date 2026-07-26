@@ -21,7 +21,6 @@ let ticketsData = [];
 let umrahData = [];
 let visasData = [];
 
-// 👈 تحديث التبويب الافتراضي ليكون عالم الطويلة بدلاً من اليمنية
 window.currentAirlinesTab = 'tawilat';
 window.currentUmrahTab = 'sanabel';
 window.currentVisasTab = 'security-approval';
@@ -33,7 +32,6 @@ window.currentMainTab = 'table-section';
 document.addEventListener('DOMContentLoaded', () => {
     setupSearchFilters(); // تفعيل محرك البحث السريع
 
-    // استرجاع التبويب النشط بذكاء عند الرجوع من صفحة التعديل
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('activeTab');
     const activeSub = urlParams.get('activeSub');
@@ -64,7 +62,7 @@ function getUrgencyClass(targetDateStr) {
     if (!targetDateStr) return '';
     try {
         const now = new Date();
-        now.setHours(0, 0, 0, 0); // تصفير الوقت للمقارنة باليوم فقط
+        now.setHours(0, 0, 0, 0);
 
         const targetDate = new Date(targetDateStr);
         if (isNaN(targetDate.getTime())) return '';
@@ -73,12 +71,9 @@ function getUrgencyClass(targetDateStr) {
         const diffTime = targetDate - now;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // إذا كانت الرحلة اليوم أو غداً أو خلال 48 ساعة
         if (diffDays >= 0 && diffDays <= 2) {
             return 'urgent-red';
-        }
-        // إذا كانت الرحلة خلال 3 إلى 5 أيام قادمة
-        else if (diffDays > 2 && diffDays <= 5) {
+        } else if (diffDays > 2 && diffDays <= 5) {
             return 'urgent-yellow';
         }
     } catch {
@@ -138,20 +133,19 @@ function initializeFirebase() {
 // 3️⃣ دوال العرض ورسم الجداول التفاعلية
 // =================================================================
 
-// 🎟️ [عرض وتصفية التذاكر المحدثة لشركات الطيران الجديدة]
+// 🎟️ [عرض وتصفية التذاكر]
 window.renderTickets = function() {
     const tbody = document.querySelector('#all-tickets-table tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
     if (ticketsData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تذاكر مسجلة حالياً في النظام.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تذاكر مسجلة حالياً في النظام.</td></tr>';
         return;
     }
 
     const selectedTab = window.currentAirlinesTab;
 
-    // 👈 منطق الفلترة والفرز الجديد
     const filtered = ticketsData.filter(ticket => {
         if (selectedTab === 'all-tickets') return true; 
         
@@ -177,14 +171,14 @@ window.renderTickets = function() {
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
         return;
     }
 
     filtered.forEach(ticket => {
         const row = document.createElement('tr');
-const urgencyClass = getUrgencyClass(ticket.departure_date);
-if (urgencyClass) row.classList.add(urgencyClass);
+        const urgencyClass = getUrgencyClass(ticket.departure_date);
+        if (urgencyClass) row.classList.add(urgencyClass);
         row.style.cursor = 'pointer'; 
         row.title = "اضغط لتعديل أو حذف التذكرة ✏️";
         
@@ -200,10 +194,11 @@ if (urgencyClass) row.classList.add(urgencyClass);
             <td>${ticket.return_date ? formatDate(ticket.return_date) : '<span style="color: #ef4444; font-size: 11px;">ذهاب فقط ✈️</span>'}</td>
             <td>${ticket.source}</td>
             <td><span class="agency-tag">${ticket.destination_agency || 'غير محدد'}</span></td>
+            <td><button class="voucher-btn" onclick="printSingleVoucher('tickets', '${ticket.id}'); event.stopPropagation();">📄 إيصال</button></td>
         `;
         tbody.appendChild(row);
     });
-updateLiveCounters();
+    updateLiveCounters();
 };
 
 // 🕋 [عرض وتصفية العمرة]
@@ -221,7 +216,7 @@ window.renderUmrah = function() {
     });
 
     if (umrahData.length === 0) {
-        const colSpan = showAllColumns ? 6 : 4;
+        const colSpan = showAllColumns ? 7 : 5;
         tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد معاملات عمرة مسجلة.</td></tr>`;
         return;
     }
@@ -236,15 +231,15 @@ window.renderUmrah = function() {
     });
 
     if (filtered.length === 0) {
-        const colSpan = showAllColumns ? 6 : 4;
+        const colSpan = showAllColumns ? 7 : 5;
         tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>`;
         return;
     }
 
     filtered.forEach(item => {
         const row = document.createElement('tr');
-const urgencyClass = getUrgencyClass(item.entry_date);
-if (urgencyClass) row.classList.add(urgencyClass);
+        const urgencyClass = getUrgencyClass(item.entry_date);
+        if (urgencyClass) row.classList.add(urgencyClass);
         row.style.cursor = 'pointer';
         row.title = "اضغط لتعديل أو حذف المعاملة ✏️";
 
@@ -260,6 +255,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
                 <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
                 <td>${item.beneficiary || '-'}</td>
                 <td><span class="agency-tag">${item.agency_type || '-'}</span></td>
+                <td><button class="voucher-btn" onclick="printSingleVoucher('umrah', '${item.id}'); event.stopPropagation();">📄 إيصال</button></td>
             `;
         } else {
             row.innerHTML = `
@@ -267,12 +263,14 @@ if (urgencyClass) row.classList.add(urgencyClass);
                 <td>${item.entry_date || '-'}</td>
                 <td>${item.exit_date || '-'}</td>
                 <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
+                <td><button class="voucher-btn" onclick="printSingleVoucher('umrah', '${item.id}'); event.stopPropagation();">📄 إيصال</button></td>
             `;
         }
         tbody.appendChild(row);
     });
-updateLiveCounters();
+    updateLiveCounters();
 };
+
 // 🛂 [عرض وتصفية التأشيرات]
 window.renderVisas = function() {
     const tbody = document.querySelector('#all-visas-table tbody');
@@ -280,7 +278,7 @@ window.renderVisas = function() {
     tbody.innerHTML = '';
 
     if (visasData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تأشيرات مسجلة.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تأشيرات مسجلة.</td></tr>';
         return;
     }
 
@@ -295,14 +293,14 @@ window.renderVisas = function() {
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:15px;">لا توجد بيانات متوفرة لهذا التصنيف.</td></tr>';
         return;
     }
 
     filtered.forEach(visa => {
-const row = document.createElement('tr');
-const urgencyClass = getUrgencyClass(visa.visa_expiry_date);
-if (urgencyClass) row.classList.add(urgencyClass);
+        const row = document.createElement('tr');
+        const urgencyClass = getUrgencyClass(visa.visa_expiry_date);
+        if (urgencyClass) row.classList.add(urgencyClass);
         row.style.cursor = 'pointer';
         row.title = "اضغط لتعديل أو حذف التأشيرة ✏️";
         
@@ -316,27 +314,23 @@ if (urgencyClass) row.classList.add(urgencyClass);
             <td><span class="agency-tag">${visa.visa_type}</span></td>
             <td>${visa.visa_source}</td>
             <td>${visa.visa_agent}</td>
+            <td><button class="voucher-btn" onclick="printSingleVoucher('visas', '${visa.id}'); event.stopPropagation();">📄 إيصال</button></td>
         `;
         tbody.appendChild(row);
     });
-updateLiveCounters();
-}
+    updateLiveCounters();
+};
 
 // =================================================================
 // 4️⃣ محركات البحث الفورية والفلترة
 // =================================================================
-// دالة تطهير وتوحيد النصوص العربية والإنجليزية
 function normalizeText(text) {
     if (!text) return '';
     return text.toString()
         .toLowerCase()
-        // توحيد همزات الألف
         .replace(/[أإآ]/g, 'ا')
-        // توحيد التاء المربوطة والهاء
         .replace(/ة/g, 'ه')
-        // توحيد الياء والألف المقصورة
         .replace(/ى/g, 'ي')
-        // إزالة الحركات والتنوين
         .replace(/[\u064B-\u0652]/g, '')
         .trim();
 }
@@ -374,20 +368,18 @@ function filterTableRowsSmart(tbodySelector, queryText, queryDate) {
         
         const rowText = normalizeText(row.textContent);
         
-        // 1️⃣ مطابقة النص والكلمات المرنة
         const queryWords = normalizedQuery.split(' ').filter(w => w.length > 0);
         const isTextMatch = queryWords.every(word => rowText.includes(word));
 
-        // 2️⃣ مطابقة التاريخ (إذا اختار الموظف تاريخاً معنياً)
         let isDateMatch = true;
         if (queryDate) {
             isDateMatch = row.textContent.includes(queryDate);
         }
 
-        // إظهار الصف فقط إذا تطابق النص والتاريخ معاً
         row.style.display = (isTextMatch && isDateMatch) ? '' : 'none';
     });
 }
+
 // =================================================================
 // 5️⃣ نظام التنقل بين التبويبات
 // =================================================================
@@ -395,7 +387,6 @@ function filterTableRowsSmart(tbodySelector, queryText, queryDate) {
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tabs-navigation .tab-btn').forEach(btn => {
         btn.classList.remove('active');
-        // الحل هنا: أضفنا علامات التنصيص (' ') حول المتغير لتكون المطابقة دقيقة 100% ولا تتداخل الكلمات
         if (btn.getAttribute('onclick').includes(`'${tabId}'`)) {
             btn.classList.add('active');
         }
@@ -577,7 +568,6 @@ window.generatePrintPreview = function() {
     let recordsToPrint = [];
     let reportTitle = 'تقرير عام';
 
-    // 1️⃣ تصفية التذاكر المحدثة لطباعة المعاينة
     if (category === 'tickets') {
         const agencyNameMap = {
             'tawilat': 'عالم الطويلة',
@@ -719,12 +709,12 @@ window.generatePrintPreview = function() {
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">تاريخ الخروج</th>
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">طريقة السفر</th>
         `;
-       if (showAllUmrahCols) {
-    printTableHtml += `
-        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المستفيد</th>
-        <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الجهة التابع لها</th>
-    `;
-}
+        if (showAllUmrahCols) {
+            printTableHtml += `
+                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">المستفيد</th>
+                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">الجهة التابع لها</th>
+            `;
+        }
     } else if (category === 'visas') {
         printTableHtml += `
             <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: right;">اسم المعني</th>
@@ -759,12 +749,12 @@ window.generatePrintPreview = function() {
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.exit_date || '-'}</td>
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
             `;
-           if (showAllUmrahCols) {
-    printTableHtml += `
-        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.beneficiary || '-'}</td>
-        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.agency_type || '-'}</td>
-    `;
-}
+            if (showAllUmrahCols) {
+                printTableHtml += `
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.beneficiary || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.agency_type || '-'}</td>
+                `;
+            }
         } else if (category === 'visas') {
             printTableHtml += `
                 <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;"><strong>${item.visa_name}</strong></td>
@@ -826,11 +816,11 @@ window.executeFinalPDF = function() {
     `);
     printWindow.document.close();
 };
+
 // =================================================================
 // 🔢 دالة التحديث الآلي لعدادات وشارات الأرقام بالواجهة
 // =================================================================
 function updateLiveCounters() {
-    // 1️⃣ تحديث عدادات التذاكر الرئيسية والفرعية
     const totalTickets = ticketsData.length;
     let countTawilat = 0, countArabSky = 0, countArabia = 0, countOtherTickets = 0;
 
@@ -854,7 +844,6 @@ function updateLiveCounters() {
     setCounterText('count-sub-arabia', countArabia);
     setCounterText('count-sub-other-tickets', countOtherTickets);
 
-    // 2️⃣ تحديث عدادات العمرة الرئيسية والفرعية
     const totalUmrah = umrahData.length;
     let countSanabel = 0, countIhram = 0, countAlamoudi = 0;
 
@@ -871,7 +860,6 @@ function updateLiveCounters() {
     setCounterText('count-sub-ihram', countIhram);
     setCounterText('count-sub-alamoudi', countAlamoudi);
 
-    // 3️⃣ تحديث عدادات التأشيرات الرئيسية والفرعية
     const totalVisas = visasData.length;
     let countSecurity = 0, countOman = 0, countOtherVisas = 0;
 
@@ -892,6 +880,103 @@ function setCounterText(elementId, textValue) {
     const el = document.getElementById(elementId);
     if (el) el.textContent = textValue;
 }
+
+// =================================================================
+// 📄 دالة طباعة وتوليد سند/إيصال الحجز الفردي للمسافر
+// =================================================================
+window.printSingleVoucher = function(category, id) {
+    let item = null;
+    let voucherTypeTitle = "";
+
+    if (category === 'tickets') {
+        item = ticketsData.find(t => t.id === id);
+        voucherTypeTitle = "تذكرة سفر ومسار رحلة";
+    } else if (category === 'umrah') {
+        item = umrahData.find(u => u.id === id);
+        voucherTypeTitle = "إيصال حجز وتأشيرة عمرة";
+    } else if (category === 'visas') {
+        item = visasData.find(v => v.id === id);
+        voucherTypeTitle = "إيصال وثيقة ومعاملة تأشيرة";
+    }
+
+    if (!item) {
+        alert("⚠️ تعذر العثور على بيانات المعاملة المحدد!");
+        return;
+    }
+
+    let detailsHtml = "";
+    if (category === 'tickets') {
+        detailsHtml = `
+            <tr><th>اسم المسافر:</th><td><strong>${item.passenger_name}</strong></td></tr>
+            <tr><th>رقم الحجز (PNR):</th><td><code style="font-size:1.1rem; color:#0284c7; font-family:monospace;">${item.booking_code}</code></td></tr>
+            <tr><th>خط السير (الرحلة):</th><td>${item.from_location} ➔ ${item.to_location}</td></tr>
+            <tr><th>تاريخ الإقلاع:</th><td>${formatDate(item.departure_date)}</td></tr>
+            <tr><th>تاريخ العودة:</th><td>${item.return_date ? formatDate(item.return_date) : 'ذهاب فقط'}</td></tr>
+            <tr><th>شركة الطيران / الجهة:</th><td>${item.destination_agency || 'غير محدد'}</td></tr>
+            <tr><th>المصدر:</th><td>${item.source || '-'}</td></tr>
+        `;
+    } else if (category === 'umrah') {
+        detailsHtml = `
+            <tr><th>اسم المعتمر:</th><td><strong>${item.pilgrim_name}</strong></td></tr>
+            <tr><th>تاريخ الدخول:</th><td>${item.entry_date || '-'}</td></tr>
+            <tr><th>تاريخ الخروج:</th><td>${item.exit_date || '-'}</td></tr>
+            <tr><th>وسيلة السفر:</th><td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td></tr>
+            <tr><th>المستفيد:</th><td>${item.beneficiary || '-'}</td></tr>
+            <tr><th>الوكيل / الجهة:</th><td>${item.agency_type || '-'}</td></tr>
+        `;
+    } else if (category === 'visas') {
+        detailsHtml = `
+            <tr><th>اسم المعني:</th><td><strong>${item.visa_name}</strong></td></tr>
+            <tr><th>نوع التأشيرة:</th><td>${item.visa_type}</td></tr>
+            <tr><th>تاريخ الصلاحية:</th><td>${item.visa_expiry_date}</td></tr>
+            <tr><th>المصدر:</th><td>${item.visa_source}</td></tr>
+            <tr><th>الوكيل:</th><td>${item.visa_agent}</td></tr>
+        `;
+    }
+
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`
+        <html lang="ar" dir="rtl">
+        <head>
+            <title>إيصال حجز - ${item.passenger_name || item.pilgrim_name || item.visa_name}</title>
+            <style>
+                body { font-family: 'Cairo', system-ui, sans-serif; background: #f8fafc; padding: 20px; color: #0f172a; direction: rtl; }
+                .voucher-card { max-width: 600px; margin: 0 auto; background: #fff; border: 2px solid #0284c7; border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                .header { text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+                .header h2 { margin: 0; color: #0284c7; font-size: 1.4rem; }
+                .header h4 { margin: 5px 0 0 0; color: #475569; font-size: 1rem; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 13px; }
+                th { background-color: #f1f5f9; color: #334155; width: 35%; }
+                .footer { margin-top: 25px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="voucher-card">
+                <div class="header">
+                    <h2>مكتب وفاء سيئون للسفريات والسياحة</h2>
+                    <h4>سند تأكيد (${voucherTypeTitle})</h4>
+                    <span style="font-size:10px; color:#94a3b8;">تاريخ الإصدار: ${new Date().toLocaleDateString('ar-YE')}</span>
+                </div>
+                <table>
+                    <tbody>${detailsHtml}</tbody>
+                </table>
+                <div class="footer">
+                    <p>نتمنى لكم رحلة سعيدة وموفقة! ✈️ - مكتب وفاء سيئون</p>
+                </div>
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(() => { window.close(); }, 500);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
+};
+
 // =================================================================
 // 8️⃣ مصنع تنسيق التواريخ
 // =================================================================
