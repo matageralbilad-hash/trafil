@@ -203,6 +203,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
         `;
         tbody.appendChild(row);
     });
+updateLiveCounters();
 };
 
 // 🕋 [عرض وتصفية العمرة]
@@ -270,6 +271,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
         }
         tbody.appendChild(row);
     });
+updateLiveCounters();
 };
 // 🛂 [عرض وتصفية التأشيرات]
 window.renderVisas = function() {
@@ -317,6 +319,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
         `;
         tbody.appendChild(row);
     });
+updateLiveCounters();
 }
 
 // =================================================================
@@ -823,6 +826,72 @@ window.executeFinalPDF = function() {
     `);
     printWindow.document.close();
 };
+// =================================================================
+// 🔢 دالة التحديث الآلي لعدادات وشارات الأرقام بالواجهة
+// =================================================================
+function updateLiveCounters() {
+    // 1️⃣ تحديث عدادات التذاكر الرئيسية والفرعية
+    const totalTickets = ticketsData.length;
+    let countTawilat = 0, countArabSky = 0, countArabia = 0, countOtherTickets = 0;
+
+    ticketsData.forEach(ticket => {
+        const agency = (ticket.destination_agency || '').toLowerCase();
+        if (agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat')) {
+            countTawilat++;
+        } else if (agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky')) {
+            countArabSky++;
+        } else if (agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia')) {
+            countArabia++;
+        } else {
+            countOtherTickets++;
+        }
+    });
+
+    setCounterText('count-main-tickets', totalTickets);
+    setCounterText('count-sub-all-tickets', totalTickets);
+    setCounterText('count-sub-tawilat', countTawilat);
+    setCounterText('count-sub-arabsky', countArabSky);
+    setCounterText('count-sub-arabia', countArabia);
+    setCounterText('count-sub-other-tickets', countOtherTickets);
+
+    // 2️⃣ تحديث عدادات العمرة الرئيسية والفرعية
+    const totalUmrah = umrahData.length;
+    let countSanabel = 0, countIhram = 0, countAlamoudi = 0;
+
+    umrahData.forEach(item => {
+        const agency = (item.agency_type || '').toLowerCase();
+        if (agency.includes('سنابل')) countSanabel++;
+        else if (agency.includes('احرام') || agency.includes('إحرام')) countIhram++;
+        else if (agency.includes('العمودي')) countAlamoudi++;
+    });
+
+    setCounterText('count-main-umrah', totalUmrah);
+    setCounterText('count-sub-all-umrah', totalUmrah);
+    setCounterText('count-sub-sanabel', countSanabel);
+    setCounterText('count-sub-ihram', countIhram);
+    setCounterText('count-sub-alamoudi', countAlamoudi);
+
+    // 3️⃣ تحديث عدادات التأشيرات الرئيسية والفرعية
+    const totalVisas = visasData.length;
+    let countSecurity = 0, countOman = 0, countOtherVisas = 0;
+
+    visasData.forEach(visa => {
+        const type = (visa.visa_type || '');
+        if (type.includes('موافقة أمنية')) countSecurity++;
+        else if (type.includes('مرور عمان')) countOman++;
+        else if (type.includes('تأشيرات أخرى')) countOtherVisas++;
+    });
+
+    setCounterText('count-main-visas', totalVisas);
+    setCounterText('count-sub-security', countSecurity);
+    setCounterText('count-sub-oman', countOman);
+    setCounterText('count-sub-other-visas', countOtherVisas);
+}
+
+function setCounterText(elementId, textValue) {
+    const el = document.getElementById(elementId);
+    if (el) el.textContent = textValue;
+}
 // =================================================================
 // 8️⃣ مصنع تنسيق التواريخ
 // =================================================================

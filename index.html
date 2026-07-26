@@ -19,21 +19,21 @@
         </header>
 
         <nav class="tabs-navigation">
-            <button class="tab-btn active" onclick="switchTab('table-section')">🎟️ التذاكر</button>
-            <button class="tab-btn" onclick="switchTab('umrah-table-section')">🕋 جدول العمرة</button>
-            <button class="tab-btn" onclick="switchTab('visas-section')">🛂 التأشيرات</button>
-            <button class="tab-btn" onclick="switchTab('reports-section')">📋 التقارير الذكية</button>
-        </nav>
+    <button class="tab-btn active" onclick="switchTab('table-section')">🎟️ التذاكر <span id="count-main-tickets" class="tab-badge">0</span></button>
+    <button class="tab-btn" onclick="switchTab('umrah-table-section')">🕋 جدول العمرة <span id="count-main-umrah" class="tab-badge">0</span></button>
+    <button class="tab-btn" onclick="switchTab('visas-section')">🛂 التأشيرات <span id="count-main-visas" class="tab-badge">0</span></button>
+    <button class="tab-btn" onclick="switchTab('reports-section')">📋 التقارير الذكية</button>
+</nav>
 
         <!-- قسم جدول التذاكر المحدث -->
 <section id="table-section" class="tab-content active-content">
-    <div class="sub-tabs">
-        <button class="sub-tab-btn active" onclick="switchSubTab('tickets', 'tawilat')">عالم الطويلة</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arab-sky')">عرب سكاي</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arabia')">العربية</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'other-airlines')">شركات أخرى</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'all-tickets')">كل التذاكر</button>
-    </div>
+ <div class="sub-tabs">
+    <button class="sub-tab-btn active" onclick="switchSubTab('tickets', 'tawilat')">عالم الطويلة <span id="count-sub-tawilat" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arab-sky')">عرب سكاي <span id="count-sub-arabsky" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'arabia')">العربية <span id="count-sub-arabia" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'other-airlines')">شركات أخرى <span id="count-sub-other-tickets" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('tickets', 'all-tickets')">كل التذاكر <span id="count-sub-all-tickets" class="sub-badge">0</span></button>
+</div>   
 
    <div class="table-controls">
     <input type="text" id="tickets-search-input" placeholder="🔍 بحث سريع في التذاكر المعروضة...">
@@ -66,11 +66,11 @@
         <!-- قسم جدول العمرة المحدث -->
 <section id="umrah-table-section" class="tab-content">
     <div class="sub-tabs">
-        <button class="sub-tab-btn active" onclick="switchSubTab('umrah', 'sanabel')">سنابل الخير</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'ihram')">إحرام</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'alamoudi')">العمودي</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'all-umrah')">كل تأشيرات العمرة</button>
-    </div>
+    <button class="sub-tab-btn active" onclick="switchSubTab('umrah', 'sanabel')">سنابل الخير <span id="count-sub-sanabel" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'ihram')">إحرام <span id="count-sub-ihram" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'alamoudi')">العمودي <span id="count-sub-alamoudi" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('umrah', 'all-umrah')">كل تأشيرات العمرة <span id="count-sub-all-umrah" class="sub-badge">0</span></button>
+</div>
 
 <div class="table-controls">
     <input type="text" id="umrah-search-input" placeholder="🔍 بحث سريع في تأشيرات العمرة الحالية...">
@@ -102,11 +102,10 @@
 
         <section id="visas-section" class="tab-content">
             <div class="sub-tabs">
-                <button class="sub-tab-btn active" onclick="switchSubTab('visas', 'security-approval')">الموافقات الأمنية</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('visas', 'oman-transit')">مرور عمان</button>
-                <button class="sub-tab-btn" onclick="switchSubTab('visas', 'other-visas')">تأشيرات أخرى</button>
-            </div>
-
+    <button class="sub-tab-btn active" onclick="switchSubTab('visas', 'security-approval')">الموافقات الأمنية <span id="count-sub-security" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('visas', 'oman-transit')">مرور عمان <span id="count-sub-oman" class="sub-badge">0</span></button>
+    <button class="sub-tab-btn" onclick="switchSubTab('visas', 'other-visas')">تأشيرات أخرى <span id="count-sub-other-visas" class="sub-badge">0</span></button>
+</div>
            <div class="table-controls">
     <input type="text" id="visas-search-input" placeholder="🔍 بحث سريع في التأشيرات...">
     <div style="display: flex; align-items: center; gap: 5px; background: #151f32; border: 1px solid #334155; padding: 4px 8px; border-radius: 8px;">
