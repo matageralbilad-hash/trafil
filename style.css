@@ -640,3 +640,50 @@ tr.urgent-yellow:hover {
 .whatsapp-share-btn:active {
     transform: scale(0.95);
 }
+
+/* ======================================================== */
+/* ⏱️ تنسيقات شارات العداد المتبقي للتوقيت */
+/* ======================================================== */
+
+.time-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 6px;
+    margin-right: 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* حالة اليوم: أحمر وومض متكرر لفت الانتباه */
+.time-badge.today {
+    background-color: #ef4444;
+    color: #ffffff;
+    animation: pulse-red 1.5s infinite;
+}
+
+/* حالة غداً: برتقالي/أصفر تنبيهي */
+.time-badge.tomorrow {
+    background-color: #f59e0b;
+    color: #0f172a;
+}
+
+/* حالة الأيام القادمة: أزرق سماوي مريح */
+.time-badge.upcoming {
+    background-color: #0284c7;
+    color: #ffffff;
+}
+
+/* حالة السابقة المنتهية: رمادي هادئ */
+.time-badge.expired {
+    background-color: #475569;
+    color: #cbd5e1;
+}
+
+/* تأثير الوميض لحالة اليوم */
+@keyframes pulse-red {
+    0% { opacity: 1; }
+    50% { opacity: 0.65; }
+    100% { opacity: 1; }
+}
