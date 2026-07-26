@@ -609,3 +609,24 @@ tr.urgent-yellow:hover {
     background-color: #38bdf8;
     color: #0f172a;
 }
+
+/* ======================================================== */
+/* 📄 تصميم زر طباعة الإيصال الفردي للمسافر */
+/* ======================================================== */
+
+.voucher-btn {
+    background: #0284c7;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+}
+
+.voucher-btn:hover {
+    background: #0369a1;
+}
