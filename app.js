@@ -1003,19 +1003,3 @@ function formatDate(dateTimeStr) {
         return dateTimeStr;
     }
 }
-// =================================================================
-// 🖥️ دالة التبديل بين وضع العرض العادي ووضع ملء الشاشة الممتد
-// =================================================================
-window.toggleFullscreenMode = function(btnElement) {
-    const isFullscreen = document.body.classList.toggle('fullscreen-mode');
-    
-    // تحديث كافة أزرار التوسيع بالواجهة لتعكس الحالة الحالية
-    const allExpandBtns = document.querySelectorAll('.expand-btn');
-    allExpandBtns.forEach(btn => {
-        if (isFullscreen) {
-            btn.innerHTML = '🔙 إغلاق التوسيع';
-        } else {
-            btn.innerHTML = '🖥️ العرض الممتد';
-        }
-    });
-};
