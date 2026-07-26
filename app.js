@@ -195,7 +195,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
         row.innerHTML = `
         <td><strong>${ticket.passenger_name}</strong></td>
     <td><code class="pnr-code" style="color: #38bdf8; font-weight: bold; font-family: monospace;">${ticket.booking_code}</code></td>
-    <td>${formatDate(ticket.departure_date)}</td>
+    <td>${formatDate(ticket.departure_date)} ${getRemainingTimeBadge(ticket.departure_date)}</td>
     <td>${ticket.from_location} ➔ ${ticket.to_location}</td>
     <td>${ticket.return_date ? formatDate(ticket.return_date) : '<span style="color: #ef4444; font-size: 11px;">ذهاب فقط ✈️</span>'}</td>
     <td>${ticket.source}</td>
@@ -256,7 +256,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
         if (showAllColumns) {
     row.innerHTML = `
         <td><strong>${item.pilgrim_name}</strong></td>
-        <td>${item.entry_date || '-'}</td>
+        <td>${item.entry_date || '-'} ${getRemainingTimeBadge(item.entry_date)}</td>
         <td>${item.exit_date || '-'}</td>
         <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
         <td>${item.beneficiary || '-'}</td>
@@ -266,10 +266,10 @@ if (urgencyClass) row.classList.add(urgencyClass);
 } else {
     row.innerHTML = `
         <td><strong>${item.pilgrim_name}</strong></td>
-        <td>${item.entry_date || '-'}</td>
+        <td>${item.entry_date || '-'} ${getRemainingTimeBadge(item.entry_date)}</td>
         <td>${item.exit_date || '-'}</td>
         <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
-       <td><button class="whatsapp-share-btn" onclick="shareToWhatsApp('umrah', '${item.id}'); event.stopPropagation();">💬 واتساب</button></td> 
+        <td><button class="whatsapp-share-btn" onclick="shareToWhatsApp('umrah', '${item.id}'); event.stopPropagation();">💬 واتساب</button></td> 
     `;
 }
         tbody.appendChild(row);
@@ -315,7 +315,7 @@ if (urgencyClass) row.classList.add(urgencyClass);
 
         row.innerHTML = `
     <td><strong>${visa.visa_name}</strong></td>
-    <td>${visa.visa_expiry_date}</td>
+    <td>${visa.visa_expiry_date} ${getRemainingTimeBadge(visa.visa_expiry_date)}</td>
     <td><span class="agency-tag">${visa.visa_type}</span></td>
     <td>${visa.visa_source}</td>
     <td>${visa.visa_agent}</td>
@@ -954,6 +954,35 @@ window.shareToWhatsApp = function(category, id) {
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
 };
+// =================================================================
+// ⏱️ دالة حساب الوقت المتبقي وإرجاع شارة التوقيت الذكية
+// =================================================================
+function getRemainingTimeBadge(targetDateStr) {
+    if (!targetDateStr) return '';
+    try {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // تصفير الوقت للمقارنة بالأيام فقط
+
+        const targetDate = new Date(targetDateStr);
+        if (isNaN(targetDate.getTime())) return '';
+        targetDate.setHours(0, 0, 0, 0);
+
+        const diffTime = targetDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return `<span class="time-badge expired">انتهت</span>`;
+        } else if (diffDays === 0) {
+            return `<span class="time-badge today">اليوم 🚨</span>`;
+        } else if (diffDays === 1) {
+            return `<span class="time-badge tomorrow">غداً ⚠️</span>`;
+        } else {
+            return `<span class="time-badge upcoming">متبقي ${diffDays} يوم</span>`;
+        }
+    } catch {
+        return '';
+    }
+}
 // =================================================================
 // 8️⃣ مصنع تنسيق التواريخ
 // =================================================================
