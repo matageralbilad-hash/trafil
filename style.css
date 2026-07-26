@@ -687,3 +687,130 @@ tr.urgent-yellow:hover {
     50% { opacity: 0.65; }
     100% { opacity: 1; }
 }
+/* ======================================================== */
+/* 📱 التعديل 13: تحسينات التجاوب الشاملة لسامسونج نوت والجوالات */
+/* ======================================================== */
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px 6px;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+    }
+
+    header p {
+        font-size: 0.8rem;
+    }
+
+    /* 1️⃣ ضبط شريط التبويبات الرئيسي ليتناسب مع شاشة الجوال */
+    .tabs-navigation {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 6px;
+    }
+
+    .tab-btn {
+        font-size: 0.85rem;
+        padding: 10px 4px;
+        flex: 1 1 45%; /* عرض زرين في كل سطر على الجوال */
+    }
+
+    /* 2️⃣ ترتيب أدوات البحث والتاريخ والطباعة بشكل رأسي مريح */
+    .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .table-controls input[type="text"] {
+        width: 100%;
+    }
+
+    .table-controls > div {
+        justify-content: center;
+        width: 100%;
+        padding: 8px !important;
+    }
+
+    .print-btn {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    /* 3️⃣ إصلاح نافذة معاينة الطباعة (Modal) لتظهر قريبة وواضحة جداً */
+    .print-modal {
+        padding: 8px;
+    }
+
+    .modal-content {
+        max-height: 96vh;
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        padding: 12px 15px;
+    }
+
+    .modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        padding: 10px 8px;
+    }
+
+    .filter-options {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group select, .filter-group input {
+        width: 100%;
+    }
+
+    /* 4️⃣ إزالة ابتعاد وانكماش جدول تقرير الطباعة على شاشة الجوال */
+    .preview-area {
+        padding: 8px 5px;
+        min-height: auto;
+        border-width: 1px;
+    }
+
+    .preview-area div[style*="display: flex"] {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 8px;
+    }
+
+    .preview-area div[style*="text-align: right"] {
+        text-align: center !important;
+    }
+
+    .preview-area table {
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .preview-area th, .preview-area td {
+        padding: 8px 4px !important;
+        font-size: 11px !important;
+        white-space: normal !important; /* السماح بالتفاف النص حتى لا يخرج خارج الشاشة */
+        word-break: break-word;
+    }
+
+    /* 5️⃣ تحسين أزرار الجدول والواتساب بداخل شاشة السامسونج */
+    .whatsapp-share-btn {
+        padding: 6px 8px;
+        font-size: 0.78rem;
+    }
+}
