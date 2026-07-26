@@ -548,3 +548,27 @@ input[type="date"] {
     text-align: center;
     font-family: monospace;
 }
+
+/* ======================================================== */
+/* 🚨 التنبيه البصري بالألوان للرحلات والمعاملات القريبة */
+/* ======================================================== */
+
+/* طوارئ: خلال 24-48 ساعة (أحمر خفيف مريح للعين) */
+tr.urgent-red {
+    background-color: rgba(239, 68, 68, 0.18) !important;
+    border-right: 4px solid #ef4444 !important;
+}
+
+tr.urgent-red:hover {
+    background-color: rgba(239, 68, 68, 0.28) !important;
+}
+
+/* تنبيه: خلال 3-5 أيام (أصفر/برتقالي خفيف) */
+tr.urgent-yellow {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    border-right: 4px solid #f59e0b !important;
+}
+
+tr.urgent-yellow:hover {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+}

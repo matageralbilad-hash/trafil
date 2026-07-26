@@ -59,6 +59,34 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
 
+// دالة فحص درجة استعجال التاريخ مقارنة باليوم الحالي
+function getUrgencyClass(targetDateStr) {
+    if (!targetDateStr) return '';
+    try {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // تصفير الوقت للمقارنة باليوم فقط
+
+        const targetDate = new Date(targetDateStr);
+        if (isNaN(targetDate.getTime())) return '';
+        targetDate.setHours(0, 0, 0, 0);
+
+        const diffTime = targetDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // إذا كانت الرحلة اليوم أو غداً أو خلال 48 ساعة
+        if (diffDays >= 0 && diffDays <= 2) {
+            return 'urgent-red';
+        }
+        // إذا كانت الرحلة خلال 3 إلى 5 أيام قادمة
+        else if (diffDays > 2 && diffDays <= 5) {
+            return 'urgent-yellow';
+        }
+    } catch {
+        return '';
+    }
+    return '';
+}
+
 // =================================================================
 // 2️⃣ تهيئة قاعدة بيانات Firebase وجلب التحديثات فوراً
 // =================================================================
@@ -155,6 +183,8 @@ window.renderTickets = function() {
 
     filtered.forEach(ticket => {
         const row = document.createElement('tr');
+const urgencyClass = getUrgencyClass(ticket.departure_date);
+if (urgencyClass) row.classList.add(urgencyClass);
         row.style.cursor = 'pointer'; 
         row.title = "اضغط لتعديل أو حذف التذكرة ✏️";
         
@@ -212,6 +242,8 @@ window.renderUmrah = function() {
 
     filtered.forEach(item => {
         const row = document.createElement('tr');
+const urgencyClass = getUrgencyClass(item.entry_date);
+if (urgencyClass) row.classList.add(urgencyClass);
         row.style.cursor = 'pointer';
         row.title = "اضغط لتعديل أو حذف المعاملة ✏️";
 
@@ -266,7 +298,9 @@ window.renderVisas = function() {
     }
 
     filtered.forEach(visa => {
-        const row = document.createElement('tr');
+const row = document.createElement('tr');
+const urgencyClass = getUrgencyClass(visa.visa_expiry_date);
+if (urgencyClass) row.classList.add(urgencyClass);
         row.style.cursor = 'pointer';
         row.title = "اضغط لتعديل أو حذف التأشيرة ✏️";
         
