@@ -609,24 +609,34 @@ tr.urgent-yellow:hover {
     background-color: #38bdf8;
     color: #0f172a;
 }
-
 /* ======================================================== */
-/* 📄 تصميم زر طباعة الإيصال الفردي للمسافر */
+/* 💬 تصميم زر الواتساب التفاعلي والمتحرك */
 /* ======================================================== */
 
-.voucher-btn {
-    background: #0284c7;
+.whatsapp-share-btn {
+    background: #25d366;
     color: #ffffff;
     border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 5px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     white-space: nowrap;
 }
 
-.voucher-btn:hover {
-    background: #0369a1;
+/* تأثير التفاعل والحركة عند تحريك الماوس أو اللمس */
+.whatsapp-share-btn:hover {
+    background: #128c7e;
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 5px 12px rgba(37, 211, 102, 0.5);
+}
+
+.whatsapp-share-btn:active {
+    transform: scale(0.95);
 }
