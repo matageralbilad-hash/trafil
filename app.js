@@ -912,7 +912,7 @@ window.shareToWhatsApp = function(category, id) {
 👤 اسم المسافر: ${item.passenger_name}
 🎫 رقم الحجز (PNR): ${item.booking_code}
 📅 تاريخ الإقلاع: ${formatDate(item.departure_date)}
-🛫 خط السير: ${item.from_location} ➔ ${item.to_location}
+🛫 خط السير: ${item.from_location} ← ${item.to_location}
 🛬 تاريخ العودة: ${item.return_date ? formatDate(item.return_date) : 'ذهاب فقط'}
 ✈️ الجهة / الطيران: ${item.destination_agency || 'غير محدد'}
 
