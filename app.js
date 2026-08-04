@@ -200,7 +200,12 @@ if (urgencyClass) row.classList.add(urgencyClass);
     <td>${ticket.return_date ? formatDate(ticket.return_date) : '<span style="color: #ef4444; font-size: 11px;">ذهاب فقط ✈️</span>'}</td>
     <td>${ticket.source}</td>
     <td><span class="agency-tag">${ticket.destination_agency || 'غير محدد'}</span></td>
-   <td><button class="whatsapp-share-btn" onclick="shareToWhatsApp('tickets', '${ticket.id}'); event.stopPropagation();">💬 واتساب</button></td> 
+   <td>
+    <div style="display: flex; gap: 5px;">
+        <button class="whatsapp-share-btn" onclick="shareToWhatsApp('tickets', '${ticket.id}'); event.stopPropagation();">💬 واتساب</button>
+        <button class="whatsapp-share-btn" style="background: #38bdf8; color: #0f172a;" onclick="window.location.href='ticket-card.html?category=tickets&id=${ticket.id}'; event.stopPropagation();">🎫 كرت</button>
+    </div>
+</td> 
 `;
         tbody.appendChild(row);
     });
@@ -261,7 +266,12 @@ if (urgencyClass) row.classList.add(urgencyClass);
         <td>${item.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
         <td>${item.beneficiary || '-'}</td>
         <td><span class="agency-tag">${item.agency_type || '-'}</span></td>
-        <td><button class="whatsapp-share-btn" onclick="shareToWhatsApp('umrah', '${item.id}'); event.stopPropagation();">💬 واتساب</button></td>
+        <td>
+    <div style="display: flex; gap: 5px;">
+        <button class="whatsapp-share-btn" onclick="shareToWhatsApp('umrah', '${item.id}'); event.stopPropagation();">💬 واتساب</button>
+        <button class="whatsapp-share-btn" style="background: #10b981; color: #ffffff;" onclick="window.location.href='ticket-card.html?category=umrah&id=${item.id}'; event.stopPropagation();">🎫 كرت</button>
+    </div>
+</td>
     `;
 } else {
     row.innerHTML = `
@@ -322,7 +332,12 @@ if (urgencyClass) row.classList.add(urgencyClass);
     <td><span class="agency-tag">${visa.visa_type}</span></td>
     <td>${visa.visa_source}</td>
     <td>${visa.visa_agent}</td>
-    <td><button class="whatsapp-share-btn" onclick="shareToWhatsApp('visas', '${visa.id}'); event.stopPropagation();">💬 واتساب</button></td>
+    <td>
+    <div style="display: flex; gap: 5px;">
+        <button class="whatsapp-share-btn" onclick="shareToWhatsApp('visas', '${visa.id}'); event.stopPropagation();">💬 واتساب</button>
+        <button class="whatsapp-share-btn" style="background: #a855f7; color: #ffffff;" onclick="window.location.href='ticket-card.html?category=visas&id=${visa.id}'; event.stopPropagation();">🎫 كرت</button>
+    </div>
+</td>
 `;
         tbody.appendChild(row);
     });
