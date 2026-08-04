@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشة العرض المباشرة - مكتب وفاء سيئون</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* ترويسة الشاشة الرئيسية */
+        .tv-header {
+            background: linear-gradient(90deg, #151f32 0%, #1e293b 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #38bdf8;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .tv-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tv-brand h1 {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin: 0;
+        }
+
+        .tv-clock-container {
+            text-align: left;
+        }
+
+        .tv-clock {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+            font-family: monospace;
+        }
+
+        .tv-date {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        /* شبكة عرض الرحلات والمعاملات */
+        .tv-main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px 30px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tv-card {
+            background: #151f32;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tv-card-header {
+            background: #1e293b;
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #f8fafc;
+            border-bottom: 2px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tv-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tv-table th {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 12px;
+            font-size: 1rem;
+            text-align: right;
+        }
+
+        .tv-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #1e293b;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .tv-table tr:nth-child(even) {
+            background-color: rgba(255,255,255,0.02);
+        }
+
+        /* شريط الأخبار والتنبيهات المتحرك */
+        .tv-ticker-container {
+            background: #0284c7;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            height: 50px;
+            overflow: hidden;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+        }
+
+        .tv-ticker-title {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 0 20px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .tv-ticker-text {
+            white-space: nowrap;
+            padding-right: 100%;
+            animation: ticker 25s linear infinite;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(100%, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1️⃣ الترويسة العلوية -->
+    <header class="tv-header">
+        <div class="tv-brand">
+            <h1>🏢 مكتب وفاء سيئون للسفريات والسياحة</h1>
+            <span style="background: #10b981; color: #0f172a; padding: 3px 10px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">مباشر LIVE 🔴</span>
+        </div>
+        <div class="tv-clock-container">
+            <div id="tv-clock" class="tv-clock">00:00:00</div>
+            <div id="tv-date" class="tv-date">جاري التحميل...</div>
+        </div>
+    </header>
+
+    <!-- 2️⃣ محتوى جدول الرحلات والعمرة -->
+    <main class="tv-main-content">
+        <!-- رحلات المغادرة -->
+        <div class="tv-card">
+            <div class="tv-card-header">
+                <span>🛫 رحلات المغادرة اليوم والقادمة</span>
+                <span id="tv-tickets-count" style="color: #38bdf8;">(0 رحلة)</span>
+            </div>
+            <div style="overflow-y: auto; flex: 1;">
+                <table class="tv-table" id="tv-tickets-table">
+                    <thead>
+                        <tr>
+                            <th>المسافر</th>
+                            <th>رقم الحجز</th>
+                            <th>المسار</th>
+                            <th>الموعد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="4" style="text-align: center; color: #94a3b8;">جاري تحميل الرحلات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- رحلات العمرة -->
+        <div class="tv-card">
+            <div class="tv-card-header">
+                <span>🕋 رحلات ومعاملات العمرة</span>
+                <span id="tv-umrah-count" style="color: #10b981;">(0 معتمر)</span>
+            </div>
+            <div style="overflow-y: auto; flex: 1;">
+                <table class="tv-table" id="tv-umrah-table">
+                    <thead>
+                        <tr>
+                            <th>المعتمر</th>
+                            <th>تاريخ الدخول</th>
+                            <th>النوع</th>
+                            <th>الجهة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="4" style="text-align: center; color: #94a3b8;">جاري تحميل بيانات العمرة...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- 3️⃣ شريط التنبيهات السفلي -->
+    <footer class="tv-ticker-container">
+        <div class="tv-ticker-title">📢 تنبيهات المكتب:</div>
+        <div class="tv-ticker-text">
+            أهلاً وسهلاً بكم في مكتب وفاء سيئون للسفريات والسياحة 🌟 نرجو من جميع المسافرين الكرام التأكد من إحضار أصل الجوازات والتواجد قبل موعد الرحلة بوقت كافٍ ✈️ نتمنى لكم رحلة سعيدة وعمرة مقبولة بإذن الله.
+        </div>
+    </footer>
+
+    <!-- ربط ملف البرمجة الخاص بالشاشة -->
+    <script type="module" src="display.js"></script>
+</body>
+</html>
