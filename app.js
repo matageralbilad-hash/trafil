@@ -290,10 +290,13 @@ window.renderVisas = function() {
     const selectedTab = window.currentVisasTab;
 
     const filtered = visasData.filter(visa => {
-        const type = (visa.visa_type || '');
-        if (selectedTab === 'security-approval') return type.includes('موافقة أمنية');
-        if (selectedTab === 'oman-transit') return type.includes('مرور عمان');
-        if (selectedTab === 'other-visas') return type.includes('تأشيرات أخرى');
+        const type = (visa.visa_type || '').toLowerCase();
+        const isSecurity = type.includes('موافقة') || type.includes('موافقه') || type.includes('أمنية') || type.includes('امنية');
+        const isOman = type.includes('مرور') || type.includes('عمان') || type.includes('عُمان');
+
+        if (selectedTab === 'security-approval') return isSecurity;
+        if (selectedTab === 'oman-transit') return isOman;
+        if (selectedTab === 'other-visas') return !isSecurity && !isOman;
         return true;
     });
 
@@ -641,14 +644,17 @@ window.generatePrintPreview = function() {
             return true;
         });
     } 
-    else if (category === 'visas') {
+   else if (category === 'visas') {
         reportTitle = `تقرير مستندات التأشيرات للملف (${window.currentVisasTab})`;
         recordsToPrint = visasData.filter(visa => {
-            const type = (visa.visa_type || '');
+            const type = (visa.visa_type || '').toLowerCase();
             const selectedTab = window.currentVisasTab;
-            if (selectedTab === 'security-approval' && !type.includes('موافقة أمنية')) return false;
-            if (selectedTab === 'oman-transit' && !type.includes('مرور عمان')) return false;
-            if (selectedTab === 'other-visas' && !type.includes('تأشيرات أخرى')) return false;
+            const isSecurity = type.includes('موافقة') || type.includes('موافقه') || type.includes('أمنية') || type.includes('امنية');
+            const isOman = type.includes('مرور') || type.includes('عمان') || type.includes('عُمان');
+
+            if (selectedTab === 'security-approval' && !isSecurity) return false;
+            if (selectedTab === 'oman-transit' && !isOman) return false;
+            if (selectedTab === 'other-visas' && (isSecurity || isOman)) return false;
 
             if (dateType === 'range' && visa.visa_expiry_date) {
                 const expDate = visa.visa_expiry_date.substring(0, 7);
@@ -875,21 +881,26 @@ function updateLiveCounters() {
     setCounterText('count-sub-ihram', countIhram);
     setCounterText('count-sub-alamoudi', countAlamoudi);
 
-    // 3️⃣ تحديث عدادات التأشيرات الرئيسية والفرعية
+ // 3️⃣ تحديث عدادات التأشيرات الرئيسية والفرعية
     const totalVisas = visasData.length;
     let countSecurity = 0, countOman = 0, countOtherVisas = 0;
 
     visasData.forEach(visa => {
-        const type = (visa.visa_type || '');
-        if (type.includes('موافقة أمنية')) countSecurity++;
-        else if (type.includes('مرور عمان')) countOman++;
-        else if (type.includes('تأشيرات أخرى')) countOtherVisas++;
+        const type = (visa.visa_type || '').toLowerCase();
+        
+        if (type.includes('موافقة') || type.includes('موافقه') || type.includes('أمنية') || type.includes('امنية')) {
+            countSecurity++;
+        } else if (type.includes('مرور') || type.includes('عمان') || type.includes('عُمان')) {
+            countOman++;
+        } else {
+            countOtherVisas++;
+        }
     });
 
     setCounterText('count-main-visas', totalVisas);
     setCounterText('count-sub-security', countSecurity);
     setCounterText('count-sub-oman', countOman);
-    setCounterText('count-sub-other-visas', countOtherVisas);
+    setCounterText('count-sub-other-visas', countOtherVisas);   
 }
 
 function setCounterText(elementId, textValue) {
