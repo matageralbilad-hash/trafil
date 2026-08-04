@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بطاقة حجز رسمية - مكتب وفاء سيئون</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- مكتبة توليد الـ QR Code تلقائياً -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* أدوات التحكم العلوية (إخفاء عند الطباعة) */
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-print { background: #10b981; color: #fff; }
+        .btn-print:hover { background: #059669; }
+
+        .btn-back { background: #334155; color: #fff; }
+        .btn-back:hover { background: #475569; }
+
+        /* تصميم كرت الحجز الحراري/الرسمي */
+        .ticket-card-container {
+            background: #ffffff;
+            color: #0f172a;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            position: relative;
+        }
+
+        /* ترويسة الكرت */
+        .card-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #38bdf8;
+        }
+
+        .card-brand h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #38bdf8;
+        }
+
+        .card-brand p {
+            margin: 4px 0 0 0;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .pnr-badge-container {
+            text-align: center;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed #38bdf8;
+            padding: 8px 15px;
+            border-radius: 10px;
+        }
+
+        .pnr-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: block;
+        }
+
+        .pnr-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #38bdf8;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        /* جسم الكرت والتفاصيل */
+        .card-body {
+            padding: 25px;
+        }
+
+        .passenger-info {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-right: 4px solid #38bdf8;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 3px;
+        }
+
+        .info-item span {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        /* المسار */
+        .route-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1e293b;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .city-box h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #38bdf8;
+        }
+
+        .flight-icon {
+            font-size: 1.5rem;
+            color: #10b981;
+        }
+
+        /* التذييل والـ QR Code */
+        .card-footer {
+            border-top: 2px dashed #e2e8f0;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notice-text {
+            font-size: 0.8rem;
+            color: #64748b;
+            max-width: 380px;
+            line-height: 1.5;
+        }
+
+        #qrcode {
+            padding: 5px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* إعدادات الطباعة */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+            }
+
+            .card-actions {
+                display: none !important;
+            }
+
+            .ticket-card-container {
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+                max-width: 100% !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- أزرار الإجراءات -->
+    <div class="card-actions">
+        <button class="action-btn btn-back" onclick="window.history.back()">➔ عودة للوحة</button>
+        <button class="action-btn btn-print" onclick="window.print()">🖨️ طباعة سند / تذكرة الحجز</button>
+    </div>
+
+    <!-- بطاقة الحجز الرسمية المطبوعة -->
+    <div class="ticket-card-container" id="printable-card">
+        
+        <!-- الترويسة -->
+        <div class="card-header">
+            <div class="card-brand">
+                <h2>🏢 مكتب وفاء سيئون للسفريات والسياحة</h2>
+                <p>سند تأكيد حجز رسمي معتمد</p>
+            </div>
+            <div class="pnr-badge-container">
+                <span class="pnr-label">رقم الحجز PNR</span>
+                <span class="pnr-value" id="card-pnr">------</span>
+            </div>
+        </div>
+
+        <!-- جسم الكرت -->
+        <div class="card-body">
+            
+            <div class="passenger-info">
+                <div class="info-item">
+                    <label>اسم المسافر المعني:</label>
+                    <span id="card-name" style="font-size: 1.2rem; color: #0f172a;">جاري جلب البيانات...</span>
+                </div>
+            </div>
+
+            <!-- عرض المسار -->
+            <div class="route-display" id="route-box">
+                <div class="city-box">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">المغادرة من</span>
+                    <h3 id="card-from">-</h3>
+                </div>
+                <div class="flight-icon">✈️</div>
+                <div class="city-box">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">الوصول إلى</span>
+                    <h3 id="card-to">-</h3>
+                </div>
+            </div>
+
+            <!-- شبكة البيانات -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>تاريخ ووقت الإقلاع:</label>
+                    <span id="card-dep-date">-</span>
+                </div>
+                <div class="info-item">
+                    <label>تاريخ العودة:</label>
+                    <span id="card-ret-date">-</span>
+                </div>
+                <div class="info-item">
+                    <label>الشركة الناقلة / الوكيل:</label>
+                    <span id="card-agency">-</span>
+                </div>
+                <div class="info-item">
+                    <label>المصدر / المكتب:</label>
+                    <span id="card-source">-</span>
+                </div>
+            </div>
+
+            <!-- التذييل والـ QR -->
+            <div class="card-footer">
+                <div class="notice-text">
+                    📌 <strong>ملاحظات هامة للمسافر:</strong><br>
+                    يرجى التواجد في المطار/المنافي قبل موعد الرحلة بوقت كافٍ، والتأكد من حمل أصل الوثائق الشخصية والجوازات المعتمدة. نتمنى لكم رحلة سعيدة!
+                </div>
+                <div id="qrcode"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ربط السكريبت البرمجي للكرت -->
+    <script type="module" src="ticket-card.js"></script>
+</body>
+</html>
