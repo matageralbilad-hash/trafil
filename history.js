@@ -26,15 +26,41 @@ function initHistoryFirebase() {
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // جلب إحصائيات العدادات العامة للأرشيف
+        // جلب البيانات واستخراج الإحصائيات للملفات المنتهية فقط
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         onValue(ref(database, 'tickets'), snap => {
-            document.getElementById('stat-tickets').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+            if (snap.exists()) {
+                const list = Object.values(snap.val());
+                const expiredCount = list.filter(t => t.departure_date && new Date(t.departure_date) < today).length;
+                document.getElementById('stat-tickets').textContent = expiredCount;
+            } else {
+                document.getElementById('stat-tickets').textContent = 0;
+            }
         });
+
         onValue(ref(database, 'umrah'), snap => {
-            document.getElementById('stat-umrah').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+            if (snap.exists()) {
+                const list = Object.values(snap.val());
+                const expiredCount = list.filter(u => {
+                    const dateStr = u.exit_date || u.entry_date;
+                    return dateStr && new Date(dateStr) < today;
+                }).length;
+                document.getElementById('stat-umrah').textContent = expiredCount;
+            } else {
+                document.getElementById('stat-umrah').textContent = 0;
+            }
         });
+
         onValue(ref(database, 'visas'), snap => {
-            document.getElementById('stat-visas').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+            if (snap.exists()) {
+                const list = Object.values(snap.val());
+                const expiredCount = list.filter(v => v.visa_expiry_date && new Date(v.visa_expiry_date) < today).length;
+                document.getElementById('stat-visas').textContent = expiredCount;
+            } else {
+                document.getElementById('stat-visas').textContent = 0;
+            }
         });
 
         window.historyDatabase = database;
@@ -65,22 +91,38 @@ function renderArchiveTable(category, dataList) {
     const tbody = document.querySelector('#archive-table tbody');
     tbody.innerHTML = '';
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 🎯 تصفية دقيقة: استخراج الرحلات والمعاملات التي مضى تاريخها فقط
+    const expiredData = dataList.filter(item => {
+        let targetDateStr = '';
+        if (category === 'tickets') targetDateStr = item.departure_date;
+        else if (category === 'umrah') targetDateStr = item.exit_date || item.entry_date;
+        else if (category === 'visas') targetDateStr = item.visa_expiry_date;
+
+        if (!targetDateStr) return false;
+        const itemDate = new Date(targetDateStr);
+        return itemDate < today;
+    });
+
     if (category === 'tickets') {
         headerRow.innerHTML = `
             <th>اسم المسافر</th>
             <th>رقم الحجز (PNR)</th>
-            <th>تاريخ الإقلاع</th>
+            <th>تاريخ الإقلاع السابـق</th>
             <th>خط السير</th>
             <th>الجهة / الطيران</th>
+            <th>الحالة</th>
             <th>طباعة</th>
         `;
 
-        if (dataList.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد سجلات تذاكر بأرشيف النظام.</td></tr>';
+        if (expiredData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تذاكر منتهية أو سابقة بالأرشيف.</td></tr>';
             return;
         }
 
-        dataList.forEach(t => {
+        expiredData.forEach(t => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${t.passenger_name}</strong></td>
@@ -88,6 +130,7 @@ function renderArchiveTable(category, dataList) {
                 <td>${t.departure_date ? t.departure_date.replace('T', ' ') : '-'}</td>
                 <td>${t.from_location} ➔ ${t.to_location}</td>
                 <td><span class="agency-tag">${t.destination_agency || '-'}</span></td>
+                <td><span style="background:#475569; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.75rem;">منتهية ⌛</span></td>
                 <td><button class="restore-btn" onclick="window.location.href='ticket-card.html?category=tickets&id=${t.id}'">🎫 كرت</button></td>
             `;
             tbody.appendChild(tr);
@@ -99,16 +142,17 @@ function renderArchiveTable(category, dataList) {
             <th>تاريخ الدخول</th>
             <th>تاريخ الخروج</th>
             <th>طريقة السفر</th>
-            <th>الجهة التابع لها</th>
+            <th>الجهة</th>
+            <th>الحالة</th>
             <th>طباعة</th>
         `;
 
-        if (dataList.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد سجلات عمرة بأرشيف النظام.</td></tr>';
+        if (expiredData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد معاملات عمرة سابقة بالأرشيف.</td></tr>';
             return;
         }
 
-        dataList.forEach(u => {
+        expiredData.forEach(u => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${u.pilgrim_name}</strong></td>
@@ -116,6 +160,7 @@ function renderArchiveTable(category, dataList) {
                 <td>${u.exit_date || '-'}</td>
                 <td>${u.travel_type === 'جو' ? 'جو ✈️' : 'بر 🚌'}</td>
                 <td><span class="agency-tag">${u.agency_type || '-'}</span></td>
+                <td><span style="background:#475569; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.75rem;">مكتملة 🕋</span></td>
                 <td><button class="restore-btn" onclick="window.location.href='ticket-card.html?category=umrah&id=${u.id}'">🎫 كرت</button></td>
             `;
             tbody.appendChild(tr);
@@ -125,18 +170,19 @@ function renderArchiveTable(category, dataList) {
         headerRow.innerHTML = `
             <th>اسم المتقدم</th>
             <th>نوع التأشيرة</th>
-            <th>تاريخ الصلاحية</th>
+            <th>تاريخ الصلاحية المنتهي</th>
             <th>المصدر</th>
             <th>الوكيل</th>
+            <th>الحالة</th>
             <th>طباعة</th>
         `;
 
-        if (dataList.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد سجلات تأشيرات بأرشيف النظام.</td></tr>';
+        if (expiredData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد تأشيرات منتهية الصلاحية بالأرشيف.</td></tr>';
             return;
         }
 
-        dataList.forEach(v => {
+        expiredData.forEach(v => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${v.visa_name}</strong></td>
@@ -144,6 +190,7 @@ function renderArchiveTable(category, dataList) {
                 <td>${v.visa_expiry_date || '-'}</td>
                 <td>${v.visa_source || '-'}</td>
                 <td>${v.visa_agent || '-'}</td>
+                <td><span style="background:#ef4444; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.75rem;">منتهية ⚠️</span></td>
                 <td><button class="restore-btn" onclick="window.location.href='ticket-card.html?category=visas&id=${v.id}'">🎫 كرت</button></td>
             `;
             tbody.appendChild(tr);
