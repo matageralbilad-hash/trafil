@@ -940,7 +940,7 @@ window.shareToWhatsApp = function(category, id) {
 📅 تاريخ الإقلاع: ${formatDate(item.departure_date)}
 🛫 خط السير: ${item.from_location} ← ${item.to_location}
 🛬 تاريخ العودة: ${item.return_date ? formatDate(item.return_date) : 'ذهاب فقط'}
-✈️ الجهة / الطيران: ${item.destination_agency || 'غير محدد'}
+
 
 🌟 نتمنى لكم رحلة سعيدة وموفقة!
 📍 مكتب وفاء سيئون - خدمة المتابعة والحجوزات`;
