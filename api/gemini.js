@@ -5,19 +5,22 @@ export default async function handler(req, res) {
     }
 
     try {
-        // قراءة المفتاح السري من متغيرات Vercel التي قمت بإضافتها
+        // قراءة المفتاح السري من متغيرات Vercel
         const apiKey = process.env.GEMINI_API_KEY;
         
-        // إرسال الطلب إلى جوجل بشكل آمن ومخفي عن المتصفح
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // 👈 تم تحديث اسم النموذج هنا إلى gemini-1.5-flash-latest ليتوافق مع API جوجل
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
         });
 
         const data = await response.json();
+        
+        // إرجاع النتيجة كما هي إلى المتصفح
         res.status(200).json(data);
     } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Vercel Server Error:", error);
+        res.status(500).json({ error: { message: 'Internal Server Error' } });
     }
 }
