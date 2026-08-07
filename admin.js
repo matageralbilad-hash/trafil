@@ -123,7 +123,7 @@ window.processAI = async function() {
     const fileInput = document.getElementById('ai-image-input').files[0];
 
     if (!textVal && !fileInput) {
-        alert('⚠️ يرجى إدخال نص الحجز أو رفع صورة أولاً!');
+        alert('⚠️ يرجى إدخال نص الحجز أو رفع صورة/PDF أولاً!');
         return;
     }
 
@@ -134,7 +134,7 @@ window.processAI = async function() {
         
         const systemPrompt = `
         أنت مساعد بيانات ذكي لمكتب سفريات يمني اسمه مكتب وفاء سيئون.
-        المطلوب: استخراج البيانات من النص المدخل أو الصورة المرفقة، وإرجاعها بصيغة JSON نظيفة فقط.
+        المطلوب: استخراج البيانات من النص المدخل أو الملف المرفق، وإرجاعها بصيغة JSON نظيفة فقط.
         
         تعليمات صارمة (CRITICAL RULE):
         يُمنع منعاً باتاً استخراج أي بيانات تخص (الوكيل، المصدر، الجهة، أو المستفيد)، يجب ترك هذه البيانات للموظف ليعبئها يدوياً.
@@ -160,16 +160,24 @@ window.processAI = async function() {
         }
 
         if (fileInput) {
-            const base64Image = await fileToBase64(fileInput);
+            const base64Data = await fileToBase64(fileInput);
+            
+            // تحديد نوع الملف بذكاء (صورة أو PDF)
+            let fileMimeType = fileInput.type;
+            if (fileInput.name.toLowerCase().endsWith('.pdf')) {
+                fileMimeType = 'application/pdf';
+            } else if (!fileMimeType) {
+                fileMimeType = 'image/jpeg'; // كقيمة افتراضية للطوارئ
+            }
+
             parts.push({
                 inlineData: {
-                    data: base64Image,
-                    mimeType: fileInput.type
+                    data: base64Data,
+                    mimeType: fileMimeType
                 }
             });
         }
 
-        // 👈 لاحظ التغيير هنا: قمنا بتوجيه الطلب للملف الوسيط الآمن الذي أنشأناه!
         const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -183,7 +191,7 @@ window.processAI = async function() {
         
         if (result.error) {
             console.error("API Error:", result.error);
-            alert("❌ حدث خطأ من السيرفر.");
+            alert("❌ حدث خطأ من سيرفر الذكاء الاصطناعي: \n" + (result.error.message || "حجم الملف كبير جداً أو غير مدعوم."));
             document.getElementById('ai-loading').style.display = 'none';
             return;
         }
@@ -201,7 +209,6 @@ window.processAI = async function() {
     }
 };
 
-// دالة توزيع المخرجات على خانات الفورم المناسبة بالذكاء الاصطناعي
 function fillAdminFormWithAI(data) {
     if (!data.category) return;
 
