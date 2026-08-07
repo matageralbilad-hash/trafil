@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- مكتبة توليد الـ QR Code تلقائياً -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- مكتبة تحويل الكرت إلى صورة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             background-color: #0f172a;
@@ -27,6 +29,7 @@
             margin-bottom: 20px;
             width: 100%;
             max-width: 650px;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -42,10 +45,14 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            min-width: 150px;
         }
 
         .btn-print { background: #10b981; color: #fff; }
         .btn-print:hover { background: #059669; }
+
+        .btn-export { background: #3b82f6; color: #fff; }
+        .btn-export:hover { background: #2563eb; }
 
         .btn-back { background: #334155; color: #fff; }
         .btn-back:hover { background: #475569; }
@@ -105,7 +112,7 @@
             font-weight: bold;
             color: #38bdf8;
             font-family: monospace;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         /* جسم الكرت والتفاصيل */
@@ -216,7 +223,8 @@
     <!-- أزرار الإجراءات -->
     <div class="card-actions">
         <button class="action-btn btn-back" onclick="window.history.back()">➔ عودة للوحة</button>
-        <button class="action-btn btn-print" onclick="window.print()">🖨️ طباعة سند / تذكرة الحجز</button>
+        <button class="action-btn btn-export" onclick="exportToImage()">🖼️ حفظ كصورة</button>
+        <button class="action-btn btn-print" onclick="window.print()">🖨️ طباعة السند</button>
     </div>
 
     <!-- بطاقة الحجز الرسمية المطبوعة -->
@@ -225,11 +233,11 @@
         <!-- الترويسة -->
         <div class="card-header">
             <div class="card-brand">
-                <h2>🏢 مكتب وفاء سيئون للسفريات والسياحة</h2>
+                <h2>مكتب وفاء سيئون للسفريات والسياحة</h2>
                 <p>سند تأكيد حجز رسمي معتمد</p>
             </div>
-            <div class="pnr-badge-container">
-                <span class="pnr-label">رقم الحجز PNR</span>
+            <div class="pnr-badge-container" id="pnr-container">
+                <span class="pnr-label" id="pnr-title">رقم الحجز PNR</span>
                 <span class="pnr-value" id="card-pnr">------</span>
             </div>
         </div>
@@ -259,29 +267,30 @@
 
             <!-- شبكة البيانات -->
             <div class="info-grid">
-                <div class="info-item">
-                    <label>تاريخ ووقت الإقلاع:</label>
-                    <span id="card-dep-date">-</span>
+                <div class="info-item" id="grid-date">
+                    <label id="lbl-date">تاريخ الإقلاع:</label>
+                    <span id="card-date">-</span>
                 </div>
-                <div class="info-item">
-                    <label>تاريخ العودة:</label>
+                <div class="info-item" id="grid-time">
+                    <label id="lbl-time">وقت الإقلاع:</label>
+                    <span id="card-time">-</span>
+                </div>
+                <div class="info-item" id="grid-ret">
+                    <label id="lbl-ret">تاريخ العودة:</label>
                     <span id="card-ret-date">-</span>
                 </div>
-                <div class="info-item">
-                    <label>الشركة الناقلة / الوكيل:</label>
-                    <span id="card-agency">-</span>
-                </div>
-                <div class="info-item">
-                    <label>المصدر / المكتب:</label>
-                    <span id="card-source">-</span>
+                <div class="info-item" id="grid-airline">
+                    <label id="lbl-airline">الطيران (اضغط للتعديل ✏️):</label>
+                    <!-- حقل الطيران قابل للتعديل المباشر -->
+                    <span id="card-airline" contenteditable="true" style="border-bottom: 1px dashed #94a3b8; outline: none; padding-bottom: 2px;">اليمنية</span>
                 </div>
             </div>
 
             <!-- التذييل والـ QR -->
             <div class="card-footer">
-                <div class="notice-text">
+                <div class="notice-text" id="card-notes">
                     📌 <strong>ملاحظات هامة للمسافر:</strong><br>
-                    يرجى التواجد في المطار/المنافي قبل موعد الرحلة بوقت كافٍ، والتأكد من حمل أصل الوثائق الشخصية والجوازات المعتمدة. نتمنى لكم رحلة سعيدة!
+                    <span id="notes-content">يرجى التواجد في المطار قبل موعد الرحلة بثلاث ساعات ، والتأكد من حمل أصل الوثائق الشخصية والجوازات المعتمدة. نتمنى لكم رحلة سعيدة</span>
                 </div>
                 <div id="qrcode"></div>
             </div>

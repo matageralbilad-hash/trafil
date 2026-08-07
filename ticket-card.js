@@ -28,11 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTicketData(category, id);
 });
 
+// دالة فصل التاريخ والوقت الذكية
+function extractDateTime(dateTimeStr) {
+    if (!dateTimeStr) return { date: '-', time: '-' };
+    const cleanStr = dateTimeStr.replace('T', ' ');
+    const parts = cleanStr.split(' ');
+    return {
+        date: parts[0] || '-',
+        time: parts.slice(1).join(' ') || '-'
+    };
+}
+
 async function loadTicketData(category, id) {
     try {
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-
         const snapshot = await get(ref(database, `${category}/${id}`));
 
         if (!snapshot.exists()) {
@@ -47,33 +57,55 @@ async function loadTicketData(category, id) {
             document.getElementById('card-pnr').textContent = data.booking_code || '---';
             document.getElementById('card-from').textContent = data.from_location || '-';
             document.getElementById('card-to').textContent = data.to_location || '-';
-            document.getElementById('card-dep-date').textContent = formatDate(data.departure_date);
-            document.getElementById('card-ret-date').textContent = data.return_date ? formatDate(data.return_date) : 'ذهاب فقط ✈️';
-            document.getElementById('card-agency').textContent = data.destination_agency || 'مكتب وفاء';
-            document.getElementById('card-source').textContent = data.source || 'المكتب الرئيسي';
+            
+            const depParts = extractDateTime(data.departure_date);
+            document.getElementById('card-date').textContent = depParts.date;
+            document.getElementById('card-time').textContent = depParts.time;
+            
+            document.getElementById('card-ret-date').textContent = data.return_date ? extractDateTime(data.return_date).date : 'ذهاب فقط ✈️';
+            
+            // الطيران افتراضياً اليمنية (قابل للتعديل عبر الـ HTML)
+            document.getElementById('card-airline').textContent = 'اليمنية';
+            
+            document.getElementById('notes-content').textContent = 'يرجى التواجد في المطار قبل موعد الرحلة بثلاث ساعات ، والتأكد من حمل أصل الوثائق الشخصية والجوازات المعتمدة. نتمنى لكم رحلة سعيدة';
 
-            // توليد الـ QR Code لكود الحجز
             generateQRCode(`PNR: ${data.booking_code} | Name: ${data.passenger_name} | Wafaa Travel`);
         } 
         else if (category === 'umrah') {
             document.getElementById('card-name').textContent = data.pilgrim_name || 'غير محدد';
-            document.getElementById('card-pnr').textContent = 'عمرة 🕋';
-            document.getElementById('route-box').style.display = 'none'; // إخفاء مسار الطيران للعمرة
-            document.getElementById('card-dep-date').textContent = data.entry_date || '-';
+            
+            // إخفاء الـ PNR والملاحظات ومسار الطيران والطيران
+            document.getElementById('pnr-container').style.display = 'none';
+            document.getElementById('route-box').style.display = 'none';
+            document.getElementById('card-notes').style.display = 'none';
+            document.getElementById('grid-time').style.display = 'none';
+            document.getElementById('grid-airline').style.display = 'none';
+
+            document.getElementById('lbl-date').textContent = 'تاريخ الدخول:';
+            document.getElementById('card-date').textContent = data.entry_date || '-';
+            
+            document.getElementById('lbl-ret').textContent = 'تاريخ الخروج:';
             document.getElementById('card-ret-date').textContent = data.exit_date || '-';
-            document.getElementById('card-agency').textContent = data.agency_type || '-';
-            document.getElementById('card-source').textContent = data.beneficiary || '-';
 
             generateQRCode(`Umrah Pilgrim: ${data.pilgrim_name} | Entry: ${data.entry_date}`);
         }
         else if (category === 'visas') {
             document.getElementById('card-name').textContent = data.visa_name || 'غير محدد';
-            document.getElementById('card-pnr').textContent = 'تأشيرة 🛂';
+            
+            // تغيير الـ PNR إلى نوع التأشيرة
+            document.getElementById('pnr-title').textContent = 'نوع التأشيرة';
+            document.getElementById('card-pnr').textContent = data.visa_type || 'تأشيرة';
+            document.getElementById('card-pnr').style.fontSize = '1.1rem'; // تصغير الخط قليلاً ليتسع
+            
             document.getElementById('route-box').style.display = 'none';
-            document.getElementById('card-dep-date').textContent = data.visa_expiry_date || '-';
-            document.getElementById('card-ret-date').textContent = 'تاريخ الانتهاء';
-            document.getElementById('card-agency').textContent = data.visa_type || '-';
-            document.getElementById('card-source').textContent = data.visa_agent || '-';
+            document.getElementById('grid-time').style.display = 'none';
+            document.getElementById('grid-ret').style.display = 'none';
+            document.getElementById('grid-airline').style.display = 'none';
+
+            document.getElementById('lbl-date').textContent = 'تاريخ الانتهاء:';
+            document.getElementById('card-date').textContent = data.visa_expiry_date || '-';
+
+            document.getElementById('notes-content').textContent = 'يرجى التأكد من صلاحية التأشيرة ومطابقتها لجواز السفر قبل المغادرة. نتمنى لكم رحلة موفقة وآمنة!';
 
             generateQRCode(`Visa Name: ${data.visa_name} | Type: ${data.visa_type}`);
         }
@@ -96,14 +128,22 @@ function generateQRCode(text) {
     });
 }
 
-function formatDate(dateTimeStr) {
-    if (!dateTimeStr) return '-';
-    try {
-        const date = new Date(dateTimeStr);
-        if (isNaN(date.getTime())) return dateTimeStr;
-        return date.toLocaleDateString('ar-YE', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' +
-               date.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
-    } catch {
-        return dateTimeStr;
-    }
-}
+// دالة تصدير الكرت إلى صورة بجودة عالية وحفظها
+window.exportToImage = function() {
+    const card = document.getElementById('printable-card');
+    
+    // إخفاء التلميح الخاص بالتعديل قبل أخذ الصورة حتى لا يظهر للعميل
+    const lblAirline = document.getElementById('lbl-airline');
+    const originalLbl = lblAirline.textContent;
+    lblAirline.textContent = 'الطيران:';
+    
+    html2canvas(card, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'Wafaa_Ticket.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // إرجاع التلميح بعد أخذ الصورة
+        lblAirline.textContent = originalLbl;
+    });
+};
