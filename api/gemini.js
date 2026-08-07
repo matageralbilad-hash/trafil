@@ -8,8 +8,8 @@ export default async function handler(req, res) {
         // قراءة المفتاح السري من متغيرات Vercel
         const apiKey = process.env.GEMINI_API_KEY;
         
-        // 👈 تم تحديث اسم النموذج هنا إلى gemini-1.5-flash-latest ليتوافق مع API جوجل
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+        // 👈 تم مطابقة اسم النموذج تماماً مع كود الـ cURL الناجح الخاص بك (gemini-flash-latest)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body)
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
         const data = await response.json();
         
-        // إرجاع النتيجة كما هي إلى المتصفح
+        // إرجاع النتيجة
         res.status(200).json(data);
     } catch (error) {
         console.error("Vercel Server Error:", error);
