@@ -14,6 +14,7 @@
         }
 
         body {
+            /* الخلفية الافتراضية قبل تحميل الصورة */
             background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
             color: #f8fafc;
             min-height: 100vh;
@@ -21,6 +22,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* تأثير الانتقال السينمائي للصورة */
+            transition: background-image 1.5s ease-in-out;
+            background-size: cover !important;
+            background-position: center !important;
+            background-attachment: fixed !important;
         }
 
         .container {
@@ -645,20 +651,34 @@
 
         // 📚 دالة جلب معلومات وصور مدينة الوصول من موسوعة ويكيبيديا العربية
         async function fetchCityWikipediaInfo(city) {
+            // إضافة كلمات مفتاحية لتحسين بحث ويكيبيديا للمدن الشهيرة
+            const searchCity = city === 'جدة' || city === 'جده' ? 'محافظة جدة' : city;
+
             try {
-                const url = `https://ar.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`;
+                const url = `https://ar.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchCity)}`;
                 const res = await fetch(url);
                 
                 if (res.ok) {
                     const data = await res.json();
+                    
+                    // 1. وضع النص
                     if (data.extract) {
                         document.getElementById('city-description').textContent = data.extract;
                     }
+                    
+                    // 2. وضع الصورة المصغرة في البطاقة
                     if (data.thumbnail && data.thumbnail.source) {
                         const imgEl = document.getElementById('city-img');
                         imgEl.src = data.thumbnail.source;
                         imgEl.style.display = 'block';
                     }
+
+                    // 3. السحر هنا 🪄: وضع الصورة الأصلية عالية الدقة كخلفية متحركة للصفحة
+                    if (data.originalimage && data.originalimage.source) {
+                        // وضعنا تدرج لوني داكن (85% أسود) فوق الصورة عشان النصوص تبقى واضحة جداً وتطلع فخمة
+                        document.body.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('${data.originalimage.source}')`;
+                    }
+
                 } else {
                     document.getElementById('city-description').textContent = `تُعد ${city} من الوجهات المميزة والحيوية التي يقصدها المسافرون. نتمنى لكم في مكتب وفاء سيئون رحلة مريحة وإقامة سعيدة وموفقة في وجهتكم القادمة!`;
                 }
