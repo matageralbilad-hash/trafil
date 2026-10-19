@@ -161,15 +161,15 @@ window.renderTickets = function() {
             return agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
         }
         if (selectedTab === 'arab-sky') {
-            return agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky');
+            return agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky');
         }
         if (selectedTab === 'arabia') {
             return agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
         }
         if (selectedTab === 'other-airlines') {
             const isTawilat = agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
-            const isArabSky = agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky');
             const isArabia = agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+            const isArabSky = agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky');
             
             return !isTawilat && !isArabSky && !isArabia;
         }
@@ -617,15 +617,14 @@ window.generatePrintPreview = function() {
             const agency = (ticket.destination_agency || '').toLowerCase();
             
             if (selectedTab === 'tawilat' && !(agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat'))) return false;
-            if (selectedTab === 'arab-sky' && !(agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky'))) return false;
+            if (selectedTab === 'arab-sky' && !(agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky'))) return false;
             if (selectedTab === 'arabia' && !(agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia'))) return false;
             if (selectedTab === 'other-airlines') {
                 const isTawilat = agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
-                const isArabSky = agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky');
                 const isArabia = agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+                const isArabSky = agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky');
                 if (isTawilat || isArabSky || isArabia) return false;
             }
-
             if (dateType === 'range' && ticket.departure_date) {
                 const depDate = ticket.departure_date.substring(0, 7);
                 if (startMonthStr && depDate < startMonthStr) return false;
@@ -866,10 +865,10 @@ function updateLiveCounters() {
         const agency = (ticket.destination_agency || '').toLowerCase();
         if (agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat')) {
             countTawilat++;
-        } else if (agency.includes('عرب سكاي') || agency.includes('عرب') || agency.includes('arab sky') || agency.includes('sky')) {
-            countArabSky++;
         } else if (agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia')) {
             countArabia++;
+        } else if (agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky')) {
+            countArabSky++;
         } else {
             countOtherTickets++;
         }
