@@ -238,6 +238,7 @@ window.renderUmrah = function() {
         if (selectedTab === 'sanabel') return agency.includes('سنابل');
         if (selectedTab === 'ihram') return agency.includes('احرام') || agency.includes('إحرام');
         if (selectedTab === 'alamoudi') return agency.includes('العمودي');
+        if (selectedTab === 'tariq') return agency.includes('طريق العالم') || agency.includes('طريق');
         return true; 
     });
 
@@ -640,6 +641,7 @@ window.generatePrintPreview = function() {
             'sanabel': 'سنابل الخير',
             'ihram': 'إحرام',
             'alamoudi': 'العمودي',
+            'tariq': 'طريق العالم',
             'all-umrah': 'كل الوكلاء'
         };
         
@@ -650,6 +652,7 @@ window.generatePrintPreview = function() {
             if (selectedTab === 'sanabel' && !agency.includes('سنابل')) return false;
             if (selectedTab === 'ihram' && (!agency.includes('إحرام') && !agency.includes('احرام'))) return false;
             if (selectedTab === 'alamoudi' && !agency.includes('العمودي')) return false;
+            if (selectedTab === 'tariq' && (!agency.includes('طريق العالم') && !agency.includes('طريق'))) return false;
 
             if (dateType === 'range' && item.entry_date) {
                 const entDate = item.entry_date.substring(0, 7);
@@ -881,13 +884,14 @@ function updateLiveCounters() {
 
     // 2️⃣ تحديث عدادات العمرة الرئيسية والفرعية
     const totalUmrah = umrahData.length;
-    let countSanabel = 0, countIhram = 0, countAlamoudi = 0;
+    let countSanabel = 0, countIhram = 0, countAlamoudi = 0, countTariq = 0;
 
     umrahData.forEach(item => {
         const agency = (item.agency_type || '').toLowerCase();
         if (agency.includes('سنابل')) countSanabel++;
         else if (agency.includes('احرام') || agency.includes('إحرام')) countIhram++;
         else if (agency.includes('العمودي')) countAlamoudi++;
+        else if (agency.includes('طريق العالم') || agency.includes('طريق')) countTariq++;
     });
 
     setCounterText('count-main-umrah', totalUmrah);
@@ -895,6 +899,7 @@ function updateLiveCounters() {
     setCounterText('count-sub-sanabel', countSanabel);
     setCounterText('count-sub-ihram', countIhram);
     setCounterText('count-sub-alamoudi', countAlamoudi);
+    setCounterText('count-sub-tariq', countTariq);
 
  // 3️⃣ تحديث عدادات التأشيرات الرئيسية والفرعية
     const totalVisas = visasData.length;

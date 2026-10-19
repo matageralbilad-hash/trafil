@@ -229,9 +229,10 @@
             } else if (key === 'agency_type') {
                 inputElementHtml = `
                     <select id="${key}">
-                        <option value="سنابل" ${value === 'سنابل' ? 'selected' : ''}>سنابل</option>
+                        <option value="سنابل الخير" ${value.includes('سنابل') ? 'selected' : ''}>سنابل الخير</option>
                         <option value="إحرام" ${value === 'إحرام' || value === 'احرام' ? 'selected' : ''}>إحرام</option>
                         <option value="العمودي" ${value === 'العمودي' ? 'selected' : ''}>العمودي</option>
+                        <option value="طريق العالم" ${value.includes('طريق') ? 'selected' : ''}>طريق العالم</option>
                     </select>
                 `;
             } else if (key === 'visa_type') {
