@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متابعة الرحلة الحية - مكتب وفاء سيئون</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            padding: 20px 15px 100px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        /* ترويسة الصفحة */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .brand-header h1 {
+            font-size: 1.4rem;
+            color: #38bdf8;
+            margin-bottom: 5px;
+        }
+
+        .brand-header p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        /* بطاقة المسار والخريطة */
+        .route-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 20px;
+            padding: 25px 20px;
+            border: 1px solid #334155;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .route-cities {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .city-box {
+            flex: 1;
+        }
+
+        .city-box span {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .city-box h2 {
+            font-size: 1.6rem;
+            color: #ffffff;
+            font-weight: 900;
+        }
+
+        .plane-divider {
+            flex: 0.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #38bdf8;
+            font-size: 1.8rem;
+            position: relative;
+        }
+
+        .plane-divider::after {
+            content: '';
+            width: 80%;
+            height: 2px;
+            border-bottom: 2px dashed #475569;
+            margin-top: 5px;
+        }
+
+        .map-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
+            padding: 10px 22px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .map-btn:hover {
+            background: #38bdf8;
+            color: #0f172a;
+            transform: translateY(-2px);
+        }
+
+        /* بطاقة العداد التنازلي */
+        .countdown-section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 22px 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .countdown-section.return-box {
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .return-box .section-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .exact-date-text {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            direction: ltr; /* لترتيب الأيام والساعات من اليسار أو اليمين بوضوح */
+        }
+
+        .time-unit {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            padding: 15px 5px;
+            border-radius: 14px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .time-unit .num {
+            font-size: 1.9rem;
+            font-weight: 900;
+            color: #38bdf8;
+            line-height: 1.1;
+            display: block;
+            font-family: monospace;
+        }
+
+        .return-box .time-unit .num {
+            color: #10b981;
+        }
+
+        .time-unit .label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .status-banner {
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        /* بطاقة الطقس الحية */
+        .weather-card {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 20px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 12px 25px rgba(2, 132, 199, 0.3);
+        }
+
+        .weather-info h3 {
+            font-size: 1.15rem;
+            margin-bottom: 4px;
+        }
+
+        .weather-info p {
+            font-size: 0.9rem;
+            color: #e0f2fe;
+        }
+
+        .weather-temp-box {
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .weather-temp {
+            font-size: 2.4rem;
+            font-weight: 900;
+            font-family: monospace;
+        }
+
+        .weather-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* بطاقة معلومات الوجهة (ويكيبيديا) */
+        .city-guide-card {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid #334155;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .guide-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: none;
+            border-bottom: 2px solid #38bdf8;
+        }
+
+        .guide-content {
+            padding: 22px;
+        }
+
+        .guide-content h3 {
+            color: #38bdf8;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guide-content p {
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        /* الزر العائم للواتساب (أحتاج مساعدة) */
+        .floating-help-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+            z-index: 999;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .floating-help-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(16, 185, 129, 0.7);
+        }
+
+        #loading-screen {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2rem;
+            color: #38bdf8;
+        }
+
+        @media (max-width: 480px) {
+            .city-box h2 { font-size: 1.3rem; }
+            .time-unit .num { font-size: 1.5rem; }
+            .weather-temp { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ترويسة المكتب -->
+        <div class="brand-header">
+            <h1>✈️ مكتب وفاء سيئون للسفريات والسياحة</h1>
+            <p>البوابة التفاعلية الحية لمتابعة موعد الرحلة ومعلومات الوجهة</p>
+        </div>
+
+        <div id="loading-screen">
+            ⏳ جاري الاتصال بالسيرفر وتحميل بيانات الرحلة الحية...
+        </div>
+
+        <!-- المحتوى الرئيسي للرحلة -->
+        <div id="trip-content" style="display: none;">
+            
+            <!-- 1️⃣ مسار الرحلة وزر الخريطة -->
+            <div class="route-card">
+                <div class="route-cities">
+                    <div class="city-box">
+                        <span>الإقلاع من</span>
+                        <h2 id="from-city">---</h2>
+                    </div>
+                    <div class="plane-divider">✈️</div>
+                    <div class="city-box">
+                        <span>الوصول إلى</span>
+                        <h2 id="to-city">---</h2>
+                    </div>
+                </div>
+                <a id="google-map-btn" href="#" target="_blank" class="map-btn">
+                    🗺️ انظر إلى <span id="map-city-name">الوجهة</span> في الخريطة
+                </a>
+            </div>
+
+            <!-- 2️⃣ العداد التنازلي لرحلة الذهاب -->
+            <div class="countdown-section">
+                <span class="section-badge">🛫 العد التنازلي لموعد إقلاع الذهاب</span>
+                <p class="exact-date-text" id="dep-exact-date">---</p>
+                
+                <div class="timer-grid" id="dep-timer-grid">
+                    <div class="time-unit">
+                        <span class="num" id="dep-days">00</span>
+                        <span class="label">يوم</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="num" id="dep-hours">00</span>
+                        <span class="label">ساعة</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="num" id="dep-mins">00</span>
+                        <span class="label">دقيقة</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="num" id="dep-secs">00</span>
+                        <span class="label">ثانية</span>
+                    </div>
+                </div>
+                <div id="dep-status-banner" class="status-banner">✈️ حان موعد الرحلة أو أقلعت بحفظ الله ورعايته!</div>
+            </div>
+
+            <!-- 3️⃣ العداد التنازلي لرحلة العودة (يظهر فقط إن وجدت عودة) -->
+            <div class="countdown-section return-box" id="return-section" style="display: none;">
+                <span class="section-badge">🛬 العد التنازلي لموعد رحلة العودة</span>
+                <p class="exact-date-text" id="ret-exact-date">---</p>
+                
+                <div class="timer-grid" id="ret-timer-grid">
+                    <div class="time-unit">
+                        <span class="num" id="ret-days">00</span>
+                        <span class="label">يوم</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="num" id="ret-hours">00</span>
+                        <span class="label">ساعة</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="num" id="ret-mins">00</span>
+                        <span class="label">دقيقة</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="num" id="ret-secs">00</span>
+                        <span class="label">ثانية</span>
+                    </div>
+                </div>
+                <div id="ret-status-banner" class="status-banner">🛬 تمت رحلة العودة بحمد الله وسلامته!</div>
+            </div>
+
+            <!-- 4️⃣ حالة الطقس المباشرة في مدينة الوصول -->
+            <div class="weather-card" id="weather-box">
+                <div class="weather-info">
+                    <h3>⛅ حالة الطقس الآن في <span id="weather-city">---</span></h3>
+                    <p id="weather-desc">جاري جلب حالة الأجواء المباشرة...</p>
+                </div>
+                <div class="weather-temp-box">
+                    <img id="weather-icon" class="weather-icon" src="" alt="طقس" style="display: none;">
+                    <span class="weather-temp" id="weather-temp">--°C</span>
+                </div>
+            </div>
+
+            <!-- 5️⃣ معلومات قوية ومصورة عن الوجهة -->
+            <div class="city-guide-card">
+                <img id="city-img" class="guide-image" src="" alt="صورة الوجهة">
+                <div class="guide-content">
+                    <h3>🌍 اكتشف وجهتك: <span id="info-city-title">---</span></h3>
+                    <p id="city-description">جاري استخراج نبذة تعريفية ومعلومات شاملة عن مدينة الوصول...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 💬 الزر العائم للتواصل مع واتساب مكتب وفاء سيئون -->
+    <a href="https://wa.me/967777275521?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%20%D9%85%D9%83%D8%AA%D8%A8%20%D9%88%D9%81%D8%A7%D8%A1%20%D8%B3%D9%8A%D8%A6%D9%88%D9%86%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D8%A3%D9%88%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D8%B1%D8%AD%D9%84%D8%AA%D9%8A." target="_blank" class="floating-help-btn">
+        💬 أحتاج مساعدة (تواصل مع المكتب)
+    </a>
+
+    <!-- السكريبت البرمجي لجلب البيانات وتشغيل العداد والطقس والمعلومات -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // إعدادات Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
+            authDomain: "travel-agency-app-95c51.firebaseapp.com",
+            projectId: "travel-agency-app-95c51",
+            storageBucket: "travel-agency-app-95c51.firebasestorage.app",
+            messagingSenderId: "83193496753",
+            appId: "1:83193496753:web:b79eba52db8bfd43374e90",
+            measurementId: "G-803PP5Q1WT"
+        };
+
+        // 🔑 مفتاح الطقس الخاص بمكتب وفاء سيئون (OpenWeatherMap)
+        const WEATHER_API_KEY = "6522de58fb1ecc94bf6644b5728abe73";
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ticketId = urlParams.get('id');
+
+            if (!ticketId) {
+                document.getElementById('loading-screen').innerHTML = '❌ رابط الرحلة غير مكتمل أو غير صالح.';
+                return;
+            }
+
+            try {
+                const snapshot = await get(ref(database, `tickets/${ticketId}`));
+                if (!snapshot.exists()) {
+                    document.getElementById('loading-screen').innerHTML = '❌ لم يتم العثور على بيانات هذه الرحلة.';
+                    return;
+                }
+
+                const ticket = snapshot.val();
+                initLivePage(ticket);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading-screen').innerHTML = '⚠️ تعذر الاتصال بالخادم، يرجى المحاولة لاحقاً.';
+            }
+        });
+
+        function initLivePage(ticket) {
+            // إخفاء شاشة التحميل وإظهار المحتوى (بدون أي اسم أو PNR أو وكيل)
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('trip-content').style.display = 'block';
+
+            const fromCity = (ticket.from_location || 'غير محدد').trim();
+            const toCity = (ticket.to_location || 'غير محدد').trim();
+
+            document.getElementById('from-city').textContent = fromCity;
+            document.getElementById('to-city').textContent = toCity;
+            document.getElementById('map-city-name').textContent = toCity;
+            document.getElementById('weather-city').textContent = toCity;
+            document.getElementById('info-city-title').textContent = toCity;
+
+            // 🗺️ تجهيز رابط خرائط جوجل المجاني المباشر
+            const mapQuery = encodeURIComponent(toCity);
+            document.getElementById('google-map-btn').href = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+
+            // ⏱️ تشغيل عداد الذهاب
+            if (ticket.departure_date) {
+                document.getElementById('dep-exact-date').textContent = `موعد الإقلاع المجدول: ${formatArabicDate(ticket.departure_date)}`;
+                startLiveCountdown(ticket.departure_date, 'dep');
+            }
+
+            // ⏱️ فحص وتشغيل عداد العودة (إن وجد فقط!)
+            if (ticket.return_date && ticket.return_date.trim() !== "") {
+                document.getElementById('return-section').style.display = 'block';
+                document.getElementById('ret-exact-date').textContent = `موعد العودة المجدول: ${formatArabicDate(ticket.return_date)}`;
+                startLiveCountdown(ticket.return_date, 'ret');
+            }
+
+            // ⛅ جلب الطقس المباشر لمدينة الوصول
+            fetchDestinationWeather(toCity);
+
+            // 📚 جلب المعلومات القوية والصورة من ويكيبيديا العربية
+            fetchCityWikipediaInfo(toCity);
+        }
+
+        // دالة تشغيل العداد التنازلي الحي بالثواني
+        function startLiveCountdown(dateStr, prefix) {
+            const targetTime = new Date(dateStr).getTime();
+            if (isNaN(targetTime)) return;
+
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const diff = targetTime - now;
+
+                if (diff <= 0) {
+                    document.getElementById(`${prefix}-timer-grid`).style.display = 'none';
+                    document.getElementById(`${prefix}-status-banner`).style.display = 'block';
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById(`${prefix}-days`).textContent = String(days).padStart(2, '0');
+                document.getElementById(`${prefix}-hours`).textContent = String(hours).padStart(2, '0');
+                document.getElementById(`${prefix}-mins`).textContent = String(mins).padStart(2, '0');
+                document.getElementById(`${prefix}-secs`).textContent = String(secs).padStart(2, '0');
+            };
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        // تنسيق التاريخ بالعربية للعميل
+        function formatArabicDate(dateTimeStr) {
+            try {
+                const d = new Date(dateTimeStr);
+                if (isNaN(d.getTime())) return dateTimeStr;
+                const datePart = d.toLocaleDateString('ar-YE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const hours = d.getHours();
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                const period = hours >= 12 ? 'مساءً' : 'صباحاً';
+                const formattedHours = hours % 12 || 12;
+                return `${datePart} - الساعة ${formattedHours}:${minutes} ${period}`;
+            } catch {
+                return dateTimeStr;
+            }
+        }
+
+        // ⛅ دالة جلب الطقس من OpenWeatherMap (مع بديل ذكي مجاني إذا كان المفتاح قيد التفعيل)
+        async function fetchDestinationWeather(city) {
+            // قاموس مساندة لأسماء المدن الشائعة لضمان دقة الطقس 100%
+            const cityMap = {
+                'جدة': 'Jeddah', 'جده': 'Jeddah',
+                'الرياض': 'Riyadh',
+                'القاهرة': 'Cairo', 'القاهره': 'Cairo',
+                'عدن': 'Aden',
+                'سيئون': 'Seiyun', 'سيؤن': 'Seiyun',
+                'المكلا': 'Mukalla',
+                'صنعاء': 'Sanaa',
+                'مكة': 'Mecca', 'مكه': 'Mecca',
+                'المدينة': 'Medina', 'المدينه': 'Medina',
+                'دبي': 'Dubai',
+                'مسقط': 'Muscat',
+                'صلالة': 'Salalah',
+                'عمان': 'Amman',
+                'اسطنبول': 'Istanbul', 'إسطنبول': 'Istanbul'
+            };
+
+            const queryCity = cityMap[city] || city;
+
+            try {
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(queryCity)}&units=metric&lang=ar&appid=${WEATHER_API_KEY}`;
+                const res = await fetch(url);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const temp = Math.round(data.main.temp);
+                    const desc = data.weather[0].description;
+                    const iconCode = data.weather[0].icon;
+                    const humidity = data.main.humidity;
+
+                    document.getElementById('weather-temp').textContent = `${temp}°C`;
+                    document.getElementById('weather-desc').textContent = `${desc} | الرطوبة: ${humidity}%`;
+                    
+                    const iconImg = document.getElementById('weather-icon');
+                    iconImg.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+                    iconImg.style.display = 'block';
+                    return;
+                }
+            } catch (e) {
+                console.warn("OpenWeatherMap fallback:", e);
+            }
+
+            // نظام طوارئ ذكي في حال كان مفتاح OpenWeatherMap لم يكمل الـ 2 ساعة للتفعيل بعد
+            try {
+                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(queryCity)}&count=1`);
+                const geoData = await geoRes.json();
+                if (geoData.results && geoData.results.length > 0) {
+                    const { latitude, longitude } = geoData.results[0];
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+                    const wData = await wRes.json();
+                    if (wData.current_weather) {
+                        document.getElementById('weather-temp').textContent = `${Math.round(wData.current_weather.temperature)}°C`;
+                        document.getElementById('weather-desc').textContent = `درجة الحرارة الحالية المباشرة | سرعة الرياح: ${wData.current_weather.windspeed} كم/س`;
+                        return;
+                    }
+                }
+            } catch (err) {
+                document.getElementById('weather-desc').textContent = 'الأجواء معتدلة ومناسبة للسفر بإذن الله';
+            }
+        }
+
+        // 📚 دالة جلب معلومات وصور مدينة الوصول من موسوعة ويكيبيديا العربية
+        async function fetchCityWikipediaInfo(city) {
+            try {
+                const url = `https://ar.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`;
+                const res = await fetch(url);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.extract) {
+                        document.getElementById('city-description').textContent = data.extract;
+                    }
+                    if (data.thumbnail && data.thumbnail.source) {
+                        const imgEl = document.getElementById('city-img');
+                        imgEl.src = data.thumbnail.source;
+                        imgEl.style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('city-description').textContent = `تُعد ${city} من الوجهات المميزة والحيوية التي يقصدها المسافرون. نتمنى لكم في مكتب وفاء سيئون رحلة مريحة وإقامة سعيدة وموفقة في وجهتكم القادمة!`;
+                }
+            } catch (e) {
+                document.getElementById('city-description').textContent = `تُعد ${city} من الوجهات المميزة والحيوية. نتمنى لكم في مكتب وفاء سيئون رحلة آمنة وموفقة!`;
+            }
+        }
+    </script>
+</body>
+</html>

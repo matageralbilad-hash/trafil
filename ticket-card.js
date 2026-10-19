@@ -72,8 +72,9 @@ async function loadTicketData(category, id) {
             generateQRCode(`PNR: ${data.booking_code} | Name: ${data.passenger_name} | Wafaa Travel`);
         } 
         else if (category === 'umrah') {
+            if(document.getElementById('btn-live-link')) document.getElementById('btn-live-link').style.display = 'none';
             document.getElementById('card-name').textContent = data.pilgrim_name || 'غير محدد';
-            
+
             // إخفاء الـ PNR والملاحظات ومسار الطيران والطيران
             document.getElementById('pnr-container').style.display = 'none';
             document.getElementById('route-box').style.display = 'none';
@@ -90,6 +91,7 @@ async function loadTicketData(category, id) {
             generateQRCode(`Umrah Pilgrim: ${data.pilgrim_name} | Entry: ${data.entry_date}`);
         }
         else if (category === 'visas') {
+            if(document.getElementById('btn-live-link')) document.getElementById('btn-live-link').style.display = 'none';
             document.getElementById('card-name').textContent = data.visa_name || 'غير محدد';
             
             // تغيير الـ PNR إلى نوع التأشيرة
@@ -145,5 +147,34 @@ window.exportToImage = function() {
         
         // إرجاع التلميح بعد أخذ الصورة
         lblAirline.textContent = originalLbl;
+    });
+};
+
+// 🔗 دالة نسخ رابط البطاقة الحية للمسافر
+window.copyLiveTicketLink = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    
+    if (!id) {
+        alert('❌ لم يتم العثور على معرف التذكرة!');
+        return;
+    }
+
+    // توليد الرابط بناءً على دومين الموقع الحالي أوتوماتيكياً
+    const baseUrl = window.location.origin + window.location.pathname.replace('ticket-card.html', '');
+    const liveUrl = `${baseUrl}live-ticket.html?id=${id}`;
+
+    navigator.clipboard.writeText(liveUrl).then(() => {
+        const btn = document.getElementById('btn-live-link');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✅ تم النسخ!';
+        btn.style.background = '#10b981';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '#8b5cf6';
+        }, 2500);
+    }).catch(() => {
+        prompt('انسخ الرابط التالي وأرسله للعميل:', liveUrl);
     });
 };
