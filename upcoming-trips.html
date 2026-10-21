@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الرحلات القادمة - مكتب وفاء سيئون</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .page-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* الهيدر العلوي الفخم */
+        .top-hero-bar {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-right: 5px solid #38bdf8;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .hero-title-box h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.5rem;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-title-box p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .back-home-btn {
+            background: #334155;
+            color: #ffffff;
+            border: 1px solid #475569;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-home-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        /* شريط أدوات البحث والطباعة */
+        .controls-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box-input {
+            flex: 1;
+            min-width: 240px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .date-box-input {
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .pdf-print-btn {
+            background: #10b981;
+            color: #ffffff;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .pdf-print-btn:hover {
+            background: #059669;
+        }
+
+        /* شارة التنبيه اللحظي */
+        .live-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* نافذة الطباعة المنبثقة (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 18px 22px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 15px 22px;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- الترويسة العلوية -->
+        <div class="top-hero-bar">
+            <div class="hero-title-box">
+                <h1>
+                    ✈️ بوابة الرحلات القادمة والمجدولة
+                    <span class="live-status-pill">🟢 فلترة حية بالثانية</span>
+                </h1>
+                <p>تظهر هنا حصرياً جميع التذاكر القادمة (من اللحظة الحالية فصاعداً) وتُستبعد أي رحلة مضى وقتها تلقائياً</p>
+            </div>
+            <a href="index.html?activeTab=reports-section" class="back-home-btn">
+                ➔ العودة للتقارير واللوحة
+            </a>
+        </div>
+
+        <!-- التبويبات الفرعية الـ 5 (نفس الاندكس العادي بالضبط) -->
+        <div class="sub-tabs" style="margin-bottom: 20px;">
+            <button class="sub-tab-btn active" onclick="switchUpcomingTab('tawilat')">عالم الطويلة <span id="count-up-tawilat" class="sub-badge">0</span></button>
+            <button class="sub-tab-btn" onclick="switchUpcomingTab('arab-sky')">عرب سكاي <span id="count-up-arabsky" class="sub-badge">0</span></button>
+            <button class="sub-tab-btn" onclick="switchUpcomingTab('arabia')">العربية <span id="count-up-arabia" class="sub-badge">0</span></button>
+            <button class="sub-tab-btn" onclick="switchUpcomingTab('other-airlines')">شركات أخرى <span id="count-up-other" class="sub-badge">0</span></button>
+            <button class="sub-tab-btn" onclick="switchUpcomingTab('all-tickets')">كل التذاكر القادمة <span id="count-up-all" class="sub-badge">0</span></button>
+        </div>
+
+        <!-- شريط البحث والتاريخ والطباعة -->
+        <div class="controls-bar">
+            <input type="text" id="upcoming-search-input" class="search-box-input" placeholder="🔍 بحث سريع في الرحلات القادمة (اسم المسافر، رقم الحجز، الوجهة، المصدر)...">
+            <input type="date" id="upcoming-date-input" class="date-box-input" title="فلترة حسب تاريخ معين">
+            <button class="pdf-print-btn" onclick="openPrintModal()">🖨️ طباعة PDF</button>
+        </div>
+
+        <!-- جدول عرض التذاكر القادمة -->
+        <div class="table-responsive">
+            <table id="upcoming-tickets-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>اسم صاحب التذكرة</th>
+                        <th>رقم الحجز</th>
+                        <th>تاريخ الإقلاع</th>
+                        <th>من ... إلى ...</th>
+                        <th>تاريخ العودة</th>
+                        <th>المصدر</th>
+                        <th>الجهة (الطيران)</th>
+                        <th>مشاركة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding: 30px; color:#94a3b8;">⏳ جاري فحص وجلب الرحلات القادمة من السيرفر...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 🖨️ نافذة معاينة الطباعة (Print Wizard Modal) -->
+    <div id="upcomingPrintModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="margin: 0; color: #38bdf8;">🖨️ طباعة وتصدير كشف الرحلات القادمة</h3>
+                <button onclick="closePrintModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+                    <label style="color: #cbd5e1; font-weight: bold;">نطاق التاريخ:</label>
+                    <select id="print-date-type" onchange="togglePrintDates()" style="padding: 8px 12px; border-radius: 8px; background: #0f172a; color: #fff; border: 1px solid #334155;">
+                        <option value="all">كل الرحلات القادمة في هذا القسم</option>
+                        <option value="range">تحديد من شهر إلى شهر</option>
+                    </select>
+                    <div id="print-range-Box" style="display: none; gap: 10px; align-items: center;">
+                        <span style="color: #94a3b8;">من:</span>
+                        <input type="month" id="print-start-month" onchange="renderPrintPreview()" style="padding: 6px; border-radius: 6px; background: #0f172a; color: #fff; border: 1px solid #334155;">
+                        <span style="color: #94a3b8;">إلى:</span>
+                        <input type="month" id="print-end-month" onchange="renderPrintPreview()" style="padding: 6px; border-radius: 6px; background: #0f172a; color: #fff; border: 1px solid #334155;">
+                    </div>
+                    <button onclick="renderPrintPreview()" style="padding: 8px 15px; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">🔄 تحديث المعاينة</button>
+                </div>
+                <div id="upcoming-print-preview" style="max-height: 450px; overflow-y: auto; border: 1px solid #334155; border-radius: 8px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closePrintModal()" style="padding: 10px 18px; background: #334155; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">إلغاء</button>
+                <button onclick="executePrintPDF()" style="padding: 10px 22px; background: #10b981; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">🖨️ تأكيد الطباعة / حفظ PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- السكريبت البرمجي الكامل للبوابة -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3sWbnHQe0CN1ivOZVTrryOI-H5w0Eao",
+            authDomain: "travel-agency-app-95c51.firebaseapp.com",
+            projectId: "travel-agency-app-95c51",
+            storageBucket: "travel-agency-app-95c51.firebasestorage.app",
+            messagingSenderId: "83193496753",
+            appId: "1:83193496753:web:b79eba52db8bfd43374e90",
+            measurementId: "G-803PP5Q1WT"
+        };
+
+        let allTicketsRaw = [];
+        let upcomingTickets = [];
+        window.currentSelectedTab = 'tawilat';
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // إعداد مستمعات البحث السريع
+            document.getElementById('upcoming-search-input').addEventListener('input', applySearchFilter);
+            document.getElementById('upcoming-date-input').addEventListener('change', applySearchFilter);
+
+            // جلب التذاكر من Firebase
+            onValue(ref(database, 'tickets'), (snapshot) => {
+                allTicketsRaw = [];
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    allTicketsRaw = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                }
+                filterAndRenderUpcoming();
+            });
+
+            // تحديث تلقائي كل دقيقة لاستبعاد أي رحلة حان وقتها للتو دون الحاجة لتحديث الصفحة
+            setInterval(filterAndRenderUpcoming, 60000);
+        });
+
+        // ⏱️ الفلتر الذكي: يعزل فقط الرحلات التي لم يحن موعد إقلاعها بعد، ويرتبها من الأقرب للأبعد
+        function filterAndRenderUpcoming() {
+            const nowMs = new Date().getTime();
+
+            upcomingTickets = allTicketsRaw.filter(ticket => {
+                if (!ticket.departure_date) return false;
+                const depMs = new Date(ticket.departure_date).getTime();
+                // إذا كانت الرحلة في المستقبل (حتى لو بعد دقيقة أو بعد سنة)
+                return !isNaN(depMs) && depMs > nowMs;
+            });
+
+            // ترتيب تصاعدي بحيث تظهر الرحلة الأقرب موعداً في أعلى الجدول
+            upcomingTickets.sort((a, b) => new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime());
+
+            updateCounters();
+            renderTable();
+        }
+
+        // 🔢 حساب عدادات كل قسم للرحلات القادمة فقط
+        function updateCounters() {
+            let cTawilat = 0, cArabSky = 0, cArabia = 0, cOther = 0;
+
+            upcomingTickets.forEach(ticket => {
+                const agency = (ticket.destination_agency || '').toLowerCase();
+                if (agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat')) {
+                    cTawilat++;
+                } else if (agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia')) {
+                    cArabia++;
+                } else if (agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky')) {
+                    cArabSky++;
+                } else {
+                    cOther++;
+                }
+            });
+
+            document.getElementById('count-up-tawilat').textContent = cTawilat;
+            document.getElementById('count-up-arabsky').textContent = cArabSky;
+            document.getElementById('count-up-arabia').textContent = cArabia;
+            document.getElementById('count-up-other').textContent = cOther;
+            document.getElementById('count-up-all').textContent = upcomingTickets.length;
+        }
+
+        // 🔄 تبديل التبويبات
+        window.switchUpcomingTab = function(tabName) {
+            window.currentSelectedTab = tabName;
+            document.querySelectorAll('.sub-tabs .sub-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick').includes(`'${tabName}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+            renderTable();
+        };
+
+        // 📋 رسم الجدول حسب التبويب المختار
+        function renderTable() {
+            const tbody = document.querySelector('#upcoming-tickets-table tbody');
+            tbody.innerHTML = '';
+
+            const tab = window.currentSelectedTab;
+
+            const filtered = upcomingTickets.filter(ticket => {
+                if (tab === 'all-tickets') return true;
+                const agency = (ticket.destination_agency || '').toLowerCase();
+
+                if (tab === 'tawilat') {
+                    return agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
+                }
+                if (tab === 'arab-sky') {
+                    return agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky');
+                }
+                if (tab === 'arabia') {
+                    return agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+                }
+                if (tab === 'other-airlines') {
+                    const isTawilat = agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
+                    const isArabia = agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+                    const isArabSky = agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky');
+                    return !isTawilat && !isArabSky && !isArabia;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:25px;">لا توجد رحلات قادمة مسجلة في هذا التصنيف حالياً.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(ticket => {
+                const row = document.createElement('tr');
+                const urgencyClass = getUrgencyClass(ticket.departure_date);
+                if (urgencyClass) row.classList.add(urgencyClass);
+                
+                row.style.cursor = 'pointer';
+                row.title = "اضغط لتعديل أو حذف التذكرة ✏️";
+                row.onclick = () => {
+                    window.location.href = `edit.html?category=tickets&id=${ticket.id}&backTab=reports-section`;
+                };
+
+                row.innerHTML = `
+                    <td><strong>${ticket.passenger_name}</strong></td>
+                    <td><code class="pnr-code" style="color: #38bdf8; font-weight: bold; font-family: monospace;">${ticket.booking_code}</code></td>
+                    <td>${formatDate(ticket.departure_date)} ${getRemainingTimeBadge(ticket.departure_date)}</td>
+                    <td>${ticket.from_location} ➔ ${ticket.to_location}</td>
+                    <td>${ticket.return_date ? formatDate(ticket.return_date) : '<span style="color: #ef4444; font-size: 11px;">ذهاب فقط ✈️</span>'}</td>
+                    <td>${ticket.source}</td>
+                    <td><span class="agency-tag">${ticket.destination_agency || 'غير محدد'}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="whatsapp-share-btn" onclick="shareWhatsApp('${ticket.id}'); event.stopPropagation();">💬 واتساب</button>
+                            <button class="whatsapp-share-btn" style="background: #38bdf8; color: #0f172a;" onclick="window.location.href='ticket-card.html?category=tickets&id=${ticket.id}'; event.stopPropagation();">🎫 كرت</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            applySearchFilter();
+        }
+
+        // 🔍 البحث الفوري المرن
+        function normalizeText(text) {
+            if (!text) return '';
+            return text.toString().toLowerCase()
+                .replace(/[أإآ]/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .replace(/ى/g, 'ي')
+                .replace(/[\u064B-\u0652]/g, '')
+                .trim();
+        }
+
+        function applySearchFilter() {
+            const queryText = normalizeText(document.getElementById('upcoming-search-input').value);
+            const queryDate = document.getElementById('upcoming-date-input').value;
+            const rows = document.querySelectorAll('#upcoming-tickets-table tbody tr');
+
+            rows.forEach(row => {
+                if (row.cells.length <= 1) return;
+                const rowText = normalizeText(row.textContent);
+                const words = queryText.split(' ').filter(w => w.length > 0);
+                const isTextMatch = words.every(w => rowText.includes(w));
+                const isDateMatch = queryDate ? row.textContent.includes(queryDate) : true;
+
+                row.style.display = (isTextMatch && isDateMatch) ? '' : 'none';
+            });
+        }
+
+        // 🎨 دوال الألوان والتنسيق والوقت المتبقي
+        function getUrgencyClass(targetDateStr) {
+            if (!targetDateStr) return '';
+            const now = new Date(); now.setHours(0, 0, 0, 0);
+            const target = new Date(targetDateStr); target.setHours(0, 0, 0, 0);
+            const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0 && diffDays <= 2) return 'urgent-red';
+            if (diffDays > 2 && diffDays <= 5) return 'urgent-yellow';
+            return '';
+        }
+
+        function getRemainingTimeBadge(targetDateStr) {
+            if (!targetDateStr) return '';
+            const now = new Date(); now.setHours(0, 0, 0, 0);
+            const target = new Date(targetDateStr); target.setHours(0, 0, 0, 0);
+            const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return `<span class="time-badge today">اليوم 🚨</span>`;
+            if (diffDays === 1) return `<span class="time-badge tomorrow">غداً ⚠️</span>`;
+            return `<span class="time-badge upcoming">متبقي ${diffDays} يوم</span>`;
+        }
+
+        function formatDate(dateTimeStr) {
+            if (!dateTimeStr) return '';
+            const date = new Date(dateTimeStr);
+            if (isNaN(date.getTime())) return dateTimeStr;
+            const datePart = date.toLocaleDateString('ar-YE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const period = hours >= 12 ? 'م' : 'ص';
+            const formattedHours = hours % 12 || 12;
+            return `${datePart} - ${formattedHours}:${minutes} ${period}`;
+        }
+
+        // 💬 مشاركة الواتساب
+        window.shareWhatsApp = function(id) {
+            const item = upcomingTickets.find(t => t.id === id);
+            if (!item) return;
+            const textMessage = `إليك تفاصيل حجز رحلتكم القادمة المؤكدة:
+👤 اسم المسافر: ${item.passenger_name}
+🎫 رقم الحجز (PNR): ${item.booking_code}
+📅 تاريخ الإقلاع: ${formatDate(item.departure_date)}
+🛫 خط السير: ${item.from_location} ← ${item.to_location}
+🛬 تاريخ العودة: ${item.return_date ? formatDate(item.return_date) : 'ذهاب فقط'}
+
+🌟 نتمنى لكم رحلة سعيدة وموفقة!
+📍 مكتب وفاء سيئون - خدمة المتابعة والحجوزات`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textMessage)}`, '_blank');
+        };
+
+        // 🖨️ دوال الطباعة والتصدير PDF
+        window.openPrintModal = function() {
+            document.getElementById('upcomingPrintModal').style.display = 'flex';
+            document.getElementById('print-date-type').value = 'all';
+            togglePrintDates();
+            renderPrintPreview();
+        };
+
+        window.closePrintModal = function() {
+            document.getElementById('upcomingPrintModal').style.display = 'none';
+        };
+
+        window.togglePrintDates = function() {
+            const type = document.getElementById('print-date-type').value;
+            document.getElementById('print-range-Box').style.display = (type === 'range') ? 'flex' : 'none';
+        };
+
+        window.renderPrintPreview = function() {
+            const tab = window.currentSelectedTab;
+            const dateType = document.getElementById('print-date-type').value;
+            const startMonth = document.getElementById('print-start-month').value;
+            const endMonth = document.getElementById('print-end-month').value;
+
+            const agencyNameMap = {
+                'tawilat': 'عالم الطويلة',
+                'arab-sky': 'عرب سكاي',
+                'arabia': 'العربية',
+                'other-airlines': 'شركات أخرى',
+                'all-tickets': 'كل الشركات'
+            };
+
+            const reportTitle = `كشف الرحلات القادمة المجدولة لـ (${agencyNameMap[tab] || tab})`;
+
+            const records = upcomingTickets.filter(ticket => {
+                const agency = (ticket.destination_agency || '').toLowerCase();
+                if (tab === 'tawilat' && !(agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat'))) return false;
+                if (tab === 'arab-sky' && !(agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky'))) return false;
+                if (tab === 'arabia' && !(agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia'))) return false;
+                if (tab === 'other-airlines') {
+                    const isTawilat = agency.includes('طويلة') || agency.includes('طويله') || agency.includes('tawila') || agency.includes('tawilat');
+                    const isArabia = agency.includes('العربية') || agency.includes('العربيه') || agency.includes('arabia');
+                    const isArabSky = agency.includes('عرب سكاي') || agency.includes('سكاي') || agency.includes('arab sky') || agency.includes('sky');
+                    if (isTawilat || isArabSky || isArabia) return false;
+                }
+
+                if (dateType === 'range' && ticket.departure_date) {
+                    const depMonth = ticket.departure_date.substring(0, 7);
+                    if (startMonth && depMonth < startMonth) return false;
+                    if (endMonth && depMonth > endMonth) return false;
+                }
+                return true;
+            });
+
+            const previewContainer = document.getElementById('upcoming-print-preview');
+            if (records.length === 0) {
+                previewContainer.innerHTML = '<p style="text-align:center; color:#ef4444; padding:25px; font-weight:bold;">⚠️ لا توجد رحلات قادمة مطابقة لشروط الفرز!</p>';
+                return;
+            }
+
+            let html = `
+                <div style="background: white; color: black; padding: 20px; direction: rtl;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px;">
+                        <div style="flex: 1;"><img src="icon-512.png" alt="شعار" style="max-height: 70px;" onerror="this.style.display='none'"></div>
+                        <div style="flex: 2; text-align: center;">
+                            <h2 style="margin: 0; color: #0f172a; font-size: 1.25rem;">مكتب وفاء سيئون للسفريات والسياحة</h2>
+                            <h3 style="margin: 5px 0 0 0; font-size: 1rem; color: #334155;">${reportTitle}</h3>
+                            <span style="font-size: 11px; color: #475569;">تاريخ الإصدار: ${new Date().toLocaleDateString('ar-YE')} | إجمالي الرحلات: ${records.length}</span>
+                        </div>
+                        <div style="flex: 1;"></div>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; color: black; font-size: 12px;">
+                        <thead>
+                            <tr style="background: #f1f5f9;">
+                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;">اسم المسافر</th>
+                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">رقم الحجز PNR</th>
+                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">خط السير</th>
+                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">موعد الإقلاع</th>
+                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">العودة</th>
+                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">المصدر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            records.forEach(item => {
+                html += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>${item.passenger_name}</strong></td>
+                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-family: monospace;">${item.booking_code}</td>
+                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.from_location} ➔ ${item.to_location}</td>
+                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${formatDate(item.departure_date)}</td>
+                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.return_date ? formatDate(item.return_date) : 'ذهاب فقط'}</td>
+                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${item.source}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+            previewContainer.innerHTML = html;
+        };
+
+        window.executePrintPDF = function() {
+            const content = document.getElementById('upcoming-print-preview').innerHTML;
+            if (!content || content.includes('لا توجد')) {
+                alert('❌ لا توجد بيانات جاهزة للطباعة!');
+                return;
+            }
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>طباعة كشف الرحلات القادمة - مكتب وفاء سيئون</title>
+                    <style>
+                        @page { size: A4 portrait; margin: 10mm; }
+                        body { font-family: 'Cairo', sans-serif; background: #fff; color: #000; direction: rtl; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                        th, td { border: 1px solid #94a3b8; padding: 8px; font-size: 12px; }
+                        th { background-color: #f1f5f9; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(() => { window.close(); }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        };
+    </script>
+</body>
+</html>
